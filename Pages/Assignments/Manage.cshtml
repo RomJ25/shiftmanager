@@ -1,0 +1,98 @@
+@page
+@model ShiftManager.Pages.Assignments.ManageModel
+@{
+    Layout = "_Layout";
+}
+<h2>Assignments — @Model.Date.ToString("ddd, MMM d") — @Model.Type?.Name</h2>
+
+<div class="card">
+    <div style="display:flex; gap:1rem; align-items:center; justify-content:space-between">
+        <div>
+            Required: <b>@Model.Instance.StaffingRequired</b> &nbsp;|&nbsp;
+            Assigned: <b>@Model.Assigned.Count</b>
+        </div>
+        <a class="btn btn-ghost" href="@(!string.IsNullOrEmpty(Model.ReturnUrl) ? Model.ReturnUrl : "/Calendar/Month")">Back to Calendar</a>
+    </div>
+</div>
+
+<div class="card">
+    <h3 style="margin-top:0">Assigned</h3>
+    <ul class="list">
+        @foreach (var a in Model.Assigned)
+        {
+            <li>
+                <div>@a.UserLabel</div>
+                <form method="post" asp-page-handler="Remove">
+                    <input type="hidden" name="assignmentId" value="@a.AssignmentId" />
+                    <input type="hidden" asp-for="ReturnUrl" />
+                    <button class="btn btn-danger">Remove</button>
+                </form>
+            </li>
+        }
+    </ul>
+</div>
+
+<div class="card">
+    <h3 style="margin-top:0">Add person</h3>
+    @if (!string.IsNullOrEmpty(Model.Error))
+    {
+        <div class="small" style="color:var(--danger)">@Model.Error</div>
+    }
+    <form method="post">
+        <input type="hidden" asp-for="Date" />
+        <input type="hidden" asp-for="ShiftTypeId" />
+        <input type="hidden" asp-for="ReturnUrl" />
+
+        @if (Model.Assigned.Count == 0)
+        {
+            <div style="margin-bottom: 1rem;">
+                <label for="ShiftName" class="form-label">Shift Name (optional)</label>
+                <input type="text" id="shiftNameInput" class="input" asp-for="ShiftName" placeholder="e.g., Store Opening, Security Round, etc." />
+                <div class="small" style="color:var(--muted); margin-top:0.25rem;">
+                    This name will be displayed as "@Model.Type?.Key.ToLower()-'your name'" in the calendar
+                </div>
+            </div>
+        }
+        else if (!string.IsNullOrEmpty(Model.ShiftName))
+        {
+            <div style="margin-bottom: 1rem;">
+                <strong>Shift Name:</strong> @Model.Type?.Key.ToLower()-'@Model.ShiftName'
+            </div>
+        }
+
+        <select class="input" asp-for="SelectedUserId">
+            <option value="">-- choose an active user --</option>
+            @foreach (var u in Model.ActiveUsers)
+            {
+                @if (Model.UsersOnTimeOff.Contains(u.Id))
+                {
+                    <option value="@u.Id" style="background-color: var(--warning); color: var(--warning-text);">🏖️ @u.DisplayName (@u.Email) - ON TIME OFF</option>
+                }
+                else
+                {
+                    <option value="@u.Id">@u.DisplayName (@u.Email)</option>
+                }
+            }
+        </select>
+        <button class="btn btn-primary" type="submit">Add</button>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Check for pending shift name from localStorage (from shift creation modal)
+    const date = '@Model.Date.ToString("yyyy-MM-dd")';
+    const shiftTypeId = '@Model.ShiftTypeId';
+    const storageKey = `pendingShiftName_${date}_${shiftTypeId}`;
+    const pendingName = localStorage.getItem(storageKey);
+
+    if (pendingName && '@Model.Assigned.Count' === '0') {
+        const input = document.getElementById('shiftNameInput');
+        if (input && !input.value) {
+            input.value = pendingName;
+            // Clear from localStorage once used
+            localStorage.removeItem(storageKey);
+        }
+    }
+});
+</script>

@@ -1,0 +1,69 @@
+@page
+@model ShiftManager.Pages.Requests.IndexModel
+@{
+    Layout = "_Layout";
+}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+    <h2 style="margin: 0;">Pending Requests</h2>
+    <a href="/Admin/TimeOff" class="btn btn-ghost" style="font-size: 0.9rem;">
+        📋 Manage Approved Time-Off
+    </a>
+</div>
+<div class="card">
+    <h3 style="margin-top:0">Pending Time-off</h3>
+    <table>
+        <thead><tr><th>User</th><th>Dates</th><th>Reason</th><th></th></tr></thead>
+        <tbody>
+        @foreach (var r in Model.TimeOff)
+        {
+            <tr>
+                <td>@r.UserName</td>
+                <td>@r.StartDate.ToString("yyyy-MM-dd") → @r.EndDate.ToString("yyyy-MM-dd")</td>
+                <td>@r.Reason</td>
+                <td style="white-space:nowrap">
+                    <form method="post" asp-page-handler="ApproveTimeOff" style="display:inline">
+                        <input type="hidden" name="id" value="@r.Id" />
+                        <button class="btn btn-primary">Approve</button>
+                    </form>
+                    <form method="post" asp-page-handler="DeclineTimeOff" style="display:inline">
+                        <input type="hidden" name="id" value="@r.Id" />
+                        <button class="btn btn-ghost">Decline</button>
+                    </form>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
+
+<div class="card">
+    <h3 style="margin-top:0">Pending Swaps</h3>
+    <table>
+        <thead><tr><th>From</th><th>Shift</th><th>Proposed To</th><th></th></tr></thead>
+        <tbody>
+        @foreach (var s in Model.Swaps)
+        {
+            <tr>
+                <td>@s.FromUser</td>
+                <td>@s.When</td>
+                <td>@s.ToUser</td>
+                <td style="white-space:nowrap">
+                    <form method="post" asp-page-handler="ApproveSwap" style="display:inline">
+                        <input type="hidden" name="id" value="@s.Id" />
+                        <button class="btn btn-primary">Approve</button>
+                    </form>
+                    <form method="post" asp-page-handler="DeclineSwap" style="display:inline">
+                        <input type="hidden" name="id" value="@s.Id" />
+                        <button class="btn btn-ghost">Decline</button>
+                    </form>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.Error))
+{
+    <div class="card" style="color:var(--danger)">@Model.Error</div>
+}

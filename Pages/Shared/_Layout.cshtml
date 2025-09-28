@@ -1,0 +1,140 @@
+@using System.Security.Claims
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@{
+    var user = HttpContextAccessor?.HttpContext?.User;
+    var name = user?.FindFirst(ClaimTypes.Name)?.Value ?? "";
+    var role = user?.FindFirst(ClaimTypes.Role)?.Value ?? "";
+    var isAdmin = User.IsInRole("Admin") || User.IsInRole("Manager");
+    var firstName = name.Split(' ').FirstOrDefault() ?? name;
+}
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@(isAdmin ? "Shift Manager" : $"My Schedule - {firstName}")</title>
+    <link rel="stylesheet" href="~/css/site.css" />
+    <script defer src="~/js/site.js"></script>
+</head>
+<body>
+<header class="@(isAdmin ? "topbar" : "topbar employee-topbar")">
+    <div class="brand">
+        @if (isAdmin)
+        {
+            <span>Shift Manager</span>
+        }
+        else
+        {
+            <div class="employee-brand">
+                <span class="brand-icon">📅</span>
+                <div class="brand-text">
+                    <div class="brand-title">My Schedule</div>
+                    <div class="brand-subtitle">Welcome back, @firstName!</div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <nav class="nav @(isAdmin ? "" : "employee-nav")">
+        @if (isAdmin)
+        {
+            <div class="dropdown">
+                <button class="linklike">Calendar ▾</button>
+                <div class="menu">
+                    <a href="/Calendar/Month">Month View</a>
+                    <a href="/Calendar/Week">Week View</a>
+                    <a href="/Calendar/Day">Day View</a>
+                </div>
+            </div>
+            <a href="/Requests/Index">Requests</a>
+            <a href="/My/Index">My Shifts</a>
+            <div class="dropdown">
+                <button class="linklike">Admin ▾</button>
+                <div class="menu">
+                    <a href="/Admin/Users">Users</a>
+                    <a href="/Admin/ShiftTypes">Shift Types</a>
+                    <a href="/Admin/TimeOff">Time-Off Management</a>
+                    <a href="/Admin/Config">Config</a>
+                </div>
+            </div>
+        }
+        else
+        {
+            <a href="/My/Index" class="nav-item primary">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-text">My Shifts</span>
+            </a>
+            <a href="/Calendar/Month" class="nav-item">
+                <span class="nav-icon">📅</span>
+                <span class="nav-text">Schedule</span>
+            </a>
+            <a href="/My/Requests" class="nav-item">
+                <span class="nav-icon">📝</span>
+                <span class="nav-text">Requests</span>
+            </a>
+            <a href="/My/NotificationCenter" class="nav-item notification-nav" style="position: relative;">
+                <span class="nav-icon">🔔</span>
+                <span class="nav-text">Notifications</span>
+                @await Component.InvokeAsync("UnreadNotificationCount")
+            </a>
+        }
+    </nav>
+
+    <div class="spacer"></div>
+
+    <div class="topbar-actions">
+        <button class="action-btn" id="themeToggle" aria-label="Toggle dark mode">
+            <span class="theme-icon">🌓</span>
+        </button>
+
+        @if (User?.Identity?.IsAuthenticated == true)
+        {
+            <div class="user-menu">
+                @if (!isAdmin)
+                {
+                    <div class="user-info">
+                        <div class="user-avatar">@firstName.Substring(0, 1).ToUpper()</div>
+                        <div class="user-details">
+                            <div class="user-name">@name</div>
+                            <div class="user-role">@role</div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <span class="admin-badge">@name (@role)</span>
+                }
+                <form method="post" asp-page="/Auth/Logout" style="display:inline">
+                    @Html.AntiForgeryToken()
+                    <button class="logout-btn" type="submit">
+                        <span class="logout-icon">🚪</span>
+                        <span class="logout-text">Logout</span>
+                    </button>
+                </form>
+            </div>
+        }
+    </div>
+</header>
+
+@if (!isAdmin)
+{
+    <div class="employee-welcome">
+        <div class="container">
+            <div class="welcome-content">
+                <h1 class="welcome-title">Good @(DateTime.Now.Hour < 12 ? "morning" : DateTime.Now.Hour < 18 ? "afternoon" : "evening"), @firstName!</h1>
+                <p class="welcome-subtitle">Here's your schedule and shift information</p>
+            </div>
+            <div class="quick-stats">
+                <!-- Quick stats will be populated by individual pages -->
+            </div>
+        </div>
+    </div>
+}
+
+<main class="@(isAdmin ? "container" : "container employee-container")">
+    @RenderBody()
+</main>
+
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

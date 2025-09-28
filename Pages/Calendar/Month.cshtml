@@ -1,0 +1,179 @@
+@page
+@model ShiftManager.Pages.Calendar.MonthModel
+@{
+    Layout = "_Layout";
+    var weeks = Model.Weeks;
+}
+<div class="calendar-header">
+    <div class="header-main">
+        <h2>@Model.CurrentMonth.ToString("MMMM yyyy")</h2>
+        @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+        {
+            <div class="calendar-help">
+                <div class="help-item">
+                    <span class="help-icon">🎯</span>
+                    <span>Click shift badges to manage assignments</span>
+                </div>
+                <div class="help-item">
+                    <span class="help-icon">⚡</span>
+                    <span>Use + / − to adjust staffing</span>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="calendar-help">
+                <div class="help-item">
+                    <span class="help-icon">👀</span>
+                    <span>View your assigned shifts and team schedule</span>
+                </div>
+            </div>
+        }
+    </div>
+    <div class="calendar-nav">
+        <a class="btn btn-ghost" href="/Calendar/Month?year=@Model.Previous.MonthYear.Year&month=@Model.Previous.MonthYear.Month">
+            <span class="nav-icon">←</span>
+            <span class="nav-text">@Model.Previous.Label</span>
+        </a>
+        <a class="btn btn-primary" href="/Calendar/Month">
+            <span class="nav-icon">📅</span>
+            <span class="nav-text">Today</span>
+        </a>
+        <a class="btn btn-ghost" href="/Calendar/Month?year=@Model.Next.MonthYear.Year&month=@Model.Next.MonthYear.Month">
+            <span class="nav-text">@Model.Next.Label</span>
+            <span class="nav-icon">→</span>
+        </a>
+    </div>
+</div>
+
+<div class="calendar-view-switcher">
+    <a class="btn btn-primary" href="/Calendar/Month">Month</a>
+    <a class="btn btn-ghost" href="/Calendar/Week">Week</a>
+    <a class="btn btn-ghost" href="/Calendar/Day">Day</a>
+</div>
+
+<div class="calendar-grid">
+    <!-- Weekday headers -->
+    <div class="calendar-weekdays">
+        <div class="weekday-header">Mon</div>
+        <div class="weekday-header">Tue</div>
+        <div class="weekday-header">Wed</div>
+        <div class="weekday-header">Thu</div>
+        <div class="weekday-header">Fri</div>
+        <div class="weekday-header">Sat</div>
+        <div class="weekday-header">Sun</div>
+    </div>
+
+    @foreach (var w in weeks)
+    {
+        foreach (var day in w)
+        {
+            var isCurrentMonth = day.Date.Month == Model.CurrentMonth.Month;
+            var cellClass = isCurrentMonth ? "calendar-cell" : "calendar-cell other-month";
+
+            <div class="@cellClass">
+                <div class="cell-date">@day.Date.Day</div>
+                @foreach (var l in day.Lines)
+                {
+                    if (l.Required > 0 || l.Assigned > 0) // Only show shifts that have activity
+                    {
+                        var badgeClass = l.Assigned >= l.Required ? "ok" : "warn";
+                        <div class="shift-line">
+                            <div class="assignment-tooltip">
+                                @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+                                {
+                                    <a href="/Assignments/Manage?date=@day.Date.ToString("yyyy-MM-dd")&shiftTypeId=@l.ShiftTypeId&returnUrl=@Uri.EscapeDataString("/Calendar/Month?year=" + Model.CurrentMonth.Year + "&month=" + Model.CurrentMonth.Month)">
+                                        <span class="shift-badge @l.ShiftTypeKey">@l.ShortName</span>
+                                    </a>
+                                }
+                                else
+                                {
+                                    <span class="shift-badge @l.ShiftTypeKey employee-badge">@l.ShortName</span>
+                                }
+                                <div class="tooltip-content">
+                                    <div class="tooltip-header">
+                                        <div class="tooltip-title">
+                                            @if (!string.IsNullOrEmpty(l.ShiftName))
+                                            {
+                                                @l.ShiftName
+                                                <span class="tooltip-custom-name">(@l.ShiftTypeName)</span>
+                                            }
+                                            else
+                                            {
+                                                @l.ShiftTypeName
+                                            }
+                                        </div>
+                                        <div class="tooltip-hours">@l.StartTime - @l.EndTime</div>
+                                    </div>
+
+                                    <div class="tooltip-section">
+                                        <div class="tooltip-section-title">Staffing</div>
+                                        <div class="tooltip-names">
+                                            @if (l.AssignedNames.Any())
+                                            {
+                                                @foreach (var name in l.AssignedNames)
+                                                {
+                                                    <span class="tooltip-name @l.ShiftTypeKey">@name</span>
+                                                }
+                                            }
+                                            @if (l.EmptySlots.Any())
+                                            {
+                                                @foreach (var empty in l.EmptySlots)
+                                                {
+                                                    <span class="tooltip-empty">@empty</span>
+                                                }
+                                            }
+                                            @if (!l.AssignedNames.Any() && !l.EmptySlots.Any())
+                                            {
+                                                <span class="tooltip-empty">No staffing required</span>
+                                            }
+                                        </div>
+                                    </div>
+
+                                    <div class="tooltip-stats">
+                                        <span class="tooltip-stat">@l.Assigned/@l.Required staffed</span>
+                                        @if (l.Assigned >= l.Required)
+                                        {
+                                            <span class="tooltip-status-ok">✓ Fully Staffed</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="tooltip-status-warn">⚠ Needs @(l.Required - l.Assigned) more</span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                            @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+                            {
+                                <div class="shift-counter" data-si="@l.InstanceId" data-conc="@l.Concurrency">
+                                    <button class="counter-btn" aria-label="Decrease required staffing"
+                                        onclick="window.adjustStaffing('@Url.Page("Month", "Adjust")', { date: '@day.Date.ToString("yyyy-MM-dd")', shiftTypeId:@l.ShiftTypeId, delta:-1, concurrency:@l.Concurrency }, (d)=>{ this.parentElement.dataset.conc=d.concurrency; this.parentElement.nextElementSibling.innerText = d.assigned + '/' + d.required; }, (e)=>alert(e.message))">−</button>
+                                    <button class="counter-btn" aria-label="Increase required staffing"
+                                        onclick="window.adjustStaffing('@Url.Page("Month", "Adjust")', { date: '@day.Date.ToString("yyyy-MM-dd")', shiftTypeId:@l.ShiftTypeId, delta:1, concurrency:@l.Concurrency }, (d)=>{ this.parentElement.dataset.conc=d.concurrency; this.parentElement.nextElementSibling.innerText = d.assigned + '/' + d.required; }, (e)=>alert(e.message))">+</button>
+                                </div>
+                            }
+                            <span class="staffing-badge @badgeClass">@l.Assigned/@l.Required</span>
+                        </div>
+                        @if (!string.IsNullOrEmpty(l.ShiftName))
+                        {
+                            <div class="shift-display-name">
+                                @l.ShortName.ToLower()-'@l.ShiftName'
+                            </div>
+                        }
+                    }
+                }
+                @if (isCurrentMonth && (User.IsInRole("Admin") || User.IsInRole("Manager")))
+                {
+                    <button class="add-shift-btn" onclick="openShiftModal('@day.Date.ToString("yyyy-MM-dd")')">
+                        <span>+</span>
+                        <span>Add Shift</span>
+                    </button>
+                }
+            </div>
+        }
+    }
+</div>
+
+<script>
+window.shiftTypes = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewData["ShiftTypes"]));
+</script>

@@ -1,0 +1,58 @@
+{
+  "Version": 1,
+  "Hash": "7OZ9dbgYVpmeMDCTG5lzO0CCXaC7d7SDmfabcMdvmhk=",
+  "Source": "ShiftManager",
+  "BasePath": "_content/ShiftManager",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [
+    {
+      "Name": "ShiftManager\\wwwroot",
+      "Source": "ShiftManager",
+      "ContentRoot": "C:\\Users\\katzi\\Downloads\\ShiftManager\\wwwroot\\",
+      "BasePath": "_content/ShiftManager",
+      "Pattern": "**"
+    }
+  ],
+  "Assets": [
+    {
+      "Identity": "C:\\Users\\katzi\\Downloads\\ShiftManager\\wwwroot\\css\\site.css",
+      "SourceId": "ShiftManager",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\katzi\\Downloads\\ShiftManager\\wwwroot\\",
+      "BasePath": "_content/ShiftManager",
+      "RelativePath": "css/site.css",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\css\\site.css"
+    },
+    {
+      "Identity": "C:\\Users\\katzi\\Downloads\\ShiftManager\\wwwroot\\js\\site.js",
+      "SourceId": "ShiftManager",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\katzi\\Downloads\\ShiftManager\\wwwroot\\",
+      "BasePath": "_content/ShiftManager",
+      "RelativePath": "js/site.js",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\js\\site.js"
+    }
+  ]
+}

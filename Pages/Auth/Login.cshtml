@@ -1,0 +1,22 @@
+@page
+@model ShiftManager.Pages.Auth.LoginModel
+@{
+    Layout = "_Layout";
+}
+<div class="card" style="max-width:420px; margin:auto">
+    <h2>Sign in</h2>
+    @if (!string.IsNullOrEmpty(Model.Error))
+    {
+        <div class="small" style="color:var(--danger)">@Model.Error</div>
+    }
+   <form method="post" asp-page="./Login">
+    @Html.AntiForgeryToken()
+    <div style="display:grid; gap:.75rem; margin-top:.75rem">
+        <label>Email<br /><input class="input" asp-for="Email" /></label>
+        <label>Password<br /><input class="input" asp-for="Password" type="password" /></label>
+        <button class="btn btn-primary" type="submit">Sign in</button>
+    </div>
+</form>
+
+    <div class="small" style="margin-top:.5rem">Demo: <b>admin@local</b> / <b>admin123</b></div>
+</div>

@@ -1,0 +1,27 @@
+@page
+@model ShiftManager.Pages.Admin.ShiftTypesModel
+@{
+    Layout = "_Layout";
+}
+<h2>Shift Types</h2>
+<div class="card">
+    <form method="post">
+        <table>
+            <thead><tr><th>Key</th><th>Name</th><th>Start</th><th>End</th></tr></thead>
+            <tbody>
+            @for (int i = 0; i < Model.Items.Count; i++)
+            {
+                <tr>
+                    <td>@Model.Items[i].Key</td>
+                    <td><input class="input" name="items[@i].Name" value="@Model.Items[i].Name" /></td>
+                    <td><input class="input" name="items[@i].Start" type="time" value="@Model.Items[i].Start" /></td>
+                    <td><input class="input" name="items[@i].End" type="time" value="@Model.Items[i].End" /></td>
+                    <input type="hidden" name="items[@i].Id" value="@Model.Items[i].Id" />
+                    <input type="hidden" name="items[@i].Key" value="@Model.Items[i].Key" />
+                </tr>
+            }
+            </tbody>
+        </table>
+        <button class="btn btn-primary" type="submit">Save</button>
+    </form>
+</div>

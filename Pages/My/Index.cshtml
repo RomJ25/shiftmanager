@@ -1,0 +1,66 @@
+@page
+@model ShiftManager.Pages.My.IndexModel
+@{
+    Layout = "_Layout";
+    var chartId = "hoursChart";
+}
+<h2>My Shifts</h2>
+<div class="card">
+    <h3 style="margin-top:0">Upcoming</h3>
+    <table>
+        <thead><tr><th>Date</th><th>Shift</th><th>Hours</th></tr></thead>
+        <tbody>
+            @foreach (var s in Model.Upcoming)
+            {
+                @if (s.IsTimeOff)
+                {
+                    <tr style="background-color: var(--warning); color: var(--warning-text) !important;">
+                        <td style="color: var(--warning-text) !important;">@s.Date.ToString("yyyy-MM-dd")</td>
+                        <td style="color: var(--warning-text) !important;">🏖️ @s.ShiftName</td>
+                        <td style="color: var(--warning-text) !important;">-</td>
+                    </tr>
+                }
+                else
+                {
+                    <tr><td>@s.Date.ToString("yyyy-MM-dd")</td><td>@s.ShiftName</td><td>@s.Hours</td></tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+<div class="card">
+    <h3 style="margin-top:0">Totals</h3>
+    <div>Next 4 weeks: <b>@Model.Next4WeeksHours</b> hours</div>
+    <canvas id="@chartId" width="600" height="220" aria-label="Hours by week"></canvas>
+</div>
+
+<script>
+(function(){
+    const data = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ChartWeeks));
+    const c = document.getElementById("@chartId");
+    const ctx = c.getContext('2d');
+
+    const padding = 24;
+    const w = c.width - padding * 2;
+    const h = c.height - padding * 2;
+    const max = Math.max(...data.map(d => d.hours), 40);
+
+    // axes
+    ctx.translate(padding, padding);
+    ctx.beginPath();
+    ctx.moveTo(0, 0); ctx.lineTo(0, h); ctx.lineTo(w, h);
+    ctx.stroke();
+
+    // bars
+    const bw = w / data.length * 0.6;
+    for (let i = 0; i < data.length; i++) {
+        const x = (i + 0.2) * (w / data.length);
+        const y = h - (data[i].hours / max) * h;
+        const bh = h - y;
+        ctx.fillRect(x, y, bw, bh);
+        ctx.fillText(data[i].label, x, h + 14);
+        ctx.fillText(data[i].hours.toString(), x, y - 4);
+    }
+})();
+</script>

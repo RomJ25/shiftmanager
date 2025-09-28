@@ -1,0 +1,221 @@
+@page
+@model ShiftManager.Pages.Calendar.DayModel
+@{
+    Layout = "_Layout";
+}
+
+<div class="calendar-header">
+    <div>
+        <h2 style="margin: 0; font-size: 1.5rem; color: var(--text);">
+            @Model.CurrentDate.ToString("dddd, MMMM dd, yyyy")
+        </h2>
+    </div>
+    <div class="calendar-nav">
+        <a class="btn btn-ghost" href="/Calendar/Day?year=@Model.Previous.Date.Year&month=@Model.Previous.Date.Month&day=@Model.Previous.Date.Day">
+            ← @Model.Previous.Label
+        </a>
+        <a class="btn btn-primary" href="/Calendar/Day">Today</a>
+        <a class="btn btn-ghost" href="/Calendar/Day?year=@Model.Next.Date.Year&month=@Model.Next.Date.Month&day=@Model.Next.Date.Day">
+            @Model.Next.Label →
+        </a>
+    </div>
+    @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+    {
+        <div class="calendar-help">
+            Click a shift badge to manage assignments.<br>
+            Use + / − to adjust required staffing.
+        </div>
+    }
+    else
+    {
+        <div class="calendar-help">
+            View your assigned shifts and detailed schedule.
+        </div>
+    }
+</div>
+
+<div class="calendar-view-switcher">
+    <a class="btn btn-ghost" href="/Calendar/Month">Month</a>
+    <a class="btn btn-ghost" href="/Calendar/Week">Week</a>
+    <a class="btn btn-primary" href="/Calendar/Day">Day</a>
+</div>
+
+<div class="day-view">
+    @foreach (var l in Model.Lines)
+    {
+        var badgeClass = l.Assigned >= l.Required ? "ok" : "warn";
+        var hasActivity = l.Required > 0 || l.Assigned > 0;
+        var shiftClass = hasActivity ? "day-shift active" : "day-shift";
+
+        <div class="@shiftClass">
+            <div class="shift-info">
+                <div class="shift-header">
+                    <div class="assignment-tooltip">
+                        @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+                        {
+                            <a href="/Assignments/Manage?date=@Model.CurrentDate.ToString("yyyy-MM-dd")&shiftTypeId=@l.ShiftTypeId&returnUrl=@Uri.EscapeDataString("/Calendar/Day?year=" + Model.CurrentDate.Year + "&month=" + Model.CurrentDate.Month + "&day=" + Model.CurrentDate.Day)">
+                                <span class="shift-badge @l.ShiftTypeKey large">@l.Name</span>
+                            </a>
+                        }
+                        else
+                        {
+                            <span class="shift-badge @l.ShiftTypeKey large employee-badge">@l.Name</span>
+                        }
+                        <div class="tooltip-content">
+                            <div class="tooltip-header">
+                                <div class="tooltip-title">
+                                    @if (!string.IsNullOrEmpty(l.ShiftName))
+                                    {
+                                        @l.ShiftName
+                                        <span class="tooltip-custom-name">(@l.ShiftTypeName)</span>
+                                    }
+                                    else
+                                    {
+                                        @l.ShiftTypeName
+                                    }
+                                </div>
+                                <div class="tooltip-hours">@l.StartTimeString - @l.EndTimeString</div>
+                            </div>
+
+                            <div class="tooltip-section">
+                                <div class="tooltip-section-title">Staffing</div>
+                                <div class="tooltip-names">
+                                    @if (l.AssignedNames.Any())
+                                    {
+                                        @foreach (var name in l.AssignedNames)
+                                        {
+                                            <span class="tooltip-name @l.ShiftTypeKey">@name</span>
+                                        }
+                                    }
+                                    @if (l.EmptySlots.Any())
+                                    {
+                                        @foreach (var empty in l.EmptySlots)
+                                        {
+                                            <span class="tooltip-empty">@empty</span>
+                                        }
+                                    }
+                                    @if (!l.AssignedNames.Any() && !l.EmptySlots.Any())
+                                    {
+                                        <span class="tooltip-empty">No staffing required</span>
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="tooltip-stats">
+                                <span class="tooltip-stat">@l.Assigned/@l.Required staffed</span>
+                                @if (l.Assigned >= l.Required)
+                                {
+                                    <span class="tooltip-status-ok">✓ Fully Staffed</span>
+                                }
+                                else
+                                {
+                                    <span class="tooltip-status-warn">⚠ Needs @(l.Required - l.Assigned) more</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <div class="shift-time">
+                        @l.StartTime.ToString("HH:mm") - @l.EndTime.ToString("HH:mm")
+                    </div>
+                </div>
+
+                @if (hasActivity)
+                {
+                    <div class="shift-staffing">
+                        <!-- Shift Name Display -->
+                        @if (!string.IsNullOrEmpty(l.ShiftName))
+                        {
+                            <div class="shift-name-display">
+                                <h4 style="margin: 0; color: var(--primary); font-size: 1.1rem;">
+                                    @l.Name.ToLower()-'@l.ShiftName'
+                                </h4>
+                            </div>
+                        }
+
+                        <!-- Staffing Info Section -->
+                        <div class="staffing-info">
+                            <span class="staffing-badge @badgeClass large">@l.Assigned/@l.Required</span>
+                            <span class="staffing-label">Assigned / Required</span>
+
+                            @if (l.AssignedNames.Any() || l.EmptySlots.Any())
+                            {
+                                <div class="assigned-names">
+                                    @foreach (var name in l.AssignedNames)
+                                    {
+                                        <span class="name-badge @l.ShiftTypeKey">@name</span>
+                                    }
+                                    @foreach (var empty in l.EmptySlots)
+                                    {
+                                        <span class="name-badge empty">@empty</span>
+                                    }
+                                </div>
+                            }
+                        </div>
+
+                        <div class="shift-controls">
+                            @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+                            {
+                                <div class="shift-counter" data-si="@l.InstanceId" data-conc="@l.Concurrency">
+                                    <button class="counter-btn large" aria-label="Decrease required staffing"
+                                        onclick="window.adjustStaffing('@Url.Page("Day", "Adjust")', { date: '@Model.CurrentDate.ToString("yyyy-MM-dd")', shiftTypeId:@l.ShiftTypeId, delta:-1, concurrency:@l.Concurrency }, (d)=>{ location.reload(); }, (e)=>alert(e.message))">−</button>
+                                    <button class="counter-btn large" aria-label="Increase required staffing"
+                                        onclick="window.adjustStaffing('@Url.Page("Day", "Adjust")', { date: '@Model.CurrentDate.ToString("yyyy-MM-dd")', shiftTypeId:@l.ShiftTypeId, delta:1, concurrency:@l.Concurrency }, (d)=>{ location.reload(); }, (e)=>alert(e.message))">+</button>
+                                </div>
+                            }
+
+                            @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+                            {
+                                <a class="btn btn-primary" href="/Assignments/Manage?date=@Model.CurrentDate.ToString("yyyy-MM-dd")&shiftTypeId=@l.ShiftTypeId&returnUrl=@Uri.EscapeDataString("/Calendar/Day?year=" + Model.CurrentDate.Year + "&month=" + Model.CurrentDate.Month + "&day=" + Model.CurrentDate.Day)">
+                                    Manage Assignments
+                                </a>
+                            }
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="shift-staffing">
+                        <div class="no-activity">
+                            <span class="muted-text">No shifts scheduled</span>
+                        </div>
+
+                        <div class="shift-controls">
+                            @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+                            {
+                                <div class="shift-counter" data-si="@l.InstanceId" data-conc="@l.Concurrency">
+                                    <button class="counter-btn large" aria-label="Add required staffing"
+                                        onclick="window.adjustStaffing('@Url.Page("Day", "Adjust")', { date: '@Model.CurrentDate.ToString("yyyy-MM-dd")', shiftTypeId:@l.ShiftTypeId, delta:1, concurrency:@l.Concurrency }, (d)=>{ location.reload(); }, (e)=>alert(e.message))">+ Add Shift</button>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="no-shift-message">
+                                    <span class="muted-text">No shifts scheduled for this time</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+    {
+        <div class="day-shift">
+            <div class="shift-info">
+                <div class="empty-state">
+                    <div class="empty-state-icon">➕</div>
+                    <button class="add-shift-btn" style="margin: 0 auto;" onclick="openShiftModal('@Model.CurrentDate.ToString("yyyy-MM-dd")')">
+                        <span>+</span>
+                        <span>Create New Shift</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<script>
+window.shiftTypes = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewData["ShiftTypes"]));
+</script>

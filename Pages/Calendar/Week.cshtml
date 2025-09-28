@@ -1,0 +1,158 @@
+@page
+@model ShiftManager.Pages.Calendar.WeekModel
+@{
+    Layout = "_Layout";
+}
+
+<div class="calendar-header">
+    <div>
+        <h2 style="margin: 0; font-size: 1.5rem; color: var(--text);">
+            Week of @Model.CurrentWeekStart.ToString("MMM dd") - @Model.CurrentWeekStart.AddDays(6).ToString("MMM dd, yyyy")
+        </h2>
+    </div>
+    <div class="calendar-nav">
+        <a class="btn btn-ghost" href="/Calendar/Week?year=@Model.Previous.WeekStart.Year&month=@Model.Previous.WeekStart.Month&day=@Model.Previous.WeekStart.Day">
+            ← @Model.Previous.Label
+        </a>
+        <a class="btn btn-primary" href="/Calendar/Week">This Week</a>
+        <a class="btn btn-ghost" href="/Calendar/Week?year=@Model.Next.WeekStart.Year&month=@Model.Next.WeekStart.Month&day=@Model.Next.WeekStart.Day">
+            @Model.Next.Label →
+        </a>
+    </div>
+    @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+    {
+        <div class="calendar-help">
+            Click a shift badge to manage assignments.<br>
+            Use + / − to adjust required staffing.
+        </div>
+    }
+    else
+    {
+        <div class="calendar-help">
+            View your assigned shifts and team schedule.
+        </div>
+    }
+</div>
+
+<div class="calendar-view-switcher">
+    <a class="btn btn-ghost" href="/Calendar/Month">Month</a>
+    <a class="btn btn-primary" href="/Calendar/Week">Week</a>
+    <a class="btn btn-ghost" href="/Calendar/Day">Day</a>
+</div>
+
+<div class="week-grid">
+    @foreach (var day in Model.Days)
+    {
+        var isToday = day.Date == DateOnly.FromDateTime(DateTime.Today);
+        var dayClass = isToday ? "week-day today" : "week-day";
+
+        <div class="@dayClass">
+            <div class="day-header">
+                <div class="day-name">@day.DayName</div>
+                <div class="day-date">@day.Date.ToString("MMM dd")</div>
+            </div>
+            <div class="day-shifts">
+                @foreach (var l in day.Lines)
+                {
+                    if (l.Required > 0 || l.Assigned > 0)
+                    {
+                        var badgeClass = l.Assigned >= l.Required ? "ok" : "warn";
+                        <div class="shift-line">
+                            <div class="assignment-tooltip">
+                                @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+                                {
+                                    <a href="/Assignments/Manage?date=@day.Date.ToString("yyyy-MM-dd")&shiftTypeId=@l.ShiftTypeId&returnUrl=@Uri.EscapeDataString("/Calendar/Week?year=" + Model.CurrentWeekStart.Year + "&month=" + Model.CurrentWeekStart.Month + "&day=" + Model.CurrentWeekStart.Day)">
+                                        <span class="shift-badge @l.ShiftTypeKey">@l.ShortName</span>
+                                    </a>
+                                }
+                                else
+                                {
+                                    <span class="shift-badge @l.ShiftTypeKey employee-badge">@l.ShortName</span>
+                                }
+                                <div class="tooltip-content">
+                                    <div class="tooltip-header">
+                                        <div class="tooltip-title">
+                                            @if (!string.IsNullOrEmpty(l.ShiftName))
+                                            {
+                                                @l.ShiftName
+                                                <span class="tooltip-custom-name">(@l.ShiftTypeName)</span>
+                                            }
+                                            else
+                                            {
+                                                @l.ShiftTypeName
+                                            }
+                                        </div>
+                                        <div class="tooltip-hours">@l.StartTime - @l.EndTime</div>
+                                    </div>
+
+                                    <div class="tooltip-section">
+                                        <div class="tooltip-section-title">Staffing</div>
+                                        <div class="tooltip-names">
+                                            @if (l.AssignedNames.Any())
+                                            {
+                                                @foreach (var name in l.AssignedNames)
+                                                {
+                                                    <span class="tooltip-name @l.ShiftTypeKey">@name</span>
+                                                }
+                                            }
+                                            @if (l.EmptySlots.Any())
+                                            {
+                                                @foreach (var empty in l.EmptySlots)
+                                                {
+                                                    <span class="tooltip-empty">@empty</span>
+                                                }
+                                            }
+                                            @if (!l.AssignedNames.Any() && !l.EmptySlots.Any())
+                                            {
+                                                <span class="tooltip-empty">No staffing required</span>
+                                            }
+                                        </div>
+                                    </div>
+
+                                    <div class="tooltip-stats">
+                                        <span class="tooltip-stat">@l.Assigned/@l.Required staffed</span>
+                                        @if (l.Assigned >= l.Required)
+                                        {
+                                            <span class="tooltip-status-ok">✓ Fully Staffed</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="tooltip-status-warn">⚠ Needs @(l.Required - l.Assigned) more</span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                            @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+                            {
+                                <div class="shift-counter" data-si="@l.InstanceId" data-conc="@l.Concurrency">
+                                    <button class="counter-btn" aria-label="Decrease required staffing"
+                                        onclick="window.adjustStaffing('@Url.Page("Week", "Adjust")', { date: '@day.Date.ToString("yyyy-MM-dd")', shiftTypeId:@l.ShiftTypeId, delta:-1, concurrency:@l.Concurrency }, (d)=>{ this.parentElement.dataset.conc=d.concurrency; this.parentElement.nextElementSibling.innerText = d.assigned + '/' + d.required; }, (e)=>alert(e.message))">−</button>
+                                    <button class="counter-btn" aria-label="Increase required staffing"
+                                        onclick="window.adjustStaffing('@Url.Page("Week", "Adjust")', { date: '@day.Date.ToString("yyyy-MM-dd")', shiftTypeId:@l.ShiftTypeId, delta:1, concurrency:@l.Concurrency }, (d)=>{ this.parentElement.dataset.conc=d.concurrency; this.parentElement.nextElementSibling.innerText = d.assigned + '/' + d.required; }, (e)=>alert(e.message))">+</button>
+                                </div>
+                            }
+                            <span class="staffing-badge @badgeClass">@l.Assigned/@l.Required</span>
+                        </div>
+                        @if (!string.IsNullOrEmpty(l.ShiftName))
+                        {
+                            <div class="shift-display-name">
+                                @l.ShortName.ToLower()-'@l.ShiftName'
+                            </div>
+                        }
+                    }
+                }
+                @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+                {
+                    <button class="add-shift-btn" onclick="openShiftModal('@day.Date.ToString("yyyy-MM-dd")')">
+                        <span>+</span>
+                        <span>Add Shift</span>
+                    </button>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+<script>
+window.shiftTypes = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewData["ShiftTypes"]));
+</script>
