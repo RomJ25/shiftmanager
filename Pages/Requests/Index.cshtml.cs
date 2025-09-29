@@ -17,8 +17,9 @@ public class IndexModel : PageModel
     private readonly IConflictChecker _checker;
     private readonly INotificationService _notificationService;
     private readonly ILogger<IndexModel> _logger;
-    public IndexModel(AppDbContext db, IConflictChecker checker, INotificationService notificationService, ILogger<IndexModel> logger)
-    { _db = db; _checker = checker; _notificationService = notificationService; _logger = logger; }
+    private readonly ICompanyScopeService _companyScope;
+    public IndexModel(AppDbContext db, IConflictChecker checker, INotificationService notificationService, ILogger<IndexModel> logger, ICompanyScopeService companyScope)
+    { _db = db; _checker = checker; _notificationService = notificationService; _logger = logger; _companyScope = companyScope; }
 
     public record TimeOffVM(int Id, string UserName, DateOnly StartDate, DateOnly EndDate, string? Reason);
     public List<TimeOffVM> TimeOff { get; set; } = new();
@@ -34,10 +35,12 @@ public class IndexModel : PageModel
         {
             _logger.LogInformation("Loading admin requests page");
 
+            var companyId = _companyScope.GetCurrentCompanyId(User);
+
             _logger.LogInformation("Loading pending time off requests");
             var pendingTO = await (from r in _db.TimeOffRequests
                                    join u in _db.Users on r.UserId equals u.Id
-                                   where r.Status == RequestStatus.Pending
+                                   where r.Status == RequestStatus.Pending && u.CompanyId == companyId
                                    orderby r.CreatedAt
                                    select new TimeOffVM(r.Id, u.DisplayName, r.StartDate, r.EndDate, r.Reason)).ToListAsync();
             TimeOff = pendingTO;
@@ -51,6 +54,9 @@ public class IndexModel : PageModel
                                       join st in _db.ShiftTypes on si.ShiftTypeId equals st.Id
                                       join u2 in _db.Users on s.ToUserId equals u2.Id
                                       where s.Status == RequestStatus.Pending
+                                            && si.CompanyId == companyId
+                                            && u1.CompanyId == companyId
+                                            && u2.CompanyId == companyId
                                       orderby s.CreatedAt
                                       select new
                                       {
@@ -73,16 +79,14 @@ public class IndexModel : PageModel
 
     public async Task<IActionResult> OnPostApproveTimeOffAsync(int id)
     {
-        var r = await _db.TimeOffRequests.FindAsync(id);
-        if (r == null) return RedirectToPage();
+        var companyId = _companyScope.GetCurrentCompanyId(User);
+        var request = await _companyScope.GetCompanyTimeOffRequestAsync(id, companyId);
+        if (request == null) return Forbid();
 
-        r.Status = RequestStatus.Approved;
+        request.Status = RequestStatus.Approved;
 
-        // Remove existing assignments in the approved window
-        var assignments = await (from a in _db.ShiftAssignments
-                                 join si in _db.ShiftInstances on a.ShiftInstanceId equals si.Id
-                                 where a.UserId == r.UserId && si.WorkDate >= r.StartDate && si.WorkDate <= r.EndDate
-                                 select a).ToListAsync();
+        // Remove existing assignments in the approved window scoped to the same company
+        var assignments = await _companyScope.GetAssignmentsForUserInRangeAsync(request.UserId, request.StartDate, request.EndDate, companyId);
         if (assignments.Any())
         {
             _db.ShiftAssignments.RemoveRange(assignments);
@@ -91,86 +95,107 @@ public class IndexModel : PageModel
         await _db.SaveChangesAsync();
 
         // Send notification to user
-        await _notificationService.CreateTimeOffNotificationAsync(r.UserId, RequestStatus.Approved, r.StartDate, r.EndDate, r.Id);
+        await _notificationService.CreateTimeOffNotificationAsync(request.UserId, RequestStatus.Approved, request.StartDate, request.EndDate, request.Id);
 
         return RedirectToPage();
     }
 
     public async Task<IActionResult> OnPostDeclineTimeOffAsync(int id)
     {
-        var r = await _db.TimeOffRequests.FindAsync(id);
-        if (r == null) return RedirectToPage();
+        var companyId = _companyScope.GetCurrentCompanyId(User);
+        var request = await _companyScope.GetCompanyTimeOffRequestAsync(id, companyId);
+        if (request == null) return Forbid();
 
-        r.Status = RequestStatus.Declined;
+        request.Status = RequestStatus.Declined;
         await _db.SaveChangesAsync();
 
         // Send notification to user
-        await _notificationService.CreateTimeOffNotificationAsync(r.UserId, RequestStatus.Declined, r.StartDate, r.EndDate, r.Id);
+        await _notificationService.CreateTimeOffNotificationAsync(request.UserId, RequestStatus.Declined, request.StartDate, request.EndDate, request.Id);
 
         return RedirectToPage();
     }
 
     public async Task<IActionResult> OnPostApproveSwapAsync(int id)
     {
-        using var trx = await _db.Database.BeginTransactionAsync();
-        var s = await _db.SwapRequests.FindAsync(id);
-        if (s == null) return RedirectToPage();
+        var companyId = _companyScope.GetCurrentCompanyId(User);
+        var swap = await _companyScope.GetCompanySwapRequestAsync(id, companyId);
+        if (swap == null) return Forbid();
 
-        var assign = await _db.ShiftAssignments.FindAsync(s.FromAssignmentId);
-        if (assign == null) { s.Status = RequestStatus.Declined; await _db.SaveChangesAsync(); return RedirectToPage(); }
+        var assignment = await _companyScope.GetCompanyShiftAssignmentAsync(swap.FromAssignmentId, companyId);
+        if (assignment == null)
+        {
+            swap.Status = RequestStatus.Declined;
+            await _db.SaveChangesAsync();
+            return RedirectToPage();
+        }
 
-        var si = await _db.ShiftInstances.FindAsync(assign.ShiftInstanceId);
-        if (si == null) { s.Status = RequestStatus.Declined; await _db.SaveChangesAsync(); return RedirectToPage(); }
+        var instance = await _db.ShiftInstances.SingleOrDefaultAsync(i => i.Id == assignment.ShiftInstanceId && i.CompanyId == companyId);
+        if (instance == null)
+        {
+            swap.Status = RequestStatus.Declined;
+            await _db.SaveChangesAsync();
+            return RedirectToPage();
+        }
 
-        var shiftType = await _db.ShiftTypes.FindAsync(si.ShiftTypeId);
-        if (shiftType == null) { s.Status = RequestStatus.Declined; await _db.SaveChangesAsync(); return RedirectToPage(); }
+        var shiftType = await _db.ShiftTypes.FindAsync(instance.ShiftTypeId);
+        if (shiftType == null)
+        {
+            swap.Status = RequestStatus.Declined;
+            await _db.SaveChangesAsync();
+            return RedirectToPage();
+        }
 
-        var conflict = await _checker.CanAssignAsync(s.ToUserId, si);
+        var conflict = await _checker.CanAssignAsync(swap.ToUserId, instance);
         if (!conflict.Allowed)
         {
             Error = "Cannot approve swap: " + string.Join(" ", conflict.Reasons);
-            await trx.RollbackAsync();
             await OnGetAsync();
             return Page();
         }
 
+        await using var trx = await _db.Database.BeginTransactionAsync();
+
         // Get original user for notification
-        var originalUserId = assign.UserId;
+        var originalUserId = assignment.UserId;
 
         // Reassign
-        assign.UserId = s.ToUserId;
-        s.Status = RequestStatus.Approved;
+        assignment.UserId = swap.ToUserId;
+        swap.Status = RequestStatus.Approved;
         await _db.SaveChangesAsync();
         await trx.CommitAsync();
 
         // Send notification to original user
-        var shiftInfo = $"{shiftType.Name} on {si.WorkDate:MMM dd, yyyy} ({shiftType.Start:HH:mm} - {shiftType.End:HH:mm})";
-        await _notificationService.CreateSwapRequestNotificationAsync(originalUserId, RequestStatus.Approved, shiftInfo, s.Id);
+        var shiftInfo = $"{shiftType.Name} on {instance.WorkDate:MMM dd, yyyy} ({shiftType.Start:HH:mm} - {shiftType.End:HH:mm})";
+        await _notificationService.CreateSwapRequestNotificationAsync(originalUserId, RequestStatus.Approved, shiftInfo, swap.Id);
 
         return RedirectToPage();
     }
 
     public async Task<IActionResult> OnPostDeclineSwapAsync(int id)
     {
-        var s = await _db.SwapRequests.FindAsync(id);
-        if (s == null) return RedirectToPage();
+        var companyId = _companyScope.GetCurrentCompanyId(User);
+        var swap = await _companyScope.GetCompanySwapRequestAsync(id, companyId);
+        if (swap == null) return Forbid();
 
         // Get shift information for notification before declining
         var shiftInfo = await (from sr in _db.SwapRequests
-                              join assign in _db.ShiftAssignments on sr.FromAssignmentId equals assign.Id
-                              join si in _db.ShiftInstances on assign.ShiftInstanceId equals si.Id
-                              join st in _db.ShiftTypes on si.ShiftTypeId equals st.Id
-                              where sr.Id == id
-                              select new { assign.UserId, ShiftInfo = $"{st.Name} on {si.WorkDate:MMM dd, yyyy} ({st.Start:HH:mm} - {st.End:HH:mm})" })
-                              .FirstOrDefaultAsync();
+                               join assign in _db.ShiftAssignments on sr.FromAssignmentId equals assign.Id
+                               join si in _db.ShiftInstances on assign.ShiftInstanceId equals si.Id
+                               join st in _db.ShiftTypes on si.ShiftTypeId equals st.Id
+                               join user in _db.Users on assign.UserId equals user.Id
+                               where sr.Id == id
+                                     && si.CompanyId == companyId
+                                     && user.CompanyId == companyId
+                               select new { assign.UserId, ShiftInfo = $"{st.Name} on {si.WorkDate:MMM dd, yyyy} ({st.Start:HH:mm} - {st.End:HH:mm})" })
+                               .FirstOrDefaultAsync();
 
-        s.Status = RequestStatus.Declined;
+        swap.Status = RequestStatus.Declined;
         await _db.SaveChangesAsync();
 
         // Send notification to user
         if (shiftInfo != null)
         {
-            await _notificationService.CreateSwapRequestNotificationAsync(shiftInfo.UserId, RequestStatus.Declined, shiftInfo.ShiftInfo, s.Id);
+            await _notificationService.CreateSwapRequestNotificationAsync(shiftInfo.UserId, RequestStatus.Declined, shiftInfo.ShiftInfo, swap.Id);
         }
 
         return RedirectToPage();

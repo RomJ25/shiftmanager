@@ -48,6 +48,7 @@ builder.Services.AddAuthorization(options =>
 
 builder.Services.AddScoped<IConflictChecker, ConflictChecker>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<ICompanyScopeService, CompanyScopeService>();
 
 var app = builder.Build();
 
