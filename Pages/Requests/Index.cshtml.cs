@@ -12,7 +12,8 @@ public async Task<IActionResult> OnPostApproveSwapAsync(int id)
         return RedirectToPage();
     }
 
-    var instance = await _db.ShiftInstances.SingleOrDefaultAsync(i => i.Id == assignment.ShiftInstanceId && i.CompanyId == companyId);
+    var instance = await _db.ShiftInstances
+        .SingleOrDefaultAsync(i => i.Id == assignment.ShiftInstanceId && i.CompanyId == companyId);
     if (instance == null)
     {
         swap.Status = RequestStatus.Declined;
@@ -59,8 +60,29 @@ public async Task<IActionResult> OnPostApproveSwapAsync(int id)
     await trx.CommitAsync();
 
     // Send notification to original user
-    var shiftInfo = $"{shiftType.Name} on {instance.WorkDate:MMM dd, yyyy} ({shiftType.Start:HH:mm} - {shiftType.End:HH:mm})";
-    await _notificationService.CreateSwapRequestNotificationAsync(originalUserId, RequestStatus.Approved, shiftInfo, swap.Id);
+    var shiftInfo = $"{shiftType.Name} on {instance.WorkDate:MMM dd, yyyy} " +
+                    $"({shiftType.Start:HH:mm} - {shiftType.End:HH:mm})";
+    await _notificationService.CreateSwapRequestNotificationAsync(
+        originalUserId, RequestStatus.Approved, shiftInfo, swap.Id);
+
+    return RedirectToPage();
+}
+
+public async Task<IActionResult> OnPostDeclineSwapAsync(int id)
+{
+    var companyId = _companyScope.GetCurrentCompanyId(User);
+    var swapData = await (from s in _db.SwapRequests
+                          where s.Id == id
+                          join assign in _db.ShiftAssignments on s.FromAssignmentId equals assign.Id
+                          join fromUser in _db.Users on assign.UserId equals fromUser.Id
+                          select new { Swap = s, FromUser = fromUser })
+                         .FirstOrDefaultAsync();
+    if (swapData == null) return RedirectToPage();
+    if (swapData.FromUser.CompanyId != companyId) return Forbid();
+
+    var s = swapData.Swap;
+    s.Status = RequestStatus.Declined;
+    await _db.SaveChangesAsync();
 
     return RedirectToPage();
 }
