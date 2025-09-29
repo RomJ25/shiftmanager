@@ -193,7 +193,7 @@ namespace ShiftManager.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("ToUserId")
+                    b.Property<int?>("ToUserId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");

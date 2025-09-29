@@ -67,7 +67,20 @@
                         <span asp-validation-for="SwapRequest.ShiftId" style="color: var(--danger); font-size: 0.8rem;"></span>
                     </div>
                     <div style="margin-bottom: 1.5rem;">
-                        <p style="color: var(--muted); font-size: 0.9rem; margin: 0;">This will create an open swap request that other employees can accept, or a manager can assign to someone.</p>
+                        <label asp-for="SwapRequest.ToUserId" style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: var(--text);">Send To (optional)</label>
+                        <select asp-for="SwapRequest.ToUserId" style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 0.5rem; background: var(--surface);">
+                            <option value="">Leave request open for any teammate</option>
+                            @foreach (var recipient in Model.PotentialRecipients)
+                            {
+                                <option value="@recipient.Id">@recipient.DisplayName (@recipient.Email)</option>
+                            }
+                        </select>
+                        <span asp-validation-for="SwapRequest.ToUserId" style="color: var(--danger); font-size: 0.8rem;"></span>
+                        <p style="color: var(--muted); font-size: 0.85rem; margin-top: 0.5rem;">Pick a coworker if you already have someone ready to swap with you, or leave the request open so anyone (or a manager) can volunteer.</p>
+                        @if (!Model.PotentialRecipients.Any())
+                        {
+                            <p style="color: var(--muted); font-size: 0.8rem; margin-top: 0.5rem;">No teammates available? Leaving the request open lets managers reassign it when someone becomes available.</p>
+                        }
                     </div>
                     <button type="submit" style="background: var(--primary); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-weight: 600; cursor: pointer; width: 100%;">Request Shift Swap</button>
                 </form>
@@ -129,6 +142,7 @@
                         <thead>
                             <tr style="border-bottom: 1px solid var(--border);">
                                 <th style="text-align: left; padding: 0.75rem 0; color: var(--text); font-weight: 600;">Shift</th>
+                                <th style="text-align: left; padding: 0.75rem 0; color: var(--text); font-weight: 600;">Recipient</th>
                                 <th style="text-align: left; padding: 0.75rem 0; color: var(--text); font-weight: 600;">Status</th>
                             </tr>
                         </thead>
@@ -137,8 +151,23 @@
                             {
                                 <tr style="border-bottom: 1px solid var(--border);">
                                     <td style="padding: 0.75rem 0; color: var(--text);">
-                                        @request.ShiftDate.ToString("MMM dd, yyyy")
-                                        <br><small style="color: var(--muted);">@request.ShiftTypeName</small>
+                                        <strong>@request.ShiftDate.ToString("MMM dd, yyyy")</strong>
+                                        <br /><small style="color: var(--muted);">@request.ShiftInstanceName</small>
+                                        <br /><small style="color: var(--muted);">@request.ShiftTimeRange</small>
+                                    </td>
+                                    <td style="padding: 0.75rem 0; color: var(--text);">
+                                        @if (request.IsOpen)
+                                        {
+                                            <span style="color: var(--muted);">Open to any teammate</span>
+                                        }
+                                        else
+                                        {
+                                            <span>@request.ToUserName</span>
+                                            @if (!string.IsNullOrEmpty(request.ToUserEmail))
+                                            {
+                                                <br /><small style="color: var(--muted);">@request.ToUserEmail</small>
+                                            }
+                                        }
                                     </td>
                                     <td style="padding: 0.75rem 0;">
                                         <span style="padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.8rem; font-weight: 600;

@@ -17,8 +17,29 @@ public class ConflictChecker : IConflictChecker
         if (user == null || !user.IsActive)
             return ConflictResult.Fail("User inactive or not found.");
 
+        if (instance.CompanyId <= 0)
+            return ConflictResult.Fail("Shift instance is not associated with a company.");
+
+        if (user.CompanyId != instance.CompanyId)
+            return ConflictResult.Fail("User belongs to a different company.");
+
         var t = await _db.ShiftTypes.FindAsync(new object?[] { instance.ShiftTypeId }, ct);
         if (t is null) return ConflictResult.Fail("Shift type missing.");
+
+        var companyProperty = t.GetType().GetProperty("CompanyId");
+        if (companyProperty is not null)
+        {
+            var value = companyProperty.GetValue(t);
+            int typeCompanyId = value switch
+            {
+                int id => id,
+                int? id => id ?? 0,
+                _ => 0
+            };
+
+            if (typeCompanyId != 0 && typeCompanyId != instance.CompanyId)
+                return ConflictResult.Fail("Shift type belongs to a different company.");
+        }
 
         // Approved Time off blocks
         bool hasTimeOff = await _db.TimeOffRequests

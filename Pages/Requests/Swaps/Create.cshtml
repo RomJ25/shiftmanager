@@ -19,12 +19,13 @@
             </label>
             <label>Proposed to user<br />
                 <select class="input" asp-for="ToUserId">
-                    <option value="">-- choose a user --</option>
+                    <option value="">Leave open for any teammate</option>
                     @foreach (var u in Model.OtherUsers)
                     {
                         <option value="@u.Id">@u.DisplayName (@u.Email)</option>
                     }
                 </select>
+                <small style="display:block; color:var(--muted); margin-top:.25rem;">Pick a teammate if you have a specific partner, or leave the request open to let others volunteer later.</small>
             </label>
             <button class="btn btn-primary" type="submit">Submit</button>
         </div>
