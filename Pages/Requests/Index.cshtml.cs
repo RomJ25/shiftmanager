@@ -23,7 +23,7 @@ public class IndexModel : PageModel
     public record TimeOffVM(int Id, string UserName, DateOnly StartDate, DateOnly EndDate, string? Reason);
     public List<TimeOffVM> TimeOff { get; set; } = new();
 
-    public record SwapVM(int Id, string FromUser, string When, string ToUser);
+    public record SwapVM(int Id, string FromUser, DateOnly ShiftDate, string ShiftName, TimeOnly Start, TimeOnly End, string? RecipientName, string? RecipientEmail);
     public List<SwapVM> Swaps { get; set; } = new();
 
     public string? Error { get; set; }
@@ -49,18 +49,22 @@ public class IndexModel : PageModel
                                       join u1 in _db.Users on a.UserId equals u1.Id
                                       join si in _db.ShiftInstances on a.ShiftInstanceId equals si.Id
                                       join st in _db.ShiftTypes on si.ShiftTypeId equals st.Id
-                                      join u2 in _db.Users on s.ToUserId equals u2.Id
+                                      join u2 in _db.Users on s.ToUserId equals u2.Id into toUsers
+                                      from u2 in toUsers.DefaultIfEmpty()
                                       where s.Status == RequestStatus.Pending
                                       orderby s.CreatedAt
-                                      select new
-                                      {
+                                      select new SwapVM(
                                           s.Id,
-                                          FromUser = u1.DisplayName,
-                                          When = $"{si.WorkDate:yyyy-MM-dd} {st.Key}",
-                                          ToUser = u2.DisplayName
-                                      }).ToListAsync();
+                                          u1.DisplayName,
+                                          si.WorkDate,
+                                          string.IsNullOrEmpty(si.Name) ? st.Name : si.Name,
+                                          st.Start,
+                                          st.End,
+                                          u2 != null ? u2.DisplayName : null,
+                                          u2 != null ? u2.Email : null
+                                      )).ToListAsync();
 
-            Swaps = pendingSwaps.Select(x => new SwapVM(x.Id, x.FromUser, x.When, x.ToUser)).ToList();
+            Swaps = pendingSwaps;
             _logger.LogInformation("Loaded {Count} pending swap requests", Swaps.Count);
             _logger.LogInformation("Admin requests page loaded successfully");
         }
@@ -125,7 +129,16 @@ public class IndexModel : PageModel
         var shiftType = await _db.ShiftTypes.FindAsync(si.ShiftTypeId);
         if (shiftType == null) { s.Status = RequestStatus.Declined; await _db.SaveChangesAsync(); return RedirectToPage(); }
 
-        var conflict = await _checker.CanAssignAsync(s.ToUserId, si);
+        if (!s.ToUserId.HasValue)
+        {
+            Error = "Cannot approve an open swap without selecting a recipient.";
+            await trx.RollbackAsync();
+            await OnGetAsync();
+            return Page();
+        }
+
+        var targetUserId = s.ToUserId.Value;
+        var conflict = await _checker.CanAssignAsync(targetUserId, si);
         if (!conflict.Allowed)
         {
             Error = "Cannot approve swap: " + string.Join(" ", conflict.Reasons);
@@ -138,7 +151,7 @@ public class IndexModel : PageModel
         var originalUserId = assign.UserId;
 
         // Reassign
-        assign.UserId = s.ToUserId;
+        assign.UserId = targetUserId;
         s.Status = RequestStatus.Approved;
         await _db.SaveChangesAsync();
         await trx.CommitAsync();
