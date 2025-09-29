@@ -100,7 +100,7 @@ public class IndexModel : PageModel
                 r.Swap.Id,
                 FormatUserName(r.FromUser),
                 r.Instance.WorkDate,
-                string.IsNullOrWhiteSpace(r.ShiftType.Name) ? r.ShiftType.Key : r.ShiftType.Name,
+                r.ShiftType.DisplayName,
                 r.ShiftType.Start,
                 r.ShiftType.End,
                 r.Recipient == null ? null : FormatUserName(r.Recipient),
@@ -204,7 +204,7 @@ public class IndexModel : PageModel
         await _db.SaveChangesAsync();
         await trx.CommitAsync();
 
-        var shiftInfo = $"{(string.IsNullOrWhiteSpace(shiftType.Name) ? shiftType.Key : shiftType.Name)} on {instance.WorkDate:MMM dd, yyyy} " +
+        var shiftInfo = $"{shiftType.DisplayName} on {instance.WorkDate:MMM dd, yyyy} " +
                         $"({shiftType.Start:HH:mm} - {shiftType.End:HH:mm})";
         await _notificationService.CreateSwapRequestNotificationAsync(
             originalUserId, RequestStatus.Approved, shiftInfo, swap.Id);
@@ -226,7 +226,7 @@ public class IndexModel : PageModel
                               {
                                   Swap = s,
                                   FromUser = fromUser,
-                                  ShiftInfo = $"{(string.IsNullOrWhiteSpace(st.Name) ? st.Key : st.Name)} on {si.WorkDate:MMM dd, yyyy} " +
+                                  ShiftInfo = $"{st.DisplayName} on {si.WorkDate:MMM dd, yyyy} " +
                                               $"({st.Start:HH:mm} - {st.End:HH:mm})"
                               })
                              .FirstOrDefaultAsync();
