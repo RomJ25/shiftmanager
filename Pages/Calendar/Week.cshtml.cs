@@ -132,14 +132,17 @@ public class WeekModel : PageModel
         public int concurrency { get; set; }
     }
 
-
     public async Task<IActionResult> OnPostAdjustAsync([FromBody] AdjustPayload payload)
     {
-        _logger.LogInformation("Adjust staffing: date={Date} shiftTypeId={ShiftTypeId} delta={Delta}", payload.date, payload.shiftTypeId, payload.delta);
+        _logger.LogInformation(
+            "Adjust staffing: date={Date} shiftTypeId={ShiftTypeId} delta={Delta}",
+            payload.date, payload.shiftTypeId, payload.delta);
+
         var companyId = int.Parse(User.FindFirst("CompanyId")!.Value);
         var date = DateOnly.Parse(payload.date);
 
-        var inst = await _db.ShiftInstances.FirstOrDefaultAsync(i => i.CompanyId == companyId && i.WorkDate == date && i.ShiftTypeId == payload.shiftTypeId);
+        var inst = await _db.ShiftInstances.FirstOrDefaultAsync(i =>
+            i.CompanyId == companyId && i.WorkDate == date && i.ShiftTypeId == payload.shiftTypeId);
         if (inst == null)
         {
             if (payload.delta < 0)
@@ -159,12 +162,15 @@ public class WeekModel : PageModel
         // concurrency check
         if (inst.Concurrency != payload.concurrency)
         {
-            _logger.LogWarning("Concurrency mismatch for ShiftInstanceId={Id}: sent={Sent}, current={Current}", inst.Id, payload.concurrency, inst.Concurrency);
+            _logger.LogWarning(
+                "Concurrency mismatch for ShiftInstanceId={Id}: sent={Sent}, current={Current}",
+                inst.Id, payload.concurrency, inst.Concurrency);
             return BadRequest(new { message = "Concurrent update detected. Reload the page." });
         }
 
         int newRequired = inst.StaffingRequired + payload.delta;
-        if (newRequired < 0) return BadRequest(new { message = "Cannot go below zero." });
+        if (newRequired < 0)
+            return BadRequest(new { message = "Cannot go below zero." });
 
         // prevent dropping below assigned count
         int assigned = await _db.ShiftAssignments.CountAsync(a => a.ShiftInstanceId == inst.Id);
@@ -178,5 +184,4 @@ public class WeekModel : PageModel
         await _db.SaveChangesAsync();
         return new JsonResult(new { required = inst.StaffingRequired, assigned, concurrency = inst.Concurrency });
     }
-
 }

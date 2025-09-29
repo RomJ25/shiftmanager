@@ -82,14 +82,30 @@ using (var scope = app.Services.CreateScope())
         {
             db.ShiftTypes.AddRange(new[]
             {
-                new ShiftType{ CompanyId = company.Id, Key="MORNING", Start=new TimeOnly(8,0), End=new TimeOnly(16,0)},
-                new ShiftType{ CompanyId = company.Id, Key="NOON", Start=new TimeOnly(16,0), End=new TimeOnly(0,0)},
-                new ShiftType{ CompanyId = company.Id, Key="NIGHT", Start=new TimeOnly(0,0), End=new TimeOnly(8,0)},
-                new ShiftType{ CompanyId = company.Id, Key="MIDDLE", Start=new TimeOnly(12,0), End=new TimeOnly(20,0)},
+                new ShiftType{ CompanyId = company.Id, Key="MORNING", Name="Morning Shift", Start=new TimeOnly(8,0), End=new TimeOnly(16,0)},
+                new ShiftType{ CompanyId = company.Id, Key="NOON", Name="Afternoon Shift", Start=new TimeOnly(16,0), End=new TimeOnly(0,0)},
+                new ShiftType{ CompanyId = company.Id, Key="NIGHT", Name="Night Shift", Start=new TimeOnly(0,0), End=new TimeOnly(8,0)},
+                new ShiftType{ CompanyId = company.Id, Key="MIDDLE", Name="Mid Shift", Start=new TimeOnly(12,0), End=new TimeOnly(20,0)},
             });
         }
     }
     if (db.ChangeTracker.HasChanges())
+    {
+        await db.SaveChangesAsync();
+    }
+
+    // Ensure existing shift types have names populated
+    var updated = false;
+    var existingTypes = await db.ShiftTypes.ToListAsync();
+    foreach (var type in existingTypes)
+    {
+        if (string.IsNullOrWhiteSpace(type.Name))
+        {
+            type.Name = type.DefaultName;
+            updated = true;
+        }
+    }
+    if (updated)
     {
         await db.SaveChangesAsync();
     }

@@ -75,14 +75,27 @@ public async Task<IActionResult> OnPostDeclineSwapAsync(int id)
                           where s.Id == id
                           join assign in _db.ShiftAssignments on s.FromAssignmentId equals assign.Id
                           join fromUser in _db.Users on assign.UserId equals fromUser.Id
-                          select new { Swap = s, FromUser = fromUser })
+                          join si in _db.ShiftInstances on assign.ShiftInstanceId equals si.Id
+                          join st in _db.ShiftTypes on si.ShiftTypeId equals st.Id
+                          select new
+                          {
+                              Swap = s,
+                              FromUser = fromUser,
+                              ShiftInfo = $"{st.Name} on {si.WorkDate:MMM dd, yyyy} " +
+                                          $"({st.Start:HH:mm} - {st.End:HH:mm})"
+                          })
                          .FirstOrDefaultAsync();
+
     if (swapData == null) return RedirectToPage();
     if (swapData.FromUser.CompanyId != companyId) return Forbid();
 
     var s = swapData.Swap;
     s.Status = RequestStatus.Declined;
     await _db.SaveChangesAsync();
+
+    // Send notification to user
+    await _notificationService.CreateSwapRequestNotificationAsync(
+        swapData.FromUser.Id, RequestStatus.Declined, swapData.ShiftInfo, s.Id);
 
     return RedirectToPage();
 }

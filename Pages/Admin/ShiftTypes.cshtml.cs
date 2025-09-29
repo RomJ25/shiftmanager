@@ -23,7 +23,15 @@ public class ShiftTypesModel : PageModel
             .Where(s => s.CompanyId == companyId)
             .OrderBy(s => s.Key)
             .ToListAsync();
-        Items = t.Select(x => new Item(x.Id, x.Key, x.Name, x.Start.ToString("HH:mm"), x.End.ToString("HH:mm"), x.CompanyId)).ToList();
+
+        Items = t.Select(x => new Item(
+                x.Id,
+                x.Key,
+                string.IsNullOrWhiteSpace(x.Name) ? x.DefaultName : x.Name,
+                x.Start.ToString("HH:mm"),
+                x.End.ToString("HH:mm"),
+                x.CompanyId))
+            .ToList();
     }
 
     public async Task<IActionResult> OnPostAsync(List<Item> items)
@@ -34,6 +42,7 @@ public class ShiftTypesModel : PageModel
         var types = await _db.ShiftTypes
             .Where(s => ids.Contains(s.Id) && s.CompanyId == companyId)
             .ToListAsync();
+
         foreach (var it in items)
         {
             if (it.Id == 0)
@@ -60,9 +69,11 @@ public class ShiftTypesModel : PageModel
             }
 
             t.Key = it.Key;
+            t.Name = string.IsNullOrWhiteSpace(it.Name) ? string.Empty : it.Name.Trim();
             t.Start = TimeOnly.Parse(it.Start);
             t.End = TimeOnly.Parse(it.End);
         }
+
         await _db.SaveChangesAsync();
         return RedirectToPage();
     }

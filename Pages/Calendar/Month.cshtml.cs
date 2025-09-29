@@ -54,7 +54,9 @@ public class MonthModel : PageModel
     public async Task OnGetAsync(int? year, int? month)
     {
         var today = DateOnly.FromDateTime(DateTime.Today);
-        var target = year.HasValue && month.HasValue ? new DateOnly(year.Value, month.Value, 1) : new DateOnly(today.Year, today.Month, 1);
+        var target = year.HasValue && month.HasValue
+            ? new DateOnly(year.Value, month.Value, 1)
+            : new DateOnly(today.Year, today.Month, 1);
         CurrentMonth = target;
 
         Previous = (target.AddMonths(-1), target.AddMonths(-1).ToString("MMM yyyy"));
@@ -67,12 +69,6 @@ public class MonthModel : PageModel
         int delta = ((int)start.DayOfWeek - (int)DayOfWeek.Monday + 7) % 7;
         var gridStart = start.AddDays(-delta);
         var dates = Enumerable.Range(0, 42).Select(i => gridStart.AddDays(i)).ToList();
-
-        // Load shift types (kept from main branch to ensure data integrity)
-        var types = await _db.ShiftTypes
-            .Where(s => s.CompanyId == companyId)
-            .OrderBy(s => s.Key)
-            .ToListAsync();
 
         var schedule = await _scheduleSummary.QueryAsync(new ScheduleSummaryRequest
         {
@@ -141,11 +137,15 @@ public class MonthModel : PageModel
 
     public async Task<IActionResult> OnPostAdjustAsync([FromBody] AdjustPayload payload)
     {
-        _logger.LogInformation("Adjust staffing: date={Date} shiftTypeId={ShiftTypeId} delta={Delta}", payload.date, payload.shiftTypeId, payload.delta);
+        _logger.LogInformation(
+            "Adjust staffing: date={Date} shiftTypeId={ShiftTypeId} delta={Delta}",
+            payload.date, payload.shiftTypeId, payload.delta);
+
         var companyId = int.Parse(User.FindFirst("CompanyId")!.Value);
         var date = DateOnly.Parse(payload.date);
 
-        var inst = await _db.ShiftInstances.FirstOrDefaultAsync(i => i.CompanyId == companyId && i.WorkDate == date && i.ShiftTypeId == payload.shiftTypeId);
+        var inst = await _db.ShiftInstances.FirstOrDefaultAsync(i =>
+            i.CompanyId == companyId && i.WorkDate == date && i.ShiftTypeId == payload.shiftTypeId);
         if (inst == null)
         {
             if (payload.delta < 0)
@@ -165,12 +165,15 @@ public class MonthModel : PageModel
         // concurrency check
         if (inst.Concurrency != payload.concurrency)
         {
-            _logger.LogWarning("Concurrency mismatch for ShiftInstanceId={Id}: sent={Sent}, current={Current}", inst.Id, payload.concurrency, inst.Concurrency);
+            _logger.LogWarning(
+                "Concurrency mismatch for ShiftInstanceId={Id}: sent={Sent}, current={Current}",
+                inst.Id, payload.concurrency, inst.Concurrency);
             return BadRequest(new { message = "Concurrent update detected. Reload the page." });
         }
 
         int newRequired = inst.StaffingRequired + payload.delta;
-        if (newRequired < 0) return BadRequest(new { message = "Cannot go below zero." });
+        if (newRequired < 0)
+            return BadRequest(new { message = "Cannot go below zero." });
 
         // prevent dropping below assigned count
         int assigned = await _db.ShiftAssignments.CountAsync(a => a.ShiftInstanceId == inst.Id);
