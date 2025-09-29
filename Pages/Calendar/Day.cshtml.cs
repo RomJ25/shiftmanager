@@ -54,7 +54,9 @@ public class DayModel : PageModel
         var companyId = int.Parse(User.FindFirst("CompanyId")!.Value);
 
         // Load shift types with custom ordering: morning, middle, noon, night
-        var types = await _db.ShiftTypes.ToListAsync();
+        var types = await _db.ShiftTypes
+            .Where(s => s.CompanyId == companyId)
+            .ToListAsync();
         types = types.OrderBy(s => s.Key switch
         {
             "MORNING" => 1,

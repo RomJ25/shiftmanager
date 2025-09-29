@@ -62,7 +62,10 @@ public class WeekModel : PageModel
         var companyId = int.Parse(User.FindFirst("CompanyId")!.Value);
 
         // Load shift types
-        var types = await _db.ShiftTypes.OrderBy(s => s.Key).ToListAsync();
+        var types = await _db.ShiftTypes
+            .Where(s => s.CompanyId == companyId)
+            .OrderBy(s => s.Key)
+            .ToListAsync();
 
         // Prepare shift types for JavaScript
         ViewData["ShiftTypes"] = types.Select(t => new
