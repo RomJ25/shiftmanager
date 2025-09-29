@@ -51,11 +51,12 @@ public class CompanyScopeService : ICompanyScopeService
                 join assignment in _db.ShiftAssignments on swap.FromAssignmentId equals assignment.Id
                 join instance in _db.ShiftInstances on assignment.ShiftInstanceId equals instance.Id
                 join fromUser in _db.Users on assignment.UserId equals fromUser.Id
-                join toUser in _db.Users on swap.ToUserId equals toUser.Id
+                join toUser in _db.Users on swap.ToUserId equals toUser.Id into recipients
+                from recipient in recipients.DefaultIfEmpty()
                 where swap.Id == requestId
                       && instance.CompanyId == companyId
                       && fromUser.CompanyId == companyId
-                      && toUser.CompanyId == companyId
+                      && (recipient == null || recipient.CompanyId == companyId)
                 select swap).SingleOrDefaultAsync();
     }
 
