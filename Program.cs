@@ -14,8 +14,6 @@ builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
 
-
-
 builder.Services.AddRazorPages(options =>
 {
     options.Conventions.AuthorizeFolder("/");
@@ -59,6 +57,7 @@ builder.Services.AddAuthorization(options =>
 
 builder.Services.AddScoped<IConflictChecker, ConflictChecker>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<ScheduleSummaryService>();
 builder.Services.AddScoped<ICompanyScopeService, CompanyScopeService>();
 
 var app = builder.Build();

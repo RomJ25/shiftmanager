@@ -2,26 +2,30 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;               // ensure this using is present
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using ShiftManager.Data;
-using ShiftManager.Models;
 using Microsoft.Extensions.Logging;
+using ShiftManager.Data;
+using ShiftManager.Services;
 
 namespace ShiftManager.Pages.Calendar;
 
 [Authorize]
 [IgnoreAntiforgeryToken] // ⬅ apply here (class level)
-
 public class MonthModel : PageModel
 {
     private readonly AppDbContext _db;
     private readonly ILogger<MonthModel> _logger;
-    public MonthModel(AppDbContext db, ILogger<MonthModel> logger) { _db = db; _logger = logger; }
+    private readonly ScheduleSummaryService _scheduleSummary;
 
+    public MonthModel(AppDbContext db, ILogger<MonthModel> logger, ScheduleSummaryService scheduleSummary)
+    {
+        _db = db;
+        _logger = logger;
+        _scheduleSummary = scheduleSummary;
+    }
 
     public DateOnly CurrentMonth { get; set; }
     public (DateOnly MonthYear, string Label) Previous { get; set; }
     public (DateOnly MonthYear, string Label) Next { get; set; }
-
     public List<List<DayVM>> Weeks { get; set; } = new();
 
     public class DayVM
@@ -29,6 +33,7 @@ public class MonthModel : PageModel
         public DateOnly Date { get; set; }
         public List<LineVM> Lines { get; set; } = new();
     }
+
     public class LineVM
     {
         public int ShiftTypeId { get; set; }
@@ -57,14 +62,28 @@ public class MonthModel : PageModel
 
         var companyId = int.Parse(User.FindFirst("CompanyId")!.Value);
 
-        // Load shift types
+        // Build 6-week grid starting Monday
+        var start = new DateOnly(target.Year, target.Month, 1);
+        int delta = ((int)start.DayOfWeek - (int)DayOfWeek.Monday + 7) % 7;
+        var gridStart = start.AddDays(-delta);
+        var dates = Enumerable.Range(0, 42).Select(i => gridStart.AddDays(i)).ToList();
+
+        // Load shift types (kept from main branch to ensure data integrity)
         var types = await _db.ShiftTypes
             .Where(s => s.CompanyId == companyId)
             .OrderBy(s => s.Key)
             .ToListAsync();
 
-        // Prepare shift types for JavaScript
-        ViewData["ShiftTypes"] = types.Select(t => new
+        var schedule = await _scheduleSummary.QueryAsync(new ScheduleSummaryRequest
+        {
+            CompanyId = companyId,
+            StartDate = dates.First(),
+            EndDate = dates.Last(),
+            IncludeAssignedNames = true,
+            IncludeEmptySlots = true
+        });
+
+        ViewData["ShiftTypes"] = schedule.ShiftTypes.Select(t => new
         {
             id = t.Id,
             key = t.Key,
@@ -73,35 +92,7 @@ public class MonthModel : PageModel
             end = t.End.ToString("HH:mm")
         }).ToList();
 
-        // Build 6-week grid starting Monday
-        var start = new DateOnly(target.Year, target.Month, 1);
-        int delta = ((int)start.DayOfWeek - (int)DayOfWeek.Monday + 7) % 7;
-        var gridStart = start.AddDays(-delta);
-        var dates = Enumerable.Range(0, 42).Select(i => gridStart.AddDays(i)).ToList();
-
-        // Load instances and assignments for the window
-        var instances = await _db.ShiftInstances
-            .Where(si => si.CompanyId == companyId && si.WorkDate >= dates.First() && si.WorkDate <= dates.Last())
-            .ToListAsync();
-
-        var instanceIds = instances.Select(i => i.Id).ToList();
-        var assignmentCounts = await _db.ShiftAssignments
-            .Where(a => instanceIds.Contains(a.ShiftInstanceId))
-            .GroupBy(a => a.ShiftInstanceId)
-            .Select(g => new { ShiftInstanceId = g.Key, Count = g.Count() })
-            .ToListAsync();
-
-        // Fetch assignments with user names
-        var assignmentsWithNames = await (from a in _db.ShiftAssignments
-                                         join u in _db.Users on a.UserId equals u.Id
-                                         where instanceIds.Contains(a.ShiftInstanceId)
-                                         select new { a.ShiftInstanceId, UserName = u.DisplayName })
-                                         .ToListAsync();
-
-        var dictAssigned = assignmentCounts.ToDictionary(x => x.ShiftInstanceId, x => x.Count);
-        var dictAssignedNames = assignmentsWithNames
-            .GroupBy(x => x.ShiftInstanceId)
-            .ToDictionary(g => g.Key, g => g.Select(x => x.UserName).ToList());
+        var dayLookup = schedule.Days.ToDictionary(d => d.Date);
 
         for (int w = 0; w < 6; w++)
         {
@@ -110,29 +101,28 @@ public class MonthModel : PageModel
             {
                 var date = dates[w * 7 + d];
                 var vm = new DayVM { Date = date };
-                foreach (var t in types)
+                if (!dayLookup.TryGetValue(date, out var summary))
                 {
-                    var inst = instances.FirstOrDefault(i => i.WorkDate == date && i.ShiftTypeId == t.Id && i.CompanyId == companyId);
-                    var assignedCount = inst != null && dictAssigned.ContainsKey(inst.Id) ? dictAssigned[inst.Id] : 0;
-                    var requiredCount = inst?.StaffingRequired ?? 0;
-                    var assignedNames = inst != null && dictAssignedNames.ContainsKey(inst.Id) ? dictAssignedNames[inst.Id] : new List<string>();
-                    var emptySlots = Enumerable.Repeat("Empty", Math.Max(0, requiredCount - assignedCount)).ToList();
+                    summary = new ShiftSummaryDayDto { Date = date };
+                }
 
+                foreach (var line in summary.Lines)
+                {
                     vm.Lines.Add(new LineVM
                     {
-                        ShiftTypeId = t.Id,
-                        InstanceId = inst?.Id ?? 0,
-                        Concurrency = inst?.Concurrency ?? 0,
-                        ShortName = t.Name[..Math.Min(3, t.Name.Length)],
-                        ShiftTypeKey = t.Key.ToLower(),
-                        ShiftTypeName = t.Name,
-                        ShiftName = inst?.Name ?? "",
-                        Assigned = assignedCount,
-                        Required = requiredCount,
-                        AssignedNames = assignedNames,
-                        EmptySlots = emptySlots,
-                        StartTime = t.Start.ToString("HH:mm"),
-                        EndTime = t.End.ToString("HH:mm")
+                        ShiftTypeId = line.ShiftTypeId,
+                        InstanceId = line.InstanceId,
+                        Concurrency = line.Concurrency,
+                        ShortName = line.ShiftTypeShortName,
+                        ShiftTypeKey = line.ShiftTypeKey,
+                        ShiftTypeName = line.ShiftTypeName,
+                        ShiftName = line.ShiftName,
+                        Assigned = line.Assigned,
+                        Required = line.Required,
+                        AssignedNames = line.AssignedNames.ToList(),
+                        EmptySlots = line.EmptySlots.ToList(),
+                        StartTime = line.StartTime.ToString("HH:mm"),
+                        EndTime = line.EndTime.ToString("HH:mm")
                     });
                 }
                 week.Add(vm);
@@ -148,7 +138,6 @@ public class MonthModel : PageModel
         public int delta { get; set; }
         public int concurrency { get; set; }
     }
-
 
     public async Task<IActionResult> OnPostAdjustAsync([FromBody] AdjustPayload payload)
     {
@@ -195,5 +184,4 @@ public class MonthModel : PageModel
         await _db.SaveChangesAsync();
         return new JsonResult(new { required = inst.StaffingRequired, assigned, concurrency = inst.Concurrency });
     }
-
 }
