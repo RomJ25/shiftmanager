@@ -13,22 +13,52 @@ public class ShiftTypesModel : PageModel
     private readonly AppDbContext _db;
     public ShiftTypesModel(AppDbContext db) => _db = db;
 
-    public record Item(int Id, string Key, string Name, string Start, string End);
+    public record Item(int Id, string Key, string Name, string Start, string End, int CompanyId);
     public List<Item> Items { get; set; } = new();
 
     public async Task OnGetAsync()
     {
-        var t = await _db.ShiftTypes.OrderBy(s => s.Key).ToListAsync();
-        Items = t.Select(x => new Item(x.Id, x.Key, x.Name, x.Start.ToString("HH:mm"), x.End.ToString("HH:mm"))).ToList();
+        var companyId = int.Parse(User.FindFirst("CompanyId")!.Value);
+        var t = await _db.ShiftTypes
+            .Where(s => s.CompanyId == companyId)
+            .OrderBy(s => s.Key)
+            .ToListAsync();
+        Items = t.Select(x => new Item(x.Id, x.Key, x.Name, x.Start.ToString("HH:mm"), x.End.ToString("HH:mm"), x.CompanyId)).ToList();
     }
 
     public async Task<IActionResult> OnPostAsync(List<Item> items)
     {
-        var ids = items.Select(i => i.Id).ToList();
-        var types = await _db.ShiftTypes.Where(s => ids.Contains(s.Id)).ToListAsync();
+        var companyId = int.Parse(User.FindFirst("CompanyId")!.Value);
+
+        var ids = items.Where(i => i.Id != 0).Select(i => i.Id).ToList();
+        var types = await _db.ShiftTypes
+            .Where(s => ids.Contains(s.Id) && s.CompanyId == companyId)
+            .ToListAsync();
         foreach (var it in items)
         {
-            var t = types.First(x => x.Id == it.Id);
+            if (it.Id == 0)
+            {
+                _db.ShiftTypes.Add(new ShiftType
+                {
+                    CompanyId = companyId,
+                    Key = it.Key,
+                    Start = TimeOnly.Parse(it.Start),
+                    End = TimeOnly.Parse(it.End)
+                });
+                continue;
+            }
+
+            if (it.CompanyId != companyId)
+            {
+                continue;
+            }
+
+            var t = types.FirstOrDefault(x => x.Id == it.Id);
+            if (t is null)
+            {
+                continue;
+            }
+
             t.Key = it.Key;
             t.Start = TimeOnly.Parse(it.Start);
             t.End = TimeOnly.Parse(it.End);

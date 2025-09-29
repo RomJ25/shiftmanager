@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using ShiftManager.Data;
 using ShiftManager.Models;
 using ShiftManager.Models.Support;
+using ShiftManager.Services;
 
 namespace ShiftManager.Pages.Admin;
 
@@ -14,11 +15,13 @@ public class TimeOffModel : PageModel
 {
     private readonly AppDbContext _db;
     private readonly ILogger<TimeOffModel> _logger;
+    private readonly ICompanyScopeService _companyScope;
 
-    public TimeOffModel(AppDbContext db, ILogger<TimeOffModel> logger)
+    public TimeOffModel(AppDbContext db, ILogger<TimeOffModel> logger, ICompanyScopeService companyScope)
     {
         _db = db;
         _logger = logger;
+        _companyScope = companyScope;
     }
 
     public record ApprovedTimeOffVM(int Id, string UserName, DateOnly StartDate, DateOnly EndDate, string? Reason, DateTime CreatedAt, DateTime ApprovedAt);
@@ -33,7 +36,7 @@ public class TimeOffModel : PageModel
         {
             _logger.LogInformation("Loading approved time-off requests for admin management");
 
-            var companyId = int.Parse(User.FindFirst("CompanyId")!.Value);
+            var companyId = _companyScope.GetCurrentCompanyId(User);
 
             ApprovedTimeOffs = await (from r in _db.TimeOffRequests
                                      join u in _db.Users on r.UserId equals u.Id
@@ -64,11 +67,12 @@ public class TimeOffModel : PageModel
         {
             _logger.LogInformation("Admin attempting to delete approved time-off request {RequestId}", id);
 
-            var request = await _db.TimeOffRequests.FindAsync(id);
+            var companyId = _companyScope.GetCurrentCompanyId(User);
+            var request = await _companyScope.GetCompanyTimeOffRequestAsync(id, companyId);
             if (request == null)
             {
                 _logger.LogWarning("Time-off request {RequestId} not found", id);
-                Error = "Time-off request not found.";
+                Error = "Time-off request not found or does not belong to your company.";
                 await OnGetAsync();
                 return Page();
             }
@@ -90,7 +94,7 @@ public class TimeOffModel : PageModel
                 return Page();
             }
 
-            var user = await _db.Users.FindAsync(request.UserId);
+            var user = await _companyScope.GetCompanyUserAsync(request.UserId, companyId);
             var userName = user?.DisplayName ?? "Unknown User";
 
             _logger.LogInformation("Deleting approved time-off request {RequestId} for user {UserName} ({StartDate} to {EndDate})",
