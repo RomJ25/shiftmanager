@@ -126,9 +126,84 @@ public class ScheduleSummaryServiceTests
         Assert.DoesNotContain(result.Days.SelectMany(d => d.Lines), l => l.ShiftTypeId == otherShiftType.Id);
     }
 
+    [Fact]
+    public async Task UsesDisplayNameWhenNameMissing()
+    {
+        using var context = CreateContext();
+        var company = await SeedCompanyAsync(context);
+        var shiftType = new ShiftType
+        {
+            CompanyId = company.Id,
+            Key = "MORNING",
+            Name = string.Empty,
+            Start = new TimeOnly(8, 0),
+            End = new TimeOnly(16, 0),
+            DisplayName = "Morning Shift"
+        };
+        context.ShiftTypes.Add(shiftType);
+        await context.SaveChangesAsync();
+
+        var instance = new ShiftInstance
+        {
+            CompanyId = company.Id,
+            ShiftTypeId = shiftType.Id,
+            WorkDate = new DateOnly(2024, 10, 4),
+            StaffingRequired = 1
+        };
+        context.ShiftInstances.Add(instance);
+        await context.SaveChangesAsync();
+
+        var service = new ScheduleSummaryService(context);
+        var result = await service.QueryAsync(new ScheduleSummaryRequest
+        {
+            CompanyId = company.Id,
+            StartDate = instance.WorkDate,
+            EndDate = instance.WorkDate
+        });
+
+        var displayName = "Morning Shift";
+
+        var shiftTypeSummary = Assert.Single(result.ShiftTypes);
+        Assert.Equal(displayName, shiftTypeSummary.Name);
+        Assert.Equal("Mor", shiftTypeSummary.ShortName);
+
+        var line = Assert.Single(Assert.Single(result.Days).Lines);
+        Assert.Equal(displayName, line.ShiftTypeName);
+        Assert.Equal("Mor", line.ShiftTypeShortName);
+    }
+
+    [Fact]
+    public async Task QueryScopesShiftTypesToCompany()
+    {
+        using var context = CreateContext();
+        var companyA = await SeedCompanyAsync(context, "Company A");
+        var companyB = await SeedCompanyAsync(context, "Company B");
+
+        var date = new DateOnly(2024, 10, 5);
+        var shiftTypeA = await SeedShiftTypeAsync(context, companyA, "A", new TimeOnly(6, 0), new TimeOnly(14, 0));
+        var shiftTypeB = await SeedShiftTypeAsync(context, companyB, "B", new TimeOnly(14, 0), new TimeOnly(22, 0));
+
+        var instanceA = new ShiftInstance { CompanyId = companyA.Id, ShiftTypeId = shiftTypeA.Id, WorkDate = date, StaffingRequired = 1 };
+        var instanceB = new ShiftInstance { CompanyId = companyB.Id, ShiftTypeId = shiftTypeB.Id, WorkDate = date, StaffingRequired = 1 };
+        context.ShiftInstances.AddRange(instanceA, instanceB);
+        await context.SaveChangesAsync();
+
+        var service = new ScheduleSummaryService(context);
+        var result = await service.QueryAsync(new ScheduleSummaryRequest
+        {
+            CompanyId = companyA.Id,
+            StartDate = date,
+            EndDate = date
+        });
+
+        var line = Assert.Single(Assert.Single(result.Days).Lines);
+        Assert.Equal(shiftTypeA.Id, line.ShiftTypeId);
+        Assert.DoesNotContain(result.Days.SelectMany(d => d.Lines), l => l.ShiftTypeId == shiftTypeB.Id);
+    }
+
     private static AppDbContext CreateContext()
     {
-        var connection = new SqliteConnection("Filename=:memory:");
+        var connection = new SqliteConnection("DataSource=:memory:");
         connection.Open();
 
         using (var pragma = connection.CreateCommand())
@@ -148,32 +223,6 @@ public class ScheduleSummaryServiceTests
         context.ChangeTracker.AutoDetectChangesEnabled = true;
         context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.TrackAll;
         return context;
-    }
-
-    private sealed class TestAppDbContext : AppDbContext
-    {
-        private readonly SqliteConnection _connection;
-
-        public TestAppDbContext(DbContextOptions<AppDbContext> options, SqliteConnection connection)
-            : base(options)
-        {
-            _connection = connection;
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            base.Dispose(disposing);
-            if (disposing)
-            {
-                _connection.Dispose();
-            }
-        }
-
-        public override async ValueTask DisposeAsync()
-        {
-            await base.DisposeAsync();
-            await _connection.DisposeAsync();
-        }
     }
 
     private static async Task<Company> SeedCompanyAsync(AppDbContext context, string name = "Test Co")

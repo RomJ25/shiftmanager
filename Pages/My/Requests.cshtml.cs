@@ -80,9 +80,9 @@ public class RequestsModel : PageModel
                                      {
                                          Id = sr.Id,
                                          ShiftDate = si.WorkDate,
-                                         ShiftTypeName = st.Name,
+                                         ShiftTypeName = st.DisplayName,
                                          ShiftTimeRange = $"{st.Start:HH:mm} - {st.End:HH:mm}",
-                                         ShiftInstanceName = string.IsNullOrEmpty(si.Name) ? st.Name : si.Name,
+                                         ShiftInstanceName = string.IsNullOrEmpty(si.Name) ? st.DisplayName : si.Name,
                                          ToUserName = tu != null ? tu.DisplayName : null,
                                          ToUserEmail = tu != null ? tu.Email : null,
                                          IsOpen = tu == null,

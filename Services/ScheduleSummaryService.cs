@@ -70,7 +70,9 @@ public class ScheduleSummaryService
 
         var shiftTypeFilter = request.ShiftTypeIds?.ToHashSet();
 
-        var shiftTypeQuery = _db.ShiftTypes.AsNoTracking();
+        var shiftTypeQuery = _db.ShiftTypes
+            .AsNoTracking()
+            .Where(t => t.CompanyId == request.CompanyId);
         if (shiftTypeFilter is { Count: > 0 })
         {
             shiftTypeQuery = shiftTypeQuery.Where(t => shiftTypeFilter.Contains(t.Id));
@@ -147,12 +149,14 @@ public class ScheduleSummaryService
                     ? Enumerable.Repeat("Empty", emptyCount).ToList()
                     : Array.Empty<string>();
 
+                var displayName = type.DisplayName;
+
                 lines.Add(new ShiftSummaryLineDto
                 {
                     ShiftTypeId = type.Id,
                     ShiftTypeKey = type.Key.ToLowerInvariant(),
-                    ShiftTypeName = type.Name,
-                    ShiftTypeShortName = Shorten(type.Name),
+                    ShiftTypeName = displayName,
+                    ShiftTypeShortName = Shorten(displayName),
                     InstanceId = inst?.Id ?? 0,
                     Concurrency = inst?.Concurrency ?? 0,
                     ShiftName = inst?.Name ?? string.Empty,
@@ -173,14 +177,18 @@ public class ScheduleSummaryService
         }
 
         var shiftTypeDtos = shiftTypes
-            .Select(t => new ShiftTypeSummaryDto
+            .Select(t =>
             {
-                Id = t.Id,
-                Key = t.Key,
-                Name = t.Name,
-                Start = t.Start,
-                End = t.End,
-                ShortName = Shorten(t.Name)
+                var displayName = t.DisplayName;
+                return new ShiftTypeSummaryDto
+                {
+                    Id = t.Id,
+                    Key = t.Key,
+                    Name = displayName,
+                    Start = t.Start,
+                    End = t.End,
+                    ShortName = Shorten(displayName)
+                };
             })
             .ToList();
 
