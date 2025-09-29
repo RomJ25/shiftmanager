@@ -18,14 +18,25 @@ public class ShiftTypesModel : PageModel
 
     public async Task OnGetAsync()
     {
-        var t = await _db.ShiftTypes.OrderBy(s => s.Key).ToListAsync();
+        var companyId = int.Parse(User.FindFirst("CompanyId")!.Value);
+        var t = await _db.ShiftTypes
+            .Where(s => s.CompanyId == companyId)
+            .OrderBy(s => s.Key)
+            .ToListAsync();
         Items = t.Select(x => new Item(x.Id, x.Key, x.Name, x.Start.ToString("HH:mm"), x.End.ToString("HH:mm"))).ToList();
     }
 
     public async Task<IActionResult> OnPostAsync(List<Item> items)
     {
+        var companyId = int.Parse(User.FindFirst("CompanyId")!.Value);
         var ids = items.Select(i => i.Id).ToList();
-        var types = await _db.ShiftTypes.Where(s => ids.Contains(s.Id)).ToListAsync();
+        var types = await _db.ShiftTypes
+            .Where(s => s.CompanyId == companyId && ids.Contains(s.Id))
+            .ToListAsync();
+        if (types.Count != ids.Count)
+        {
+            return Forbid();
+        }
         foreach (var it in items)
         {
             var t = types.First(x => x.Id == it.Id);

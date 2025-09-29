@@ -123,7 +123,12 @@ public class IndexModel : PageModel
         if (si == null) { s.Status = RequestStatus.Declined; await _db.SaveChangesAsync(); return RedirectToPage(); }
 
         var shiftType = await _db.ShiftTypes.FindAsync(si.ShiftTypeId);
-        if (shiftType == null) { s.Status = RequestStatus.Declined; await _db.SaveChangesAsync(); return RedirectToPage(); }
+        if (shiftType == null || shiftType.CompanyId != si.CompanyId)
+        {
+            s.Status = RequestStatus.Declined;
+            await _db.SaveChangesAsync();
+            return RedirectToPage();
+        }
 
         var conflict = await _checker.CanAssignAsync(s.ToUserId, si);
         if (!conflict.Allowed)

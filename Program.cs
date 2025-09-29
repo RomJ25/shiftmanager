@@ -67,13 +67,13 @@ using (var scope = app.Services.CreateScope())
     var company = db.Companies.First();
 
     // Seed shift types (fixed keys)
-    if (!db.ShiftTypes.Any())
+    if (!db.ShiftTypes.Any(st => st.CompanyId == company.Id))
     {
         db.ShiftTypes.AddRange(new[] {
-            new ShiftType{ Key="MORNING", Start=new TimeOnly(8,0), End=new TimeOnly(16,0)},
-            new ShiftType{ Key="NOON", Start=new TimeOnly(16,0), End=new TimeOnly(0,0)},
-            new ShiftType{ Key="NIGHT", Start=new TimeOnly(0,0), End=new TimeOnly(8,0)},
-            new ShiftType{ Key="MIDDLE", Start=new TimeOnly(12,0), End=new TimeOnly(20,0)},
+            new ShiftType{ CompanyId = company.Id, Key="MORNING", Start=new TimeOnly(8,0), End=new TimeOnly(16,0)},
+            new ShiftType{ CompanyId = company.Id, Key="NOON", Start=new TimeOnly(16,0), End=new TimeOnly(0,0)},
+            new ShiftType{ CompanyId = company.Id, Key="NIGHT", Start=new TimeOnly(0,0), End=new TimeOnly(8,0)},
+            new ShiftType{ CompanyId = company.Id, Key="MIDDLE", Start=new TimeOnly(12,0), End=new TimeOnly(20,0)},
         });
         await db.SaveChangesAsync();
     }

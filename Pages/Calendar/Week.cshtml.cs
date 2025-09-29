@@ -62,7 +62,10 @@ public class WeekModel : PageModel
         var companyId = int.Parse(User.FindFirst("CompanyId")!.Value);
 
         // Load shift types
-        var types = await _db.ShiftTypes.OrderBy(s => s.Key).ToListAsync();
+        var types = await _db.ShiftTypes
+            .Where(st => st.CompanyId == companyId)
+            .OrderBy(s => s.Key)
+            .ToListAsync();
 
         // Prepare shift types for JavaScript
         ViewData["ShiftTypes"] = types.Select(t => new
@@ -152,6 +155,13 @@ public class WeekModel : PageModel
         _logger.LogInformation("Adjust staffing: date={Date} shiftTypeId={ShiftTypeId} delta={Delta}", payload.date, payload.shiftTypeId, payload.delta);
         var companyId = int.Parse(User.FindFirst("CompanyId")!.Value);
         var date = DateOnly.Parse(payload.date);
+
+        bool shiftTypeExists = await _db.ShiftTypes
+            .AnyAsync(st => st.CompanyId == companyId && st.Id == payload.shiftTypeId);
+        if (!shiftTypeExists)
+        {
+            return BadRequest(new { message = "Shift type not found." });
+        }
 
         var inst = await _db.ShiftInstances.FirstOrDefaultAsync(i => i.CompanyId == companyId && i.WorkDate == date && i.ShiftTypeId == payload.shiftTypeId);
         if (inst == null)

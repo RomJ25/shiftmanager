@@ -5,7 +5,9 @@ namespace ShiftManager.Models;
 public class ShiftType
 {
     public int Id { get; set; }
+    public int CompanyId { get; set; }
     public string Key { get; set; } = string.Empty; // MORNING, NOON, NIGHT, MIDDLE
+    public Company Company { get; set; } = null!;
     [NotMapped]
     public string Name
     {

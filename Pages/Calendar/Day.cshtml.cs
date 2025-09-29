@@ -54,7 +54,9 @@ public class DayModel : PageModel
         var companyId = int.Parse(User.FindFirst("CompanyId")!.Value);
 
         // Load shift types with custom ordering: morning, middle, noon, night
-        var types = await _db.ShiftTypes.ToListAsync();
+        var types = await _db.ShiftTypes
+            .Where(st => st.CompanyId == companyId)
+            .ToListAsync();
         types = types.OrderBy(s => s.Key switch
         {
             "MORNING" => 1,
@@ -142,6 +144,13 @@ public class DayModel : PageModel
         _logger.LogInformation("Adjust staffing: date={Date} shiftTypeId={ShiftTypeId} delta={Delta}", payload.date, payload.shiftTypeId, payload.delta);
         var companyId = int.Parse(User.FindFirst("CompanyId")!.Value);
         var date = DateOnly.Parse(payload.date);
+
+        bool shiftTypeExists = await _db.ShiftTypes
+            .AnyAsync(st => st.CompanyId == companyId && st.Id == payload.shiftTypeId);
+        if (!shiftTypeExists)
+        {
+            return BadRequest(new { message = "Shift type not found." });
+        }
 
         var inst = await _db.ShiftInstances.FirstOrDefaultAsync(i => i.CompanyId == companyId && i.WorkDate == date && i.ShiftTypeId == payload.shiftTypeId);
         if (inst == null)

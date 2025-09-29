@@ -38,7 +38,8 @@ public class ManageModel : PageModel
     public async Task<IActionResult> OnGetAsync()
     {
         var companyId = int.Parse(User.FindFirst("CompanyId")!.Value);
-        Type = await _db.ShiftTypes.FindAsync(ShiftTypeId);
+        Type = await _db.ShiftTypes
+            .FirstOrDefaultAsync(st => st.CompanyId == companyId && st.Id == ShiftTypeId);
         if (Type == null) return RedirectToPage("/Calendar/Month");
 
         Instance = await _db.ShiftInstances.FirstOrDefaultAsync(i => i.CompanyId == companyId && i.WorkDate == Date && i.ShiftTypeId == ShiftTypeId)

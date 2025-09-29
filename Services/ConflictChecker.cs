@@ -18,7 +18,8 @@ public class ConflictChecker : IConflictChecker
             return ConflictResult.Fail("User inactive or not found.");
 
         var t = await _db.ShiftTypes.FindAsync(new object?[] { instance.ShiftTypeId }, ct);
-        if (t is null) return ConflictResult.Fail("Shift type missing.");
+        if (t is null || t.CompanyId != instance.CompanyId)
+            return ConflictResult.Fail("Shift type missing.");
 
         // Approved Time off blocks
         bool hasTimeOff = await _db.TimeOffRequests
