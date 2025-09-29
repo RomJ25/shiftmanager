@@ -38,8 +38,20 @@ public class CreateModel : PageModel
     public async Task<IActionResult> OnPostAsync()
     {
         await OnGetAsync();
-        if (SelectedAssignmentId is null || ToUserId is null) return Page();
-        _db.SwapRequests.Add(new SwapRequest { FromAssignmentId = SelectedAssignmentId.Value, ToUserId = ToUserId.Value });
+
+        if (SelectedAssignmentId is null)
+        {
+            ModelState.AddModelError(nameof(SelectedAssignmentId), "Please choose one of your upcoming shifts.");
+            return Page();
+        }
+
+        if (ToUserId.HasValue && !OtherUsers.Any(u => u.Id == ToUserId.Value))
+        {
+            ModelState.AddModelError(nameof(ToUserId), "Please select a valid teammate or leave the request open.");
+            return Page();
+        }
+
+        _db.SwapRequests.Add(new SwapRequest { FromAssignmentId = SelectedAssignmentId.Value, ToUserId = ToUserId });
         await _db.SaveChangesAsync();
         return RedirectToPage("/Requests/Index");
     }

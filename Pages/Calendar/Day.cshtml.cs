@@ -2,9 +2,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using ShiftManager.Data;
 using ShiftManager.Models;
-using Microsoft.Extensions.Logging;
+using ShiftManager.Services;
 
 namespace ShiftManager.Pages.Calendar;
 
@@ -14,7 +15,13 @@ public class DayModel : PageModel
 {
     private readonly AppDbContext _db;
     private readonly ILogger<DayModel> _logger;
-    public DayModel(AppDbContext db, ILogger<DayModel> logger) { _db = db; _logger = logger; }
+    private readonly ScheduleSummaryService _scheduleSummary;
+    public DayModel(AppDbContext db, ILogger<DayModel> logger, ScheduleSummaryService scheduleSummary)
+    {
+        _db = db;
+        _logger = logger;
+        _scheduleSummary = scheduleSummary;
+    }
 
     public DateOnly CurrentDate { get; set; }
     public (DateOnly Date, string Label) Previous { get; set; }
@@ -53,78 +60,76 @@ public class DayModel : PageModel
 
         var companyId = int.Parse(User.FindFirst("CompanyId")!.Value);
 
-        // Load shift types with custom ordering: morning, middle, noon, night
-        var types = await _db.ShiftTypes.ToListAsync();
-        types = types.OrderBy(s => s.Key switch
+        // Query schedule summary for this day
+        var schedule = await _scheduleSummary.QueryAsync(new ScheduleSummaryRequest
         {
-            "MORNING" => 1,
-            "MIDDLE" => 2,
-            "NOON" => 3,
-            "NIGHT" => 4,
-            _ => 99
-        }).ToList();
+            CompanyId = companyId,
+            StartDate = CurrentDate,
+            EndDate = CurrentDate,
+            IncludeAssignedNames = true,
+            IncludeEmptySlots = true
+        });
 
-        // Prepare shift types for JavaScript
-        ViewData["ShiftTypes"] = types.Select(t => new
-        {
-            id = t.Id,
-            key = t.Key,
-            name = t.DisplayName,
-            start = t.Start.ToString("HH:mm"),
-            end = t.End.ToString("HH:mm")
-        }).ToList();
-
-        // Load instances and assignments for the day
-        var instances = await _db.ShiftInstances
-            .Where(si => si.CompanyId == companyId && si.WorkDate == CurrentDate)
-            .ToListAsync();
-
-        var instanceIds = instances.Select(i => i.Id).ToList();
-        var assignmentCounts = await _db.ShiftAssignments
-            .Where(a => instanceIds.Contains(a.ShiftInstanceId))
-            .GroupBy(a => a.ShiftInstanceId)
-            .Select(g => new { ShiftInstanceId = g.Key, Count = g.Count() })
-            .ToListAsync();
-
-        // Fetch assignments with user names
-        var assignmentsWithNames = await (from a in _db.ShiftAssignments
-                                         join u in _db.Users on a.UserId equals u.Id
-                                         where instanceIds.Contains(a.ShiftInstanceId)
-                                         select new { a.ShiftInstanceId, UserName = u.DisplayName })
-                                         .ToListAsync();
-
-        var dictAssigned = assignmentCounts.ToDictionary(x => x.ShiftInstanceId, x => x.Count);
-        var dictAssignedNames = assignmentsWithNames
-            .GroupBy(x => x.ShiftInstanceId)
-            .ToDictionary(g => g.Key, g => g.Select(x => x.UserName).ToList());
-
-        foreach (var t in types)
-        {
-            var inst = instances.FirstOrDefault(i => i.ShiftTypeId == t.Id);
-            var assignedCount = inst != null && dictAssigned.ContainsKey(inst.Id) ? dictAssigned[inst.Id] : 0;
-            var requiredCount = inst?.StaffingRequired ?? 0;
-            var assignedNames = inst != null && dictAssignedNames.ContainsKey(inst.Id) ? dictAssignedNames[inst.Id] : new List<string>();
-            var emptySlots = Enumerable.Repeat("Empty", Math.Max(0, requiredCount - assignedCount)).ToList();
-
-            Lines.Add(new LineVM
+        // Provide shift types for frontend
+        ViewData["ShiftTypes"] = schedule.ShiftTypes
+            .OrderBy(t =>
             {
-                ShiftTypeId = t.Id,
-                InstanceId = inst?.Id ?? 0,
-                Concurrency = inst?.Concurrency ?? 0,
-                Name = t.DisplayName,
-                ShortName = t.Key[..Math.Min(3, t.Key.Length)],
-                ShiftTypeKey = t.Key.ToLower(),
-                ShiftTypeName = t.DisplayName,
-                ShiftName = inst?.Name ?? "",
-                StartTime = t.Start,
-                EndTime = t.End,
-                StartTimeString = t.Start.ToString("HH:mm"),
-                EndTimeString = t.End.ToString("HH:mm"),
-                Assigned = assignedCount,
-                Required = requiredCount,
-                AssignedNames = assignedNames,
-                EmptySlots = emptySlots
-            });
+                // Custom order: morning, middle, noon, night
+                return t.Key.ToUpper() switch
+                {
+                    "MORNING" => 1,
+                    "MIDDLE" => 2,
+                    "NOON" => 3,
+                    "NIGHT" => 4,
+                    _ => 99
+                };
+            })
+            .ThenBy(t => t.Name)
+            .Select(t => new
+            {
+                id = t.Id,
+                key = t.Key,
+                name = t.Name,
+                start = t.Start.ToString("HH:mm"),
+                end = t.End.ToString("HH:mm")
+            })
+            .ToList();
+
+        var daySummary = schedule.Days.FirstOrDefault();
+        if (daySummary != null)
+        {
+            var order = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["MORNING"] = 1,
+                ["MIDDLE"] = 2,
+                ["NOON"] = 3,
+                ["NIGHT"] = 4
+            };
+
+            foreach (var line in daySummary.Lines
+                         .OrderBy(l => order.TryGetValue(l.ShiftTypeKey, out var rank) ? rank : 99)
+                         .ThenBy(l => l.ShiftTypeName))
+            {
+                Lines.Add(new LineVM
+                {
+                    ShiftTypeId = line.ShiftTypeId,
+                    InstanceId = line.InstanceId,
+                    Concurrency = line.Concurrency,
+                    Name = line.ShiftTypeName,
+                    ShortName = line.ShiftTypeShortName,
+                    ShiftTypeKey = line.ShiftTypeKey,
+                    ShiftTypeName = line.ShiftTypeName,
+                    ShiftName = line.ShiftName,
+                    StartTime = line.StartTime,
+                    EndTime = line.EndTime,
+                    StartTimeString = line.StartTime.ToString("HH:mm"),
+                    EndTimeString = line.EndTime.ToString("HH:mm"),
+                    Assigned = line.Assigned,
+                    Required = line.Required,
+                    AssignedNames = line.AssignedNames.ToList(),
+                    EmptySlots = line.EmptySlots.ToList()
+                });
+            }
         }
     }
 
@@ -136,14 +141,14 @@ public class DayModel : PageModel
         public int concurrency { get; set; }
     }
 
-
     public async Task<IActionResult> OnPostAdjustAsync([FromBody] AdjustPayload payload)
     {
         _logger.LogInformation("Adjust staffing: date={Date} shiftTypeId={ShiftTypeId} delta={Delta}", payload.date, payload.shiftTypeId, payload.delta);
         var companyId = int.Parse(User.FindFirst("CompanyId")!.Value);
         var date = DateOnly.Parse(payload.date);
 
-        var inst = await _db.ShiftInstances.FirstOrDefaultAsync(i => i.CompanyId == companyId && i.WorkDate == date && i.ShiftTypeId == payload.shiftTypeId);
+        var inst = await _db.ShiftInstances.FirstOrDefaultAsync(i =>
+            i.CompanyId == companyId && i.WorkDate == date && i.ShiftTypeId == payload.shiftTypeId);
         if (inst == null)
         {
             if (payload.delta < 0)
@@ -182,5 +187,4 @@ public class DayModel : PageModel
         await _db.SaveChangesAsync();
         return new JsonResult(new { required = inst.StaffingRequired, assigned, concurrency = inst.Concurrency });
     }
-
 }

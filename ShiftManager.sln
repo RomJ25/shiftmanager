@@ -4,6 +4,8 @@ VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShiftManager", "ShiftManager.csproj", "{24E931EF-1D06-9E43-E5FB-AF0E807D4B70}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShiftManager.Tests", "ShiftManager.Tests/ShiftManager.Tests.csproj", "{E56CDDEB-E29A-4FA0-AAF0-CDF7705C005A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -14,6 +16,10 @@ Global
 		{24E931EF-1D06-9E43-E5FB-AF0E807D4B70}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{24E931EF-1D06-9E43-E5FB-AF0E807D4B70}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{24E931EF-1D06-9E43-E5FB-AF0E807D4B70}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E56CDDEB-E29A-4FA0-AAF0-CDF7705C005A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E56CDDEB-E29A-4FA0-AAF0-CDF7705C005A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E56CDDEB-E29A-4FA0-AAF0-CDF7705C005A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E56CDDEB-E29A-4FA0-AAF0-CDF7705C005A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

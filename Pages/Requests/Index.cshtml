@@ -39,23 +39,44 @@
 <div class="card">
     <h3 style="margin-top:0">Pending Swaps</h3>
     <table>
-        <thead><tr><th>From</th><th>Shift</th><th>Proposed To</th><th></th></tr></thead>
+        <thead><tr><th>From</th><th>Shift</th><th>Recipient</th><th></th></tr></thead>
         <tbody>
         @foreach (var s in Model.Swaps)
         {
             <tr>
                 <td>@s.FromUser</td>
-                <td>@s.When</td>
-                <td>@s.ToUser</td>
+                <td>
+                    <strong>@s.ShiftDate.ToString("yyyy-MM-dd")</strong><br />
+                    <small style="color:var(--muted);">@s.ShiftName</small><br />
+                    <small style="color:var(--muted);">@s.Start.ToString("HH:mm") - @s.End.ToString("HH:mm")</small>
+                </td>
+                <td>
+                    @if (string.IsNullOrEmpty(s.RecipientName))
+                    {
+                        <span style="color:var(--muted);">Open offer (no teammate selected)</span>
+                    }
+                    else
+                    {
+                        <div>@s.RecipientName</div>
+                        @if (!string.IsNullOrEmpty(s.RecipientEmail))
+                        {
+                            <small style="color:var(--muted);">@s.RecipientEmail</small>
+                        }
+                    }
+                </td>
                 <td style="white-space:nowrap">
                     <form method="post" asp-page-handler="ApproveSwap" style="display:inline">
                         <input type="hidden" name="id" value="@s.Id" />
-                        <button class="btn btn-primary">Approve</button>
+                        <button class="btn btn-primary" @(string.IsNullOrEmpty(s.RecipientName) ? "disabled" : null)>Approve</button>
                     </form>
                     <form method="post" asp-page-handler="DeclineSwap" style="display:inline">
                         <input type="hidden" name="id" value="@s.Id" />
                         <button class="btn btn-ghost">Decline</button>
                     </form>
+                    @if (string.IsNullOrEmpty(s.RecipientName))
+                    {
+                        <div style="margin-top:0.25rem; font-size:0.8rem; color:var(--muted);">Assign a teammate before approving an open request.</div>
+                    }
                 </td>
             </tr>
         }
