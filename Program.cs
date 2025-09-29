@@ -64,19 +64,26 @@ using (var scope = app.Services.CreateScope())
         await db.SaveChangesAsync();
     }
 
-    var company = db.Companies.First();
-
-    // Seed shift types (fixed keys)
-    if (!db.ShiftTypes.Any())
+    var companies = await db.Companies.ToListAsync();
+    foreach (var company in companies)
     {
-        db.ShiftTypes.AddRange(new[] {
-            new ShiftType{ Key="MORNING", Start=new TimeOnly(8,0), End=new TimeOnly(16,0)},
-            new ShiftType{ Key="NOON", Start=new TimeOnly(16,0), End=new TimeOnly(0,0)},
-            new ShiftType{ Key="NIGHT", Start=new TimeOnly(0,0), End=new TimeOnly(8,0)},
-            new ShiftType{ Key="MIDDLE", Start=new TimeOnly(12,0), End=new TimeOnly(20,0)},
-        });
+        if (!await db.ShiftTypes.AnyAsync(st => st.CompanyId == company.Id))
+        {
+            db.ShiftTypes.AddRange(new[]
+            {
+                new ShiftType{ CompanyId = company.Id, Key="MORNING", Start=new TimeOnly(8,0), End=new TimeOnly(16,0)},
+                new ShiftType{ CompanyId = company.Id, Key="NOON", Start=new TimeOnly(16,0), End=new TimeOnly(0,0)},
+                new ShiftType{ CompanyId = company.Id, Key="NIGHT", Start=new TimeOnly(0,0), End=new TimeOnly(8,0)},
+                new ShiftType{ CompanyId = company.Id, Key="MIDDLE", Start=new TimeOnly(12,0), End=new TimeOnly(20,0)},
+            });
+        }
+    }
+    if (db.ChangeTracker.HasChanges())
+    {
         await db.SaveChangesAsync();
     }
+
+    var company = companies.First();
 
     // Seed config
     if (!db.Configs.Any())

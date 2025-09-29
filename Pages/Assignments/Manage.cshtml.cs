@@ -35,11 +35,15 @@ public class ManageModel : PageModel
     public HashSet<int> UsersOnTimeOff { get; set; } = new();
     public string? Error { get; set; }
 
-    public async Task<IActionResult> OnGetAsync()
+    private async Task<IActionResult?> LoadPageDataAsync()
     {
         var companyId = int.Parse(User.FindFirst("CompanyId")!.Value);
-        Type = await _db.ShiftTypes.FindAsync(ShiftTypeId);
-        if (Type == null) return RedirectToPage("/Calendar/Month");
+
+        Type = await _db.ShiftTypes.FirstOrDefaultAsync(t => t.Id == ShiftTypeId && t.CompanyId == companyId);
+        if (Type == null)
+        {
+            return RedirectToPage("/Calendar/Month");
+        }
 
         Instance = await _db.ShiftInstances.FirstOrDefaultAsync(i => i.CompanyId == companyId && i.WorkDate == Date && i.ShiftTypeId == ShiftTypeId)
             ?? new ShiftInstance { CompanyId = companyId, WorkDate = Date, ShiftTypeId = ShiftTypeId, StaffingRequired = 0 };
@@ -62,20 +66,37 @@ public class ManageModel : PageModel
         ActiveUsers = await _db.Users.Where(u => u.IsActive && u.CompanyId == companyId).OrderBy(u => u.DisplayName).ToListAsync();
 
         // Check which users have approved time off on this date
-        UsersOnTimeOff = (await _db.TimeOffRequests
-            .Where(r => r.Status == RequestStatus.Approved &&
-                       r.StartDate <= Date &&
-                       r.EndDate >= Date)
-            .Select(r => r.UserId)
+        UsersOnTimeOff = (await (from r in _db.TimeOffRequests
+                                  join u in _db.Users on r.UserId equals u.Id
+                                  where r.Status == RequestStatus.Approved &&
+                                        r.StartDate <= Date &&
+                                        r.EndDate >= Date &&
+                                        u.CompanyId == companyId
+                                  select r.UserId)
             .ToListAsync())
             .ToHashSet();
+
+        return null;
+    }
+
+    public async Task<IActionResult> OnGetAsync()
+    {
+        var result = await LoadPageDataAsync();
+        if (result != null)
+        {
+            return result;
+        }
 
         return Page();
     }
 
     public async Task<IActionResult> OnPostAsync()
     {
-        await OnGetAsync(); // reload context for Instance
+        var loadResult = await LoadPageDataAsync();
+        if (loadResult != null)
+        {
+            return loadResult;
+        }
         _logger.LogInformation("Attempt add user {UserId} to shiftInstance {InstanceId}", SelectedUserId, Instance.Id);
 
         if (SelectedUserId is null) { Error = "Select a user."; return Page(); }
@@ -125,10 +146,12 @@ public class ManageModel : PageModel
 
     public async Task<IActionResult> OnPostRemoveAsync(int assignmentId)
     {
+        var companyId = int.Parse(User.FindFirst("CompanyId")!.Value);
+
         var a = await _db.ShiftAssignments
             .Include(sa => sa.ShiftInstance)
             .ThenInclude(si => si.ShiftType)
-            .FirstOrDefaultAsync(sa => sa.Id == assignmentId);
+            .FirstOrDefaultAsync(sa => sa.Id == assignmentId && sa.ShiftInstance.CompanyId == companyId && sa.ShiftInstance.ShiftType.CompanyId == companyId);
 
         if (a != null)
         {
