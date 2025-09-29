@@ -31,6 +31,7 @@ public class RequestsModel : PageModel
     public List<MyTimeOffRequest> MyTimeOffRequests { get; set; } = new();
     public List<MySwapRequest> MySwapRequests { get; set; } = new();
     public List<AvailableShift> AvailableShifts { get; set; } = new();
+    public List<SwapRecipient> PotentialRecipients { get; set; } = new();
 
     public string? Message { get; set; }
     public string? Error { get; set; }
@@ -41,6 +42,12 @@ public class RequestsModel : PageModel
         {
             _logger.LogInformation("Starting OnGetAsync for requests page");
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var companyIdClaim = User.FindFirst("CompanyId");
+            var companyId = companyIdClaim != null ? int.Parse(companyIdClaim.Value) : 0;
+            if (companyIdClaim == null)
+            {
+                _logger.LogWarning("CompanyId claim missing for user {UserId}; swap recipient list may be incomplete", userId);
+            }
             _logger.LogInformation("User ID: {UserId}", userId);
 
             // Load user's time off requests
@@ -60,28 +67,28 @@ public class RequestsModel : PageModel
                 .ToListAsync();
             _logger.LogInformation("Loaded {Count} time off requests for user {UserId}", MyTimeOffRequests.Count, userId);
 
-            // Load user's swap requests - simplified query first
-            _logger.LogInformation("Loading shift assignments for user {UserId}", userId);
-            var userAssignmentIds = await _db.ShiftAssignments
-                .Where(sa => sa.UserId == userId)
-                .Select(sa => sa.Id)
-                .ToListAsync();
-            _logger.LogInformation("Found {Count} shift assignments for user {UserId}", userAssignmentIds.Count, userId);
-
             _logger.LogInformation("Loading swap requests for user assignments");
-            MySwapRequests = await _db.SwapRequests
-                .Where(sr => userAssignmentIds.Contains(sr.FromAssignmentId))
-                .OrderByDescending(r => r.CreatedAt)
-                .Select(r => new MySwapRequest
-                {
-                    Id = r.Id,
-                    ShiftDate = DateOnly.FromDateTime(DateTime.Today), // Will fix with proper join later
-                    ShiftTypeName = "Swap Request", // Will fix with proper join later
-                    ToUserName = "Target User", // Will fix with proper join later
-                    Status = r.Status.ToString(),
-                    CreatedAt = r.CreatedAt
-                })
-                .ToListAsync();
+            MySwapRequests = await (from sr in _db.SwapRequests
+                                     join sa in _db.ShiftAssignments on sr.FromAssignmentId equals sa.Id
+                                     join si in _db.ShiftInstances on sa.ShiftInstanceId equals si.Id
+                                     join st in _db.ShiftTypes on si.ShiftTypeId equals st.Id
+                                     join tu in _db.Users on sr.ToUserId equals tu.Id into toUsers
+                                     from tu in toUsers.DefaultIfEmpty()
+                                     where sa.UserId == userId
+                                     orderby sr.CreatedAt descending
+                                     select new MySwapRequest
+                                     {
+                                         Id = sr.Id,
+                                         ShiftDate = si.WorkDate,
+                                         ShiftTypeName = st.Name,
+                                         ShiftTimeRange = $"{st.Start:HH:mm} - {st.End:HH:mm}",
+                                         ShiftInstanceName = string.IsNullOrEmpty(si.Name) ? st.Name : si.Name,
+                                         ToUserName = tu != null ? tu.DisplayName : null,
+                                         ToUserEmail = tu != null ? tu.Email : null,
+                                         IsOpen = tu == null,
+                                         Status = sr.Status.ToString(),
+                                         CreatedAt = sr.CreatedAt
+                                     }).ToListAsync();
             _logger.LogInformation("Loaded {Count} swap requests for user {UserId}", MySwapRequests.Count, userId);
 
             // Load available shifts for swapping (user's upcoming assignments)
@@ -107,6 +114,19 @@ public class RequestsModel : PageModel
                 .OrderBy(s => s.Date)
                 .ToListAsync();
             _logger.LogInformation("Loaded {Count} available shifts for user {UserId}", AvailableShifts.Count, userId);
+
+            _logger.LogInformation("Loading potential swap recipients for user {UserId}", userId);
+            PotentialRecipients = await _db.Users
+                .Where(u => u.CompanyId == companyId && u.Id != userId && u.IsActive)
+                .OrderBy(u => u.DisplayName)
+                .Select(u => new SwapRecipient
+                {
+                    Id = u.Id,
+                    DisplayName = u.DisplayName,
+                    Email = u.Email
+                })
+                .ToListAsync();
+            _logger.LogInformation("Loaded {Count} potential swap recipients for user {UserId}", PotentialRecipients.Count, userId);
             _logger.LogInformation("OnGetAsync completed successfully for user {UserId}", userId);
         }
         catch (Exception ex)
@@ -191,6 +211,8 @@ public class RequestsModel : PageModel
             }
 
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var companyIdClaim = User.FindFirst("CompanyId");
+            var companyId = companyIdClaim != null ? int.Parse(companyIdClaim.Value) : 0;
             _logger.LogInformation("Swap request for user {UserId}, ShiftId {ShiftId}", userId, SwapRequest.ShiftId);
 
             // Verify the assignment belongs to the user
@@ -207,10 +229,39 @@ public class RequestsModel : PageModel
 
             _logger.LogInformation("Found assignment {AssignmentId} for user {UserId}", assignment.Id, userId);
 
+            AppUser? targetUser = null;
+            if (SwapRequest.ToUserId.HasValue)
+            {
+                targetUser = await _db.Users
+                    .Where(u => u.Id == SwapRequest.ToUserId.Value && u.CompanyId == companyId && u.IsActive)
+                    .FirstOrDefaultAsync();
+
+                if (targetUser == null)
+                {
+                    ModelState.AddModelError("SwapRequest.ToUserId", "Please select a valid teammate.");
+                    _logger.LogWarning("Invalid swap recipient {RecipientId} submitted by user {UserId}", SwapRequest.ToUserId.Value, userId);
+                }
+            }
+
+            if (!ModelState.IsValid)
+            {
+                await OnGetAsync();
+                return Page();
+            }
+
+            if (targetUser != null)
+            {
+                _logger.LogInformation("Swap request will be proposed to user {RecipientId}", targetUser.Id);
+            }
+            else
+            {
+                _logger.LogInformation("Swap request submitted as an open offer");
+            }
+
             var swapRequest = new SwapRequest
             {
                 FromAssignmentId = assignment.Id,
-                ToUserId = SwapRequest.ToUserId == 0 ? 1 : SwapRequest.ToUserId, // Default to admin if no specific user
+                ToUserId = SwapRequest.ToUserId,
                 Status = RequestStatus.Pending,
                 CreatedAt = DateTime.UtcNow
             };
@@ -249,7 +300,7 @@ public class RequestsModel : PageModel
     {
         public int ShiftId { get; set; }
 
-        public int ToUserId { get; set; } // 0 for open request
+        public int? ToUserId { get; set; }
     }
 
     public class MyTimeOffRequest
@@ -267,7 +318,11 @@ public class RequestsModel : PageModel
         public int Id { get; set; }
         public DateOnly ShiftDate { get; set; }
         public string ShiftTypeName { get; set; } = "";
-        public string ToUserName { get; set; } = "";
+        public string ShiftInstanceName { get; set; } = "";
+        public string ShiftTimeRange { get; set; } = "";
+        public string? ToUserName { get; set; }
+        public string? ToUserEmail { get; set; }
+        public bool IsOpen { get; set; }
         public string Status { get; set; } = "";
         public DateTime CreatedAt { get; set; }
     }
@@ -279,5 +334,12 @@ public class RequestsModel : PageModel
         public string ShiftTypeName { get; set; } = "";
         public TimeOnly StartTime { get; set; }
         public TimeOnly EndTime { get; set; }
+    }
+
+    public class SwapRecipient
+    {
+        public int Id { get; set; }
+        public string DisplayName { get; set; } = "";
+        public string Email { get; set; } = "";
     }
 }

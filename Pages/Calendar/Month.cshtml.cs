@@ -10,12 +10,12 @@ namespace ShiftManager.Pages.Calendar;
 
 [Authorize]
 [IgnoreAntiforgeryToken] // ⬅ apply here (class level)
-
 public class MonthModel : PageModel
 {
     private readonly AppDbContext _db;
     private readonly ILogger<MonthModel> _logger;
     private readonly ScheduleSummaryService _scheduleSummary;
+
     public MonthModel(AppDbContext db, ILogger<MonthModel> logger, ScheduleSummaryService scheduleSummary)
     {
         _db = db;
@@ -23,11 +23,9 @@ public class MonthModel : PageModel
         _scheduleSummary = scheduleSummary;
     }
 
-
     public DateOnly CurrentMonth { get; set; }
     public (DateOnly MonthYear, string Label) Previous { get; set; }
     public (DateOnly MonthYear, string Label) Next { get; set; }
-
     public List<List<DayVM>> Weeks { get; set; } = new();
 
     public class DayVM
@@ -35,6 +33,7 @@ public class MonthModel : PageModel
         public DateOnly Date { get; set; }
         public List<LineVM> Lines { get; set; } = new();
     }
+
     public class LineVM
     {
         public int ShiftTypeId { get; set; }
@@ -68,6 +67,12 @@ public class MonthModel : PageModel
         int delta = ((int)start.DayOfWeek - (int)DayOfWeek.Monday + 7) % 7;
         var gridStart = start.AddDays(-delta);
         var dates = Enumerable.Range(0, 42).Select(i => gridStart.AddDays(i)).ToList();
+
+        // Load shift types (kept from main branch to ensure data integrity)
+        var types = await _db.ShiftTypes
+            .Where(s => s.CompanyId == companyId)
+            .OrderBy(s => s.Key)
+            .ToListAsync();
 
         var schedule = await _scheduleSummary.QueryAsync(new ScheduleSummaryRequest
         {
@@ -134,7 +139,6 @@ public class MonthModel : PageModel
         public int concurrency { get; set; }
     }
 
-
     public async Task<IActionResult> OnPostAdjustAsync([FromBody] AdjustPayload payload)
     {
         _logger.LogInformation("Adjust staffing: date={Date} shiftTypeId={ShiftTypeId} delta={Delta}", payload.date, payload.shiftTypeId, payload.delta);
@@ -180,5 +184,4 @@ public class MonthModel : PageModel
         await _db.SaveChangesAsync();
         return new JsonResult(new { required = inst.StaffingRequired, assigned, concurrency = inst.Concurrency });
     }
-
 }

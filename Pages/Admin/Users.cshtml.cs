@@ -6,6 +6,8 @@ using Microsoft.Extensions.Logging;
 using ShiftManager.Data;
 using ShiftManager.Models;
 using ShiftManager.Models.Support;
+using ShiftManager.Services;
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace ShiftManager.Pages.Admin;
@@ -15,10 +17,13 @@ public class UsersModel : PageModel
 {
     private readonly AppDbContext _db;
     private readonly ILogger<UsersModel> _logger;
-    public UsersModel(AppDbContext db, ILogger<UsersModel> logger)
+    private readonly ICompanyScopeService _companyScope;
+
+    public UsersModel(AppDbContext db, ILogger<UsersModel> logger, ICompanyScopeService companyScope)
     {
         _db = db;
         _logger = logger;
+        _companyScope = companyScope;
     }
 
     public record UserVM(int Id, string DisplayName, string Email, string Role, bool IsActive);
@@ -27,27 +32,40 @@ public class UsersModel : PageModel
     [BindProperty, EmailAddress] public string NewEmail { get; set; } = string.Empty;
     [BindProperty] public string NewDisplayName { get; set; } = string.Empty;
     [BindProperty] public string NewPassword { get; set; } = string.Empty;
-    [BindProperty] public string NewRole { get; set; } = "Employee";
+    [BindProperty] public string NewRole { get; set; } = UserRole.Employee.ToString();
     public string? Error { get; set; }
+
+    public IReadOnlyList<UserRole> AvailableRoles { get; } = Enum.GetValues<UserRole>();
 
     public async Task OnGetAsync()
     {
-        var companyId = int.Parse(User.FindFirst("CompanyId")!.Value);
-        Users = await _db.Users.Where(u => u.CompanyId == companyId)
+        var companyId = _companyScope.GetCurrentCompanyId(User);
+        Users = await _db.Users
+            .Where(u => u.CompanyId == companyId)
             .OrderBy(u => u.DisplayName)
-            .Select(u => new UserVM(u.Id, u.DisplayName, u.Email, u.Role.ToString(), u.IsActive)).ToListAsync();
+            .Select(u => new UserVM(u.Id, u.DisplayName, u.Email, u.Role.ToString(), u.IsActive))
+            .ToListAsync();
     }
 
     public async Task<IActionResult> OnPostAddAsync()
     {
         await OnGetAsync();
+
         if (string.IsNullOrWhiteSpace(NewEmail) || string.IsNullOrWhiteSpace(NewDisplayName) || string.IsNullOrWhiteSpace(NewPassword))
-        { Error = "All fields are required."; return Page(); }
+        {
+            Error = "All fields are required.";
+            return Page();
+        }
 
-        if (await _db.Users.AnyAsync(u => u.Email == NewEmail)) { Error = "Email already exists."; return Page(); }
+        if (await _db.Users.AnyAsync(u => u.Email == NewEmail))
+        {
+            Error = "Email already exists.";
+            return Page();
+        }
 
-        var companyId = int.Parse(User.FindFirst("CompanyId")!.Value);
+        var companyId = _companyScope.GetCurrentCompanyId(User);
         var (h, s) = PasswordHasher.CreateHash(NewPassword);
+
         _db.Users.Add(new AppUser
         {
             CompanyId = companyId,
@@ -58,33 +76,46 @@ public class UsersModel : PageModel
             PasswordHash = h,
             PasswordSalt = s
         });
+
         await _db.SaveChangesAsync();
         return RedirectToPage();
     }
 
     public async Task<IActionResult> OnPostToggleAsync(int id)
     {
-        var u = await _db.Users.FindAsync(id);
-        if (u != null) { u.IsActive = !u.IsActive; await _db.SaveChangesAsync(); }
+        var companyId = _companyScope.GetCurrentCompanyId(User);
+        var user = await _companyScope.GetCompanyUserAsync(id, companyId);
+        if (user == null) return Forbid();
+
+        user.IsActive = !user.IsActive;
+        await _db.SaveChangesAsync();
         return RedirectToPage();
     }
 
     public async Task<IActionResult> OnPostRoleAsync(int id, string role)
     {
-        var u = await _db.Users.FindAsync(id);
-        if (u != null) { u.Role = Enum.Parse<UserRole>(role); await _db.SaveChangesAsync(); }
+        var companyId = _companyScope.GetCurrentCompanyId(User);
+        var user = await _companyScope.GetCompanyUserAsync(id, companyId);
+        if (user == null) return Forbid();
+
+        user.Role = Enum.Parse<UserRole>(role);
+        await _db.SaveChangesAsync();
         return RedirectToPage();
     }
 
     public async Task<IActionResult> OnPostResetPasswordAsync(int id, string newPassword)
     {
-        var u = await _db.Users.FindAsync(id);
-        if (u != null && !string.IsNullOrWhiteSpace(newPassword))
-        {
-            var (h, s) = PasswordHasher.CreateHash(newPassword);
-            u.PasswordHash = h; u.PasswordSalt = s;
-            await _db.SaveChangesAsync();
-        }
+        if (string.IsNullOrWhiteSpace(newPassword)) return RedirectToPage();
+
+        var companyId = _companyScope.GetCurrentCompanyId(User);
+        var user = await _companyScope.GetCompanyUserAsync(id, companyId);
+        if (user == null) return Forbid();
+
+        var (h, s) = PasswordHasher.CreateHash(newPassword);
+        user.PasswordHash = h;
+        user.PasswordSalt = s;
+
+        await _db.SaveChangesAsync();
         return RedirectToPage();
     }
 
@@ -95,6 +126,7 @@ public class UsersModel : PageModel
         try
         {
             var currentUserId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
+            var companyId = _companyScope.GetCurrentCompanyId(User);
 
             // Prevent self-deletion
             if (id == currentUserId)
@@ -105,7 +137,7 @@ public class UsersModel : PageModel
                 return Page();
             }
 
-            var user = await _db.Users.FindAsync(id);
+            var user = await _companyScope.GetCompanyUserAsync(id, companyId);
             if (user == null)
             {
                 _logger.LogWarning("User {UserId} not found for deletion", id);
@@ -114,19 +146,13 @@ public class UsersModel : PageModel
                 return Page();
             }
 
-            var companyId = int.Parse(User.FindFirst("CompanyId")!.Value);
-            if (user.CompanyId != companyId)
-            {
-                _logger.LogWarning("User {CurrentUserId} attempted to delete user {TargetUserId} from different company", currentUserId, id);
-                Error = "You can only delete users from your own company.";
-                await OnGetAsync();
-                return Page();
-            }
-
             _logger.LogInformation("Starting deletion of user {UserId} ({UserName}) by admin {CurrentUserId}", id, user.DisplayName, currentUserId);
 
             // 1. Remove all shift assignments
-            var shiftAssignments = await _db.ShiftAssignments.Where(sa => sa.UserId == id).ToListAsync();
+            var shiftAssignments = await (from sa in _db.ShiftAssignments
+                                          join si in _db.ShiftInstances on sa.ShiftInstanceId equals si.Id
+                                          where sa.UserId == id && si.CompanyId == companyId
+                                          select sa).ToListAsync();
             if (shiftAssignments.Any())
             {
                 _logger.LogInformation("Removing {Count} shift assignments for user {UserId}", shiftAssignments.Count, id);

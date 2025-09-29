@@ -21,9 +21,10 @@
             <label>Display name<br /><input class="input" asp-for="NewDisplayName" /></label>
             <label>Role<br />
                 <select class="input" asp-for="NewRole">
-                    <option>Employee</option>
-                    <option>Manager</option>
-                    <option>Admin</option>
+                    @foreach (var role in Model.AvailableRoles)
+                    {
+                        <option value="@role">@role</option>
+                    }
                 </select>
             </label>
             <label>Password<br /><input class="input" asp-for="NewPassword" type="password" /></label>
@@ -47,14 +48,10 @@
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="id" value="@u.Id" />
                     <select class="input" name="role" onchange="this.form.submit()">
-                    @if (u.Role == "Employee")
-                    { <option value="Employee" selected>Employee</option> }
-                    else
-                    { <option value="Employee">Employee</option> }
-                    @if (u.Role == "Manager")  { <option value="Manager" selected>Manager</option> }
-                    else                        { <option value="Manager">Manager</option> }
-                    @if (u.Role == "Admin")    { <option value="Admin" selected>Admin</option> }
-                    else                        { <option value="Admin">Admin</option> }
+                    @foreach (var role in Model.AvailableRoles)
+                    {
+                        <option value="@role" @(u.Role == role.ToString() ? "selected" : null)>@role</option>
+                    }
                     </select>
                     </form>
 

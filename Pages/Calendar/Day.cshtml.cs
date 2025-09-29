@@ -60,6 +60,7 @@ public class DayModel : PageModel
 
         var companyId = int.Parse(User.FindFirst("CompanyId")!.Value);
 
+        // Query schedule summary for this day
         var schedule = await _scheduleSummary.QueryAsync(new ScheduleSummaryRequest
         {
             CompanyId = companyId,
@@ -69,14 +70,30 @@ public class DayModel : PageModel
             IncludeEmptySlots = true
         });
 
-        ViewData["ShiftTypes"] = schedule.ShiftTypes.Select(t => new
-        {
-            id = t.Id,
-            key = t.Key,
-            name = t.Name,
-            start = t.Start.ToString("HH:mm"),
-            end = t.End.ToString("HH:mm")
-        }).ToList();
+        // Provide shift types for frontend
+        ViewData["ShiftTypes"] = schedule.ShiftTypes
+            .OrderBy(t =>
+            {
+                // Custom order: morning, middle, noon, night
+                return t.Key.ToUpper() switch
+                {
+                    "MORNING" => 1,
+                    "MIDDLE" => 2,
+                    "NOON" => 3,
+                    "NIGHT" => 4,
+                    _ => 99
+                };
+            })
+            .ThenBy(t => t.Name)
+            .Select(t => new
+            {
+                id = t.Id,
+                key = t.Key,
+                name = t.Name,
+                start = t.Start.ToString("HH:mm"),
+                end = t.End.ToString("HH:mm")
+            })
+            .ToList();
 
         var daySummary = schedule.Days.FirstOrDefault();
         if (daySummary != null)
@@ -124,7 +141,6 @@ public class DayModel : PageModel
         public int concurrency { get; set; }
     }
 
-
     public async Task<IActionResult> OnPostAdjustAsync([FromBody] AdjustPayload payload)
     {
         _logger.LogInformation("Adjust staffing: date={Date} shiftTypeId={ShiftTypeId} delta={Delta}", payload.date, payload.shiftTypeId, payload.delta);
@@ -170,5 +186,4 @@ public class DayModel : PageModel
         await _db.SaveChangesAsync();
         return new JsonResult(new { required = inst.StaffingRequired, assigned, concurrency = inst.Concurrency });
     }
-
 }

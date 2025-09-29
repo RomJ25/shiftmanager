@@ -5,6 +5,7 @@ using ShiftManager.Data;
 using ShiftManager.Models;
 using ShiftManager.Services;
 using ShiftManager.Models.Support;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,8 +13,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
-
-
 
 builder.Services.AddRazorPages(options =>
 {
@@ -42,13 +41,24 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("IsManagerOrAdmin",
-        policy => policy.RequireRole(nameof(UserRole.Manager), nameof(UserRole.Admin)));
-    options.AddPolicy("IsAdmin", policy => policy.RequireRole(nameof(UserRole.Admin)));
+        policy => policy.RequireAssertion(context =>
+        {
+            var roleClaim = context.User.FindFirst(ClaimTypes.Role)?.Value;
+            return UserRoleExtensions.IsManagerial(roleClaim);
+        }));
+
+    options.AddPolicy("IsAdmin",
+        policy => policy.RequireAssertion(context =>
+        {
+            var roleClaim = context.User.FindFirst(ClaimTypes.Role)?.Value;
+            return Enum.TryParse<UserRole>(roleClaim, out var role) && role == UserRole.Admin;
+        }));
 });
 
 builder.Services.AddScoped<IConflictChecker, ConflictChecker>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<ScheduleSummaryService>();
+builder.Services.AddScoped<ICompanyScopeService, CompanyScopeService>();
 
 var app = builder.Build();
 
@@ -65,19 +75,26 @@ using (var scope = app.Services.CreateScope())
         await db.SaveChangesAsync();
     }
 
-    var company = db.Companies.First();
-
-    // Seed shift types (fixed keys)
-    if (!db.ShiftTypes.Any())
+    var companies = await db.Companies.ToListAsync();
+    foreach (var company in companies)
     {
-        db.ShiftTypes.AddRange(new[] {
-            new ShiftType{ Key="MORNING", Start=new TimeOnly(8,0), End=new TimeOnly(16,0)},
-            new ShiftType{ Key="NOON", Start=new TimeOnly(16,0), End=new TimeOnly(0,0)},
-            new ShiftType{ Key="NIGHT", Start=new TimeOnly(0,0), End=new TimeOnly(8,0)},
-            new ShiftType{ Key="MIDDLE", Start=new TimeOnly(12,0), End=new TimeOnly(20,0)},
-        });
+        if (!await db.ShiftTypes.AnyAsync(st => st.CompanyId == company.Id))
+        {
+            db.ShiftTypes.AddRange(new[]
+            {
+                new ShiftType{ CompanyId = company.Id, Key="MORNING", Start=new TimeOnly(8,0), End=new TimeOnly(16,0)},
+                new ShiftType{ CompanyId = company.Id, Key="NOON", Start=new TimeOnly(16,0), End=new TimeOnly(0,0)},
+                new ShiftType{ CompanyId = company.Id, Key="NIGHT", Start=new TimeOnly(0,0), End=new TimeOnly(8,0)},
+                new ShiftType{ CompanyId = company.Id, Key="MIDDLE", Start=new TimeOnly(12,0), End=new TimeOnly(20,0)},
+            });
+        }
+    }
+    if (db.ChangeTracker.HasChanges())
+    {
         await db.SaveChangesAsync();
     }
+
+    var company = companies.First();
 
     // Seed config
     if (!db.Configs.Any())
