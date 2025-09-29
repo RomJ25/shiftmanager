@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using ShiftManager.Data;
 using ShiftManager.Models;
 using ShiftManager.Models.Support;
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace ShiftManager.Pages.Admin;
@@ -27,8 +28,10 @@ public class UsersModel : PageModel
     [BindProperty, EmailAddress] public string NewEmail { get; set; } = string.Empty;
     [BindProperty] public string NewDisplayName { get; set; } = string.Empty;
     [BindProperty] public string NewPassword { get; set; } = string.Empty;
-    [BindProperty] public string NewRole { get; set; } = "Employee";
+    [BindProperty] public string NewRole { get; set; } = UserRole.Employee.ToString();
     public string? Error { get; set; }
+
+    public IReadOnlyList<UserRole> AvailableRoles { get; } = Enum.GetValues<UserRole>();
 
     public async Task OnGetAsync()
     {

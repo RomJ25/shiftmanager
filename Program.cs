@@ -5,6 +5,7 @@ using ShiftManager.Data;
 using ShiftManager.Models;
 using ShiftManager.Services;
 using ShiftManager.Models.Support;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,8 +43,18 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("IsManagerOrAdmin",
-        policy => policy.RequireRole(nameof(UserRole.Manager), nameof(UserRole.Admin)));
-    options.AddPolicy("IsAdmin", policy => policy.RequireRole(nameof(UserRole.Admin)));
+        policy => policy.RequireAssertion(context =>
+        {
+            var roleClaim = context.User.FindFirst(ClaimTypes.Role)?.Value;
+            return UserRoleExtensions.IsManagerial(roleClaim);
+        }));
+
+    options.AddPolicy("IsAdmin",
+        policy => policy.RequireAssertion(context =>
+        {
+            var roleClaim = context.User.FindFirst(ClaimTypes.Role)?.Value;
+            return Enum.TryParse<UserRole>(roleClaim, out var role) && role == UserRole.Admin;
+        }));
 });
 
 builder.Services.AddScoped<IConflictChecker, ConflictChecker>();
