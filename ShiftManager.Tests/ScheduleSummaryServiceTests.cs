@@ -15,9 +15,8 @@ public class ScheduleSummaryServiceTests
     {
         using var context = CreateContext();
         var company = await SeedCompanyAsync(context);
-        var shiftType = new ShiftType { Key = "NIGHT", Start = new TimeOnly(22, 0), End = new TimeOnly(6, 0) };
-        context.ShiftTypes.Add(shiftType);
-        await context.SaveChangesAsync();
+        var shiftType = await SeedShiftTypeAsync(context, company, "NIGHT", new TimeOnly(22, 0), new TimeOnly(6, 0));
+        var otherShiftType = await SeedOtherCompanyShiftTypeAsync(context);
 
         var instance = new ShiftInstance
         {
@@ -41,6 +40,7 @@ public class ScheduleSummaryServiceTests
         var line = Assert.Single(Assert.Single(result.Days).Lines.Where(l => l.ShiftTypeId == shiftType.Id));
         Assert.Equal(new TimeOnly(22, 0), line.StartTime);
         Assert.Equal(new TimeOnly(6, 0), line.EndTime);
+        Assert.DoesNotContain(result.Days.SelectMany(d => d.Lines), l => l.ShiftTypeId == otherShiftType.Id);
     }
 
     [Fact]
@@ -48,9 +48,8 @@ public class ScheduleSummaryServiceTests
     {
         using var context = CreateContext();
         var company = await SeedCompanyAsync(context);
-        var shiftType = new ShiftType { Key = "MORNING", Start = new TimeOnly(8, 0), End = new TimeOnly(16, 0) };
-        context.ShiftTypes.Add(shiftType);
-        await context.SaveChangesAsync();
+        var shiftType = await SeedShiftTypeAsync(context, company, "MORNING", new TimeOnly(8, 0), new TimeOnly(16, 0));
+        var otherShiftType = await SeedOtherCompanyShiftTypeAsync(context);
 
         var instance = new ShiftInstance
         {
@@ -85,6 +84,7 @@ public class ScheduleSummaryServiceTests
         Assert.Equal(3, line.Required);
         Assert.Contains("Alice", line.AssignedNames);
         Assert.Contains("Bob", line.AssignedNames);
+        Assert.DoesNotContain(result.Days.SelectMany(d => d.Lines), l => l.ShiftTypeId == otherShiftType.Id);
     }
 
     [Fact]
@@ -92,9 +92,8 @@ public class ScheduleSummaryServiceTests
     {
         using var context = CreateContext();
         var company = await SeedCompanyAsync(context);
-        var shiftType = new ShiftType { Key = "NOON", Start = new TimeOnly(12, 0), End = new TimeOnly(20, 0) };
-        context.ShiftTypes.Add(shiftType);
-        await context.SaveChangesAsync();
+        var shiftType = await SeedShiftTypeAsync(context, company, "NOON", new TimeOnly(12, 0), new TimeOnly(20, 0));
+        var otherShiftType = await SeedOtherCompanyShiftTypeAsync(context);
 
         var instance = new ShiftInstance
         {
@@ -124,6 +123,7 @@ public class ScheduleSummaryServiceTests
         var line = Assert.Single(Assert.Single(result.Days).Lines.Where(l => l.ShiftTypeId == shiftType.Id));
         Assert.Equal(3, line.EmptySlots.Count);
         Assert.All(line.EmptySlots, slot => Assert.Equal("Empty", slot));
+        Assert.DoesNotContain(result.Days.SelectMany(d => d.Lines), l => l.ShiftTypeId == otherShiftType.Id);
     }
 
     private static AppDbContext CreateContext()
@@ -131,12 +131,22 @@ public class ScheduleSummaryServiceTests
         var connection = new SqliteConnection("Filename=:memory:");
         connection.Open();
 
+        using (var pragma = connection.CreateCommand())
+        {
+            pragma.CommandText = "PRAGMA foreign_keys = ON;";
+            pragma.ExecuteNonQuery();
+        }
+
         var options = new DbContextOptionsBuilder<AppDbContext>()
             .UseSqlite(connection)
+            .EnableDetailedErrors()
+            .EnableSensitiveDataLogging()
             .Options;
 
         var context = new TestAppDbContext(options, connection);
         context.Database.EnsureCreated();
+        context.ChangeTracker.AutoDetectChangesEnabled = true;
+        context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.TrackAll;
         return context;
     }
 
@@ -166,11 +176,32 @@ public class ScheduleSummaryServiceTests
         }
     }
 
-    private static async Task<Company> SeedCompanyAsync(AppDbContext context)
+    private static async Task<Company> SeedCompanyAsync(AppDbContext context, string name = "Test Co")
     {
-        var company = new Company { Name = "Test Co" };
+        var company = new Company { Name = name };
         context.Companies.Add(company);
         await context.SaveChangesAsync();
         return company;
+    }
+
+    private static async Task<ShiftType> SeedShiftTypeAsync(AppDbContext context, Company company, string key, TimeOnly start, TimeOnly end)
+    {
+        var shiftType = new ShiftType
+        {
+            CompanyId = company.Id,
+            Key = key,
+            Start = start,
+            End = end
+        };
+
+        context.ShiftTypes.Add(shiftType);
+        await context.SaveChangesAsync();
+        return shiftType;
+    }
+
+    private static async Task<ShiftType> SeedOtherCompanyShiftTypeAsync(AppDbContext context)
+    {
+        var otherCompany = await SeedCompanyAsync(context, "Other Co");
+        return await SeedShiftTypeAsync(context, otherCompany, "OTHER", new TimeOnly(1, 0), new TimeOnly(9, 0));
     }
 }
