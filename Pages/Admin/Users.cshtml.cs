@@ -7,6 +7,7 @@ using ShiftManager.Data;
 using ShiftManager.Models;
 using ShiftManager.Models.Support;
 using ShiftManager.Services;
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace ShiftManager.Pages.Admin;
@@ -17,6 +18,7 @@ public class UsersModel : PageModel
     private readonly AppDbContext _db;
     private readonly ILogger<UsersModel> _logger;
     private readonly ICompanyScopeService _companyScope;
+
     public UsersModel(AppDbContext db, ILogger<UsersModel> logger, ICompanyScopeService companyScope)
     {
         _db = db;
@@ -30,27 +32,40 @@ public class UsersModel : PageModel
     [BindProperty, EmailAddress] public string NewEmail { get; set; } = string.Empty;
     [BindProperty] public string NewDisplayName { get; set; } = string.Empty;
     [BindProperty] public string NewPassword { get; set; } = string.Empty;
-    [BindProperty] public string NewRole { get; set; } = "Employee";
+    [BindProperty] public string NewRole { get; set; } = UserRole.Employee.ToString();
     public string? Error { get; set; }
+
+    public IReadOnlyList<UserRole> AvailableRoles { get; } = Enum.GetValues<UserRole>();
 
     public async Task OnGetAsync()
     {
         var companyId = _companyScope.GetCurrentCompanyId(User);
-        Users = await _db.Users.Where(u => u.CompanyId == companyId)
+        Users = await _db.Users
+            .Where(u => u.CompanyId == companyId)
             .OrderBy(u => u.DisplayName)
-            .Select(u => new UserVM(u.Id, u.DisplayName, u.Email, u.Role.ToString(), u.IsActive)).ToListAsync();
+            .Select(u => new UserVM(u.Id, u.DisplayName, u.Email, u.Role.ToString(), u.IsActive))
+            .ToListAsync();
     }
 
     public async Task<IActionResult> OnPostAddAsync()
     {
         await OnGetAsync();
-        if (string.IsNullOrWhiteSpace(NewEmail) || string.IsNullOrWhiteSpace(NewDisplayName) || string.IsNullOrWhiteSpace(NewPassword))
-        { Error = "All fields are required."; return Page(); }
 
-        if (await _db.Users.AnyAsync(u => u.Email == NewEmail)) { Error = "Email already exists."; return Page(); }
+        if (string.IsNullOrWhiteSpace(NewEmail) || string.IsNullOrWhiteSpace(NewDisplayName) || string.IsNullOrWhiteSpace(NewPassword))
+        {
+            Error = "All fields are required.";
+            return Page();
+        }
+
+        if (await _db.Users.AnyAsync(u => u.Email == NewEmail))
+        {
+            Error = "Email already exists.";
+            return Page();
+        }
 
         var companyId = _companyScope.GetCurrentCompanyId(User);
         var (h, s) = PasswordHasher.CreateHash(NewPassword);
+
         _db.Users.Add(new AppUser
         {
             CompanyId = companyId,
@@ -61,6 +76,7 @@ public class UsersModel : PageModel
             PasswordHash = h,
             PasswordSalt = s
         });
+
         await _db.SaveChangesAsync();
         return RedirectToPage();
     }
@@ -98,6 +114,7 @@ public class UsersModel : PageModel
         var (h, s) = PasswordHasher.CreateHash(newPassword);
         user.PasswordHash = h;
         user.PasswordSalt = s;
+
         await _db.SaveChangesAsync();
         return RedirectToPage();
     }
