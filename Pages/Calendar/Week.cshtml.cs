@@ -2,9 +2,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using ShiftManager.Data;
-using ShiftManager.Models;
 using Microsoft.Extensions.Logging;
+using ShiftManager.Data;
+using ShiftManager.Services;
 
 namespace ShiftManager.Pages.Calendar;
 
@@ -14,7 +14,13 @@ public class WeekModel : PageModel
 {
     private readonly AppDbContext _db;
     private readonly ILogger<WeekModel> _logger;
-    public WeekModel(AppDbContext db, ILogger<WeekModel> logger) { _db = db; _logger = logger; }
+    private readonly ScheduleSummaryService _scheduleSummary;
+    public WeekModel(AppDbContext db, ILogger<WeekModel> logger, ScheduleSummaryService scheduleSummary)
+    {
+        _db = db;
+        _logger = logger;
+        _scheduleSummary = scheduleSummary;
+    }
 
     public DateOnly CurrentWeekStart { get; set; }
     public (DateOnly WeekStart, string Label) Previous { get; set; }
@@ -61,11 +67,19 @@ public class WeekModel : PageModel
 
         var companyId = int.Parse(User.FindFirst("CompanyId")!.Value);
 
-        // Load shift types
-        var types = await _db.ShiftTypes.OrderBy(s => s.Key).ToListAsync();
+        // Generate 7 days for the week
+        var weekDates = Enumerable.Range(0, 7).Select(i => CurrentWeekStart.AddDays(i)).ToList();
 
-        // Prepare shift types for JavaScript
-        ViewData["ShiftTypes"] = types.Select(t => new
+        var schedule = await _scheduleSummary.QueryAsync(new ScheduleSummaryRequest
+        {
+            CompanyId = companyId,
+            StartDate = weekDates.First(),
+            EndDate = weekDates.Last(),
+            IncludeAssignedNames = true,
+            IncludeEmptySlots = true
+        });
+
+        ViewData["ShiftTypes"] = schedule.ShiftTypes.Select(t => new
         {
             id = t.Id,
             key = t.Key,
@@ -74,32 +88,7 @@ public class WeekModel : PageModel
             end = t.End.ToString("HH:mm")
         }).ToList();
 
-        // Generate 7 days for the week
-        var weekDates = Enumerable.Range(0, 7).Select(i => CurrentWeekStart.AddDays(i)).ToList();
-
-        // Load instances and assignments for the week
-        var instances = await _db.ShiftInstances
-            .Where(si => si.CompanyId == companyId && si.WorkDate >= weekDates.First() && si.WorkDate <= weekDates.Last())
-            .ToListAsync();
-
-        var instanceIds = instances.Select(i => i.Id).ToList();
-        var assignmentCounts = await _db.ShiftAssignments
-            .Where(a => instanceIds.Contains(a.ShiftInstanceId))
-            .GroupBy(a => a.ShiftInstanceId)
-            .Select(g => new { ShiftInstanceId = g.Key, Count = g.Count() })
-            .ToListAsync();
-
-        // Fetch assignments with user names
-        var assignmentsWithNames = await (from a in _db.ShiftAssignments
-                                         join u in _db.Users on a.UserId equals u.Id
-                                         where instanceIds.Contains(a.ShiftInstanceId)
-                                         select new { a.ShiftInstanceId, UserName = u.DisplayName })
-                                         .ToListAsync();
-
-        var dictAssigned = assignmentCounts.ToDictionary(x => x.ShiftInstanceId, x => x.Count);
-        var dictAssignedNames = assignmentsWithNames
-            .GroupBy(x => x.ShiftInstanceId)
-            .ToDictionary(g => g.Key, g => g.Select(x => x.UserName).ToList());
+        var dayLookup = schedule.Days.ToDictionary(d => d.Date);
 
         foreach (var date in weekDates)
         {
@@ -109,30 +98,27 @@ public class WeekModel : PageModel
                 DayName = date.DayOfWeek.ToString()
             };
 
-            foreach (var t in types)
+            if (dayLookup.TryGetValue(date, out var summary))
             {
-                var inst = instances.FirstOrDefault(i => i.WorkDate == date && i.ShiftTypeId == t.Id && i.CompanyId == companyId);
-                var assignedCount = inst != null && dictAssigned.ContainsKey(inst.Id) ? dictAssigned[inst.Id] : 0;
-                var requiredCount = inst?.StaffingRequired ?? 0;
-                var assignedNames = inst != null && dictAssignedNames.ContainsKey(inst.Id) ? dictAssignedNames[inst.Id] : new List<string>();
-                var emptySlots = Enumerable.Repeat("Empty", Math.Max(0, requiredCount - assignedCount)).ToList();
-
-                dayVm.Lines.Add(new LineVM
+                foreach (var line in summary.Lines)
                 {
-                    ShiftTypeId = t.Id,
-                    InstanceId = inst?.Id ?? 0,
-                    Concurrency = inst?.Concurrency ?? 0,
-                    ShortName = t.Name[..Math.Min(3, t.Name.Length)],
-                    ShiftTypeKey = t.Key.ToLower(),
-                    ShiftTypeName = t.Name,
-                    ShiftName = inst?.Name ?? "",
-                    Assigned = assignedCount,
-                    Required = requiredCount,
-                    AssignedNames = assignedNames,
-                    EmptySlots = emptySlots,
-                    StartTime = t.Start.ToString("HH:mm"),
-                    EndTime = t.End.ToString("HH:mm")
-                });
+                    dayVm.Lines.Add(new LineVM
+                    {
+                        ShiftTypeId = line.ShiftTypeId,
+                        InstanceId = line.InstanceId,
+                        Concurrency = line.Concurrency,
+                        ShortName = line.ShiftTypeShortName,
+                        ShiftTypeKey = line.ShiftTypeKey,
+                        ShiftTypeName = line.ShiftTypeName,
+                        ShiftName = line.ShiftName,
+                        Assigned = line.Assigned,
+                        Required = line.Required,
+                        AssignedNames = line.AssignedNames.ToList(),
+                        EmptySlots = line.EmptySlots.ToList(),
+                        StartTime = line.StartTime.ToString("HH:mm"),
+                        EndTime = line.EndTime.ToString("HH:mm")
+                    });
+                }
             }
             Days.Add(dayVm);
         }

@@ -48,6 +48,7 @@ builder.Services.AddAuthorization(options =>
 
 builder.Services.AddScoped<IConflictChecker, ConflictChecker>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<ScheduleSummaryService>();
 
 var app = builder.Build();
 
