@@ -114,7 +114,7 @@ public class ManageModel : PageModel
         // Send notification to the assigned user
         await _notificationService.CreateShiftAddedNotificationAsync(
             SelectedUserId.Value,
-            Type!.Name,
+            Type!.DisplayName,
             Date,
             Type.Start,
             Type.End
@@ -137,7 +137,7 @@ public class ManageModel : PageModel
             // Send notification before removing
             await _notificationService.CreateShiftRemovedNotificationAsync(
                 a.UserId,
-                a.ShiftInstance.ShiftType.Name,
+                a.ShiftInstance.ShiftType.DisplayName,
                 a.ShiftInstance.WorkDate,
                 a.ShiftInstance.ShiftType.Start,
                 a.ShiftInstance.ShiftType.End

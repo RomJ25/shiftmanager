@@ -19,7 +19,14 @@ public class ShiftTypesModel : PageModel
     public async Task OnGetAsync()
     {
         var t = await _db.ShiftTypes.OrderBy(s => s.Key).ToListAsync();
-        Items = t.Select(x => new Item(x.Id, x.Key, x.Name, x.Start.ToString("HH:mm"), x.End.ToString("HH:mm"))).ToList();
+        Items = t
+            .Select(x => new Item(
+                x.Id,
+                x.Key,
+                string.IsNullOrWhiteSpace(x.Name) ? x.DefaultName : x.Name,
+                x.Start.ToString("HH:mm"),
+                x.End.ToString("HH:mm")))
+            .ToList();
     }
 
     public async Task<IActionResult> OnPostAsync(List<Item> items)
@@ -30,6 +37,7 @@ public class ShiftTypesModel : PageModel
         {
             var t = types.First(x => x.Id == it.Id);
             t.Key = it.Key;
+            t.Name = string.IsNullOrWhiteSpace(it.Name) ? string.Empty : it.Name.Trim();
             t.Start = TimeOnly.Parse(it.Start);
             t.End = TimeOnly.Parse(it.End);
         }

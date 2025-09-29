@@ -144,7 +144,7 @@ public class IndexModel : PageModel
         await trx.CommitAsync();
 
         // Send notification to original user
-        var shiftInfo = $"{shiftType.Name} on {si.WorkDate:MMM dd, yyyy} ({shiftType.Start:HH:mm} - {shiftType.End:HH:mm})";
+        var shiftInfo = $"{shiftType.DisplayName} on {si.WorkDate:MMM dd, yyyy} ({shiftType.Start:HH:mm} - {shiftType.End:HH:mm})";
         await _notificationService.CreateSwapRequestNotificationAsync(originalUserId, RequestStatus.Approved, shiftInfo, s.Id);
 
         return RedirectToPage();
@@ -161,7 +161,7 @@ public class IndexModel : PageModel
                               join si in _db.ShiftInstances on assign.ShiftInstanceId equals si.Id
                               join st in _db.ShiftTypes on si.ShiftTypeId equals st.Id
                               where sr.Id == id
-                              select new { assign.UserId, ShiftInfo = $"{st.Name} on {si.WorkDate:MMM dd, yyyy} ({st.Start:HH:mm} - {st.End:HH:mm})" })
+                              select new { assign.UserId, ShiftInfo = $"{st.DisplayName} on {si.WorkDate:MMM dd, yyyy} ({st.Start:HH:mm} - {st.End:HH:mm})" })
                               .FirstOrDefaultAsync();
 
         s.Status = RequestStatus.Declined;

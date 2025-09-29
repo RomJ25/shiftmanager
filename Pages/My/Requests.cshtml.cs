@@ -99,7 +99,7 @@ public class RequestsModel : PageModel
                     {
                         ShiftId = x.Assignment.Id,
                         Date = x.Instance.WorkDate,
-                        ShiftTypeName = st.Name,
+                        ShiftTypeName = st.DisplayName,
                         StartTime = st.Start,
                         EndTime = st.End
                     })

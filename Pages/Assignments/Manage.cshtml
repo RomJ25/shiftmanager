@@ -3,7 +3,7 @@
 @{
     Layout = "_Layout";
 }
-<h2>Assignments — @Model.Date.ToString("ddd, MMM d") — @Model.Type?.Name</h2>
+<h2>Assignments — @Model.Date.ToString("ddd, MMM d") — @Model.Type?.DisplayName (@Model.Type?.Key)</h2>
 
 <div class="card">
     <div style="display:flex; gap:1rem; align-items:center; justify-content:space-between">

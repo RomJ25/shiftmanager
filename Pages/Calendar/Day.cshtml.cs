@@ -69,7 +69,7 @@ public class DayModel : PageModel
         {
             id = t.Id,
             key = t.Key,
-            name = t.Name,
+            name = t.DisplayName,
             start = t.Start.ToString("HH:mm"),
             end = t.End.ToString("HH:mm")
         }).ToList();
@@ -111,10 +111,10 @@ public class DayModel : PageModel
                 ShiftTypeId = t.Id,
                 InstanceId = inst?.Id ?? 0,
                 Concurrency = inst?.Concurrency ?? 0,
-                Name = t.Name,
-                ShortName = t.Name[..Math.Min(3, t.Name.Length)],
+                Name = t.DisplayName,
+                ShortName = t.Key[..Math.Min(3, t.Key.Length)],
                 ShiftTypeKey = t.Key.ToLower(),
-                ShiftTypeName = t.Name,
+                ShiftTypeName = t.DisplayName,
                 ShiftName = inst?.Name ?? "",
                 StartTime = t.Start,
                 EndTime = t.End,

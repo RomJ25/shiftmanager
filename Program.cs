@@ -69,12 +69,29 @@ using (var scope = app.Services.CreateScope())
     // Seed shift types (fixed keys)
     if (!db.ShiftTypes.Any())
     {
-        db.ShiftTypes.AddRange(new[] {
-            new ShiftType{ Key="MORNING", Start=new TimeOnly(8,0), End=new TimeOnly(16,0)},
-            new ShiftType{ Key="NOON", Start=new TimeOnly(16,0), End=new TimeOnly(0,0)},
-            new ShiftType{ Key="NIGHT", Start=new TimeOnly(0,0), End=new TimeOnly(8,0)},
-            new ShiftType{ Key="MIDDLE", Start=new TimeOnly(12,0), End=new TimeOnly(20,0)},
+        db.ShiftTypes.AddRange(new[]
+        {
+            new ShiftType{ Key="MORNING", Name="Morning Shift", Start=new TimeOnly(8,0), End=new TimeOnly(16,0)},
+            new ShiftType{ Key="NOON", Name="Afternoon Shift", Start=new TimeOnly(16,0), End=new TimeOnly(0,0)},
+            new ShiftType{ Key="NIGHT", Name="Night Shift", Start=new TimeOnly(0,0), End=new TimeOnly(8,0)},
+            new ShiftType{ Key="MIDDLE", Name="Mid Shift", Start=new TimeOnly(12,0), End=new TimeOnly(20,0)},
         });
+        await db.SaveChangesAsync();
+    }
+
+    // Ensure existing shift types have display names populated
+    var updated = false;
+    var existingTypes = await db.ShiftTypes.ToListAsync();
+    foreach (var type in existingTypes)
+    {
+        if (string.IsNullOrWhiteSpace(type.Name))
+        {
+            type.Name = type.DefaultName;
+            updated = true;
+        }
+    }
+    if (updated)
+    {
         await db.SaveChangesAsync();
     }
 
