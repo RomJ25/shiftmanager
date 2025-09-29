@@ -126,6 +126,44 @@ public class ScheduleSummaryServiceTests
         Assert.All(line.EmptySlots, slot => Assert.Equal("Empty", slot));
     }
 
+    [Fact]
+    public async Task UsesDisplayNameWhenNameMissing()
+    {
+        using var context = CreateContext();
+        var company = await SeedCompanyAsync(context);
+        var shiftType = new ShiftType { Key = "MORNING", Name = string.Empty, Start = new TimeOnly(8, 0), End = new TimeOnly(16, 0) };
+        context.ShiftTypes.Add(shiftType);
+        await context.SaveChangesAsync();
+
+        var instance = new ShiftInstance
+        {
+            CompanyId = company.Id,
+            ShiftTypeId = shiftType.Id,
+            WorkDate = new DateOnly(2024, 10, 4),
+            StaffingRequired = 1
+        };
+        context.ShiftInstances.Add(instance);
+        await context.SaveChangesAsync();
+
+        var service = new ScheduleSummaryService(context);
+        var result = await service.QueryAsync(new ScheduleSummaryRequest
+        {
+            CompanyId = company.Id,
+            StartDate = instance.WorkDate,
+            EndDate = instance.WorkDate
+        });
+
+        var displayName = "Morning Shift";
+
+        var shiftTypeSummary = Assert.Single(result.ShiftTypes);
+        Assert.Equal(displayName, shiftTypeSummary.Name);
+        Assert.Equal("Mor", shiftTypeSummary.ShortName);
+
+        var line = Assert.Single(Assert.Single(result.Days).Lines);
+        Assert.Equal(displayName, line.ShiftTypeName);
+        Assert.Equal("Mor", line.ShiftTypeShortName);
+    }
+
     private static AppDbContext CreateContext()
     {
         var connection = new SqliteConnection("Filename=:memory:");

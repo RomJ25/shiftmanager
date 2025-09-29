@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using ShiftManager.Data;
@@ -111,12 +112,86 @@ public class CompanyScopeGuardTests
         Assert.True((await context.Users.SingleAsync(u => u.Id == otherUser.Id)).IsActive);
     }
 
+    [Fact]
+    public async Task ApproveSwap_UsesDisplayNameInNotification()
+    {
+        await using var context = CreateSqliteContext();
+        var company = new Company { Name = "Company" };
+        context.Companies.Add(company);
+        await context.SaveChangesAsync();
+
+        var admin = await SeedUserAsync(context, company.Id, "admin@test", UserRole.Admin);
+        var fromUser = await SeedUserAsync(context, company.Id, "from@test", UserRole.Employee);
+        var toUser = await SeedUserAsync(context, company.Id, "to@test", UserRole.Employee);
+
+        var shiftType = new ShiftType
+        {
+            CompanyId = company.Id,
+            Key = "MORNING",
+            Name = string.Empty,
+            Start = new TimeOnly(8, 0),
+            End = new TimeOnly(16, 0)
+        };
+        context.ShiftTypes.Add(shiftType);
+        await context.SaveChangesAsync();
+
+        var instance = new ShiftInstance
+        {
+            CompanyId = company.Id,
+            ShiftTypeId = shiftType.Id,
+            WorkDate = new DateOnly(2024, 10, 5)
+        };
+        context.ShiftInstances.Add(instance);
+        await context.SaveChangesAsync();
+
+        var assignment = new ShiftAssignment
+        {
+            ShiftInstanceId = instance.Id,
+            UserId = fromUser.Id
+        };
+        context.ShiftAssignments.Add(assignment);
+        await context.SaveChangesAsync();
+
+        var swapRequest = new SwapRequest
+        {
+            FromAssignmentId = assignment.Id,
+            ToUserId = toUser.Id,
+            Status = RequestStatus.Pending
+        };
+        context.SwapRequests.Add(swapRequest);
+        await context.SaveChangesAsync();
+
+        var notificationService = new RecordingNotificationService();
+        var companyScope = new CompanyScopeService(context);
+        var page = new IndexModel(context, new ConflictChecker(context), notificationService, NullLogger<IndexModel>.Instance, companyScope);
+        AttachUser(page, admin.Id, company.Id);
+
+        var result = await page.OnPostApproveSwapAsync(swapRequest.Id);
+
+        Assert.IsType<RedirectToPageResult>(result);
+        Assert.Equal("Morning Shift on Oct 05, 2024 (08:00 - 16:00)", notificationService.LastShiftInfo);
+    }
+
     private static AppDbContext CreateContext()
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
         return new AppDbContext(options);
+    }
+
+    private static TestAppDbContext CreateSqliteContext()
+    {
+        var connection = new SqliteConnection("Filename=:memory:");
+        connection.Open();
+
+        var options = new DbContextOptionsBuilder<AppDbContext>()
+            .UseSqlite(connection)
+            .Options;
+
+        var context = new TestAppDbContext(options, connection);
+        context.Database.EnsureCreated();
+        return context;
     }
 
     private static async Task<(Company companyA, Company companyB)> SeedCompaniesAsync(AppDbContext context)
@@ -143,6 +218,32 @@ public class CompanyScopeGuardTests
         context.Users.Add(user);
         await context.SaveChangesAsync();
         return user;
+    }
+
+    private sealed class TestAppDbContext : AppDbContext
+    {
+        private readonly SqliteConnection _connection;
+
+        public TestAppDbContext(DbContextOptions<AppDbContext> options, SqliteConnection connection)
+            : base(options)
+        {
+            _connection = connection;
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+            if (disposing)
+            {
+                _connection.Dispose();
+            }
+        }
+
+        public override async ValueTask DisposeAsync()
+        {
+            await base.DisposeAsync();
+            await _connection.DisposeAsync();
+        }
     }
 
     private static void AttachUser(PageModel model, int userId, int companyId)
@@ -177,5 +278,28 @@ public class CompanyScopeGuardTests
 
         public Task CreateSwapRequestNotificationAsync(int userId, RequestStatus status, string shiftInfo, int requestId)
             => Task.CompletedTask;
+    }
+
+    private sealed class RecordingNotificationService : INotificationService
+    {
+        public string? LastShiftInfo { get; private set; }
+
+        public Task CreateNotificationAsync(int userId, NotificationType type, string title, string message, int? relatedEntityId = null, string? relatedEntityType = null)
+            => Task.CompletedTask;
+
+        public Task CreateShiftAddedNotificationAsync(int userId, string shiftTypeName, DateOnly shiftDate, TimeOnly startTime, TimeOnly endTime)
+            => Task.CompletedTask;
+
+        public Task CreateShiftRemovedNotificationAsync(int userId, string shiftTypeName, DateOnly shiftDate, TimeOnly startTime, TimeOnly endTime)
+            => Task.CompletedTask;
+
+        public Task CreateTimeOffNotificationAsync(int userId, RequestStatus status, DateOnly startDate, DateOnly endDate, int requestId)
+            => Task.CompletedTask;
+
+        public Task CreateSwapRequestNotificationAsync(int userId, RequestStatus status, string shiftInfo, int requestId)
+        {
+            LastShiftInfo = shiftInfo;
+            return Task.CompletedTask;
+        }
     }
 }

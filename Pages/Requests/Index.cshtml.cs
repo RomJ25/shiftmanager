@@ -60,7 +60,7 @@ public async Task<IActionResult> OnPostApproveSwapAsync(int id)
     await trx.CommitAsync();
 
     // Send notification to original user
-    var shiftInfo = $"{shiftType.Name} on {instance.WorkDate:MMM dd, yyyy} " +
+    var shiftInfo = $"{shiftType.DisplayName} on {instance.WorkDate:MMM dd, yyyy} " +
                     $"({shiftType.Start:HH:mm} - {shiftType.End:HH:mm})";
     await _notificationService.CreateSwapRequestNotificationAsync(
         originalUserId, RequestStatus.Approved, shiftInfo, swap.Id);
@@ -81,7 +81,7 @@ public async Task<IActionResult> OnPostDeclineSwapAsync(int id)
                           {
                               Swap = s,
                               FromUser = fromUser,
-                              ShiftInfo = $"{st.Name} on {si.WorkDate:MMM dd, yyyy} " +
+                              ShiftInfo = $"{st.DisplayName} on {si.WorkDate:MMM dd, yyyy} " +
                                           $"({st.Start:HH:mm} - {st.End:HH:mm})"
                           })
                          .FirstOrDefaultAsync();
