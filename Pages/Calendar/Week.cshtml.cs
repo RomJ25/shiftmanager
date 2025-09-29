@@ -141,8 +141,19 @@ public class WeekModel : PageModel
         var companyId = int.Parse(User.FindFirst("CompanyId")!.Value);
         var date = DateOnly.Parse(payload.date);
 
+        var shiftType = await _db.ShiftTypes.AsNoTracking()
+            .FirstOrDefaultAsync(t => t.Id == payload.shiftTypeId);
+        if (shiftType == null || shiftType.CompanyId != companyId)
+        {
+            _logger.LogWarning(
+                "Attempt to adjust staffing with invalid shift type {ShiftTypeId} for company {CompanyId}",
+                payload.shiftTypeId,
+                companyId);
+            return BadRequest(new { message = "Invalid shift type." });
+        }
+
         var inst = await _db.ShiftInstances.FirstOrDefaultAsync(i =>
-            i.CompanyId == companyId && i.WorkDate == date && i.ShiftTypeId == payload.shiftTypeId);
+            i.CompanyId == companyId && i.WorkDate == date && i.ShiftTypeId == shiftType.Id);
         if (inst == null)
         {
             if (payload.delta < 0)
@@ -150,7 +161,7 @@ public class WeekModel : PageModel
             inst = new ShiftInstance
             {
                 CompanyId = companyId,
-                ShiftTypeId = payload.shiftTypeId,
+                ShiftTypeId = shiftType.Id,
                 WorkDate = date,
                 StaffingRequired = 0,
                 Concurrency = 0,
