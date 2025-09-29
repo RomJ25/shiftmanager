@@ -33,11 +33,12 @@ public class IndexModel : PageModel
         try
         {
             _logger.LogInformation("Loading admin requests page");
+            var companyId = int.Parse(User.FindFirst("CompanyId")!.Value);
 
             _logger.LogInformation("Loading pending time off requests");
             var pendingTO = await (from r in _db.TimeOffRequests
                                    join u in _db.Users on r.UserId equals u.Id
-                                   where r.Status == RequestStatus.Pending
+                                   where r.Status == RequestStatus.Pending && u.CompanyId == companyId
                                    orderby r.CreatedAt
                                    select new TimeOffVM(r.Id, u.DisplayName, r.StartDate, r.EndDate, r.Reason)).ToListAsync();
             TimeOff = pendingTO;
@@ -51,6 +52,8 @@ public class IndexModel : PageModel
                                       join st in _db.ShiftTypes on si.ShiftTypeId equals st.Id
                                       join u2 in _db.Users on s.ToUserId equals u2.Id
                                       where s.Status == RequestStatus.Pending
+                                            && u1.CompanyId == companyId
+                                            && u2.CompanyId == companyId
                                       orderby s.CreatedAt
                                       select new
                                       {
@@ -73,8 +76,15 @@ public class IndexModel : PageModel
 
     public async Task<IActionResult> OnPostApproveTimeOffAsync(int id)
     {
-        var r = await _db.TimeOffRequests.FindAsync(id);
-        if (r == null) return RedirectToPage();
+        var companyId = int.Parse(User.FindFirst("CompanyId")!.Value);
+        var requestWithUser = await (from r in _db.TimeOffRequests
+                                     join u in _db.Users on r.UserId equals u.Id
+                                     where r.Id == id
+                                     select new { Request = r, User = u }).FirstOrDefaultAsync();
+        if (requestWithUser == null) return RedirectToPage();
+        if (requestWithUser.User.CompanyId != companyId) return Forbid();
+
+        var r = requestWithUser.Request;
 
         r.Status = RequestStatus.Approved;
 
@@ -98,8 +108,15 @@ public class IndexModel : PageModel
 
     public async Task<IActionResult> OnPostDeclineTimeOffAsync(int id)
     {
-        var r = await _db.TimeOffRequests.FindAsync(id);
-        if (r == null) return RedirectToPage();
+        var companyId = int.Parse(User.FindFirst("CompanyId")!.Value);
+        var requestWithUser = await (from r in _db.TimeOffRequests
+                                     join u in _db.Users on r.UserId equals u.Id
+                                     where r.Id == id
+                                     select new { Request = r, User = u }).FirstOrDefaultAsync();
+        if (requestWithUser == null) return RedirectToPage();
+        if (requestWithUser.User.CompanyId != companyId) return Forbid();
+
+        var r = requestWithUser.Request;
 
         r.Status = RequestStatus.Declined;
         await _db.SaveChangesAsync();
@@ -112,12 +129,19 @@ public class IndexModel : PageModel
 
     public async Task<IActionResult> OnPostApproveSwapAsync(int id)
     {
+        var companyId = int.Parse(User.FindFirst("CompanyId")!.Value);
         using var trx = await _db.Database.BeginTransactionAsync();
-        var s = await _db.SwapRequests.FindAsync(id);
-        if (s == null) return RedirectToPage();
+        var swapData = await (from s in _db.SwapRequests
+                              where s.Id == id
+                              join assign in _db.ShiftAssignments on s.FromAssignmentId equals assign.Id
+                              join fromUser in _db.Users on assign.UserId equals fromUser.Id
+                              join toUser in _db.Users on s.ToUserId equals toUser.Id
+                              select new { Swap = s, Assignment = assign, FromUser = fromUser, ToUser = toUser }).FirstOrDefaultAsync();
+        if (swapData == null) return RedirectToPage();
+        if (swapData.FromUser.CompanyId != companyId || swapData.ToUser.CompanyId != companyId) return Forbid();
 
-        var assign = await _db.ShiftAssignments.FindAsync(s.FromAssignmentId);
-        if (assign == null) { s.Status = RequestStatus.Declined; await _db.SaveChangesAsync(); return RedirectToPage(); }
+        var s = swapData.Swap;
+        var assign = swapData.Assignment;
 
         var si = await _db.ShiftInstances.FindAsync(assign.ShiftInstanceId);
         if (si == null) { s.Status = RequestStatus.Declined; await _db.SaveChangesAsync(); return RedirectToPage(); }
@@ -152,8 +176,16 @@ public class IndexModel : PageModel
 
     public async Task<IActionResult> OnPostDeclineSwapAsync(int id)
     {
-        var s = await _db.SwapRequests.FindAsync(id);
-        if (s == null) return RedirectToPage();
+        var companyId = int.Parse(User.FindFirst("CompanyId")!.Value);
+        var swapData = await (from s in _db.SwapRequests
+                              where s.Id == id
+                              join assign in _db.ShiftAssignments on s.FromAssignmentId equals assign.Id
+                              join fromUser in _db.Users on assign.UserId equals fromUser.Id
+                              select new { Swap = s, FromUser = fromUser }).FirstOrDefaultAsync();
+        if (swapData == null) return RedirectToPage();
+        if (swapData.FromUser.CompanyId != companyId) return Forbid();
+
+        var s = swapData.Swap;
 
         // Get shift information for notification before declining
         var shiftInfo = await (from sr in _db.SwapRequests
