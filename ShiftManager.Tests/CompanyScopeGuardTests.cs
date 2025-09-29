@@ -1,4 +1,9 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -94,6 +99,103 @@ public class CompanyScopeGuardTests
     }
 
     [Fact]
+    public async Task IndexModel_Handlers_ExecuteSuccessfully()
+    {
+        await using var context = CreateContext();
+        var (companyA, companyB) = await SeedCompaniesAsync(context);
+        var admin = await SeedUserAsync(context, companyA.Id, "admin@a.test", UserRole.Admin);
+        var employee = await SeedUserAsync(context, companyA.Id, "employee@a.test", UserRole.Employee);
+        var recipient = await SeedUserAsync(context, companyA.Id, "recipient@a.test", UserRole.Employee);
+        await SeedUserAsync(context, companyB.Id, "other@b.test", UserRole.Employee);
+
+        var approveTimeOff = new TimeOffRequest
+        {
+            UserId = employee.Id,
+            StartDate = DateOnly.FromDateTime(DateTime.Today.AddDays(1)),
+            EndDate = DateOnly.FromDateTime(DateTime.Today.AddDays(2)),
+            Reason = "Vacation"
+        };
+        var declineTimeOff = new TimeOffRequest
+        {
+            UserId = employee.Id,
+            StartDate = DateOnly.FromDateTime(DateTime.Today.AddDays(10)),
+            EndDate = DateOnly.FromDateTime(DateTime.Today.AddDays(12)),
+            Reason = "Personal"
+        };
+        context.TimeOffRequests.AddRange(approveTimeOff, declineTimeOff);
+
+        var shiftType = new ShiftType
+        {
+            CompanyId = companyA.Id,
+            Key = "DAY",
+            Name = "Day Shift",
+            Start = new TimeOnly(9, 0),
+            End = new TimeOnly(17, 0)
+        };
+        context.ShiftTypes.Add(shiftType);
+        await context.SaveChangesAsync();
+
+        var instanceApprove = new ShiftInstance
+        {
+            CompanyId = companyA.Id,
+            ShiftTypeId = shiftType.Id,
+            WorkDate = DateOnly.FromDateTime(DateTime.Today.AddDays(3)),
+            Name = "Day"
+        };
+        var instanceDecline = new ShiftInstance
+        {
+            CompanyId = companyA.Id,
+            ShiftTypeId = shiftType.Id,
+            WorkDate = DateOnly.FromDateTime(DateTime.Today.AddDays(4)),
+            Name = "Day"
+        };
+        context.ShiftInstances.AddRange(instanceApprove, instanceDecline);
+        await context.SaveChangesAsync();
+
+        var assignmentApprove = new ShiftAssignment { ShiftInstanceId = instanceApprove.Id, UserId = employee.Id };
+        var assignmentDecline = new ShiftAssignment { ShiftInstanceId = instanceDecline.Id, UserId = employee.Id };
+        context.ShiftAssignments.AddRange(assignmentApprove, assignmentDecline);
+        await context.SaveChangesAsync();
+
+        var approveSwap = new SwapRequest { FromAssignmentId = assignmentApprove.Id, ToUserId = recipient.Id };
+        var declineSwap = new SwapRequest { FromAssignmentId = assignmentDecline.Id, ToUserId = recipient.Id };
+        context.SwapRequests.AddRange(approveSwap, declineSwap);
+        await context.SaveChangesAsync();
+
+        var notifications = new StubNotificationService();
+        var companyScope = new CompanyScopeService(context);
+        var checker = new AllowingConflictChecker();
+        var page = new IndexModel(context, checker, notifications, NullLogger<IndexModel>.Instance, companyScope);
+        AttachUser(page, admin.Id, companyA.Id);
+
+        await page.OnGetAsync();
+
+        Assert.Equal(2, page.TimeOff.Count);
+        Assert.Equal(2, page.Swaps.Count);
+
+        var approveTimeOffResult = await page.OnPostApproveTimeOffAsync(approveTimeOff.Id);
+        Assert.IsType<RedirectToPageResult>(approveTimeOffResult);
+        Assert.Equal(RequestStatus.Approved, (await context.TimeOffRequests.FindAsync(approveTimeOff.Id))!.Status);
+        Assert.Contains(notifications.TimeOffNotifications, n => n.requestId == approveTimeOff.Id && n.status == RequestStatus.Approved);
+
+        var declineTimeOffResult = await page.OnPostDeclineTimeOffAsync(declineTimeOff.Id);
+        Assert.IsType<RedirectToPageResult>(declineTimeOffResult);
+        Assert.Equal(RequestStatus.Declined, (await context.TimeOffRequests.FindAsync(declineTimeOff.Id))!.Status);
+        Assert.Contains(notifications.TimeOffNotifications, n => n.requestId == declineTimeOff.Id && n.status == RequestStatus.Declined);
+
+        var approveSwapResult = await page.OnPostApproveSwapAsync(approveSwap.Id);
+        Assert.IsType<RedirectToPageResult>(approveSwapResult);
+        Assert.Equal(RequestStatus.Approved, (await context.SwapRequests.FindAsync(approveSwap.Id))!.Status);
+        Assert.Equal(recipient.Id, (await context.ShiftAssignments.FindAsync(assignmentApprove.Id))!.UserId);
+        Assert.Contains(notifications.SwapNotifications, n => n.requestId == approveSwap.Id && n.status == RequestStatus.Approved);
+
+        var declineSwapResult = await page.OnPostDeclineSwapAsync(declineSwap.Id);
+        Assert.IsType<RedirectToPageResult>(declineSwapResult);
+        Assert.Equal(RequestStatus.Declined, (await context.SwapRequests.FindAsync(declineSwap.Id))!.Status);
+        Assert.Contains(notifications.SwapNotifications, n => n.requestId == declineSwap.Id && n.status == RequestStatus.Declined);
+    }
+
+    [Fact]
     public async Task ToggleUser_FromDifferentCompany_IsRejected()
     {
         await using var context = CreateContext();
@@ -163,6 +265,9 @@ public class CompanyScopeGuardTests
 
     private sealed class StubNotificationService : INotificationService
     {
+        public List<(int userId, RequestStatus status, DateOnly startDate, DateOnly endDate, int requestId)> TimeOffNotifications { get; } = new();
+        public List<(int userId, RequestStatus status, string shiftInfo, int requestId)> SwapNotifications { get; } = new();
+
         public Task CreateNotificationAsync(int userId, NotificationType type, string title, string message, int? relatedEntityId = null, string? relatedEntityType = null)
             => Task.CompletedTask;
 
@@ -173,9 +278,21 @@ public class CompanyScopeGuardTests
             => Task.CompletedTask;
 
         public Task CreateTimeOffNotificationAsync(int userId, RequestStatus status, DateOnly startDate, DateOnly endDate, int requestId)
-            => Task.CompletedTask;
+        {
+            TimeOffNotifications.Add((userId, status, startDate, endDate, requestId));
+            return Task.CompletedTask;
+        }
 
         public Task CreateSwapRequestNotificationAsync(int userId, RequestStatus status, string shiftInfo, int requestId)
-            => Task.CompletedTask;
+        {
+            SwapNotifications.Add((userId, status, shiftInfo, requestId));
+            return Task.CompletedTask;
+        }
+    }
+
+    private sealed class AllowingConflictChecker : IConflictChecker
+    {
+        public Task<ConflictResult> CanAssignAsync(int userId, ShiftInstance instance, CancellationToken ct = default)
+            => Task.FromResult(ConflictResult.Ok());
     }
 }
