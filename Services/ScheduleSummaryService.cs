@@ -70,7 +70,9 @@ public class ScheduleSummaryService
 
         var shiftTypeFilter = request.ShiftTypeIds?.ToHashSet();
 
-        var shiftTypeQuery = _db.ShiftTypes.AsNoTracking();
+        var shiftTypeQuery = _db.ShiftTypes
+            .AsNoTracking()
+            .Where(t => t.CompanyId == request.CompanyId);
         if (shiftTypeFilter is { Count: > 0 })
         {
             shiftTypeQuery = shiftTypeQuery.Where(t => shiftTypeFilter.Contains(t.Id));

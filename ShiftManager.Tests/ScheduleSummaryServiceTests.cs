@@ -15,7 +15,7 @@ public class ScheduleSummaryServiceTests
     {
         using var context = CreateContext();
         var company = await SeedCompanyAsync(context);
-        var shiftType = new ShiftType { Key = "NIGHT", Start = new TimeOnly(22, 0), End = new TimeOnly(6, 0) };
+        var shiftType = new ShiftType { CompanyId = company.Id, Key = "NIGHT", Start = new TimeOnly(22, 0), End = new TimeOnly(6, 0) };
         context.ShiftTypes.Add(shiftType);
         await context.SaveChangesAsync();
 
@@ -48,7 +48,7 @@ public class ScheduleSummaryServiceTests
     {
         using var context = CreateContext();
         var company = await SeedCompanyAsync(context);
-        var shiftType = new ShiftType { Key = "MORNING", Start = new TimeOnly(8, 0), End = new TimeOnly(16, 0) };
+        var shiftType = new ShiftType { CompanyId = company.Id, Key = "MORNING", Start = new TimeOnly(8, 0), End = new TimeOnly(16, 0) };
         context.ShiftTypes.Add(shiftType);
         await context.SaveChangesAsync();
 
@@ -92,7 +92,7 @@ public class ScheduleSummaryServiceTests
     {
         using var context = CreateContext();
         var company = await SeedCompanyAsync(context);
-        var shiftType = new ShiftType { Key = "NOON", Start = new TimeOnly(12, 0), End = new TimeOnly(20, 0) };
+        var shiftType = new ShiftType { CompanyId = company.Id, Key = "NOON", Start = new TimeOnly(12, 0), End = new TimeOnly(20, 0) };
         context.ShiftTypes.Add(shiftType);
         await context.SaveChangesAsync();
 
@@ -131,7 +131,15 @@ public class ScheduleSummaryServiceTests
     {
         using var context = CreateContext();
         var company = await SeedCompanyAsync(context);
-        var shiftType = new ShiftType { Key = "MORNING", Name = string.Empty, Start = new TimeOnly(8, 0), End = new TimeOnly(16, 0) };
+        var shiftType = new ShiftType
+        {
+            CompanyId = company.Id,
+            Key = "MORNING",
+            Name = string.Empty,
+            Start = new TimeOnly(8, 0),
+            End = new TimeOnly(16, 0),
+            DisplayName = "Morning Shift"
+        };
         context.ShiftTypes.Add(shiftType);
         await context.SaveChangesAsync();
 
@@ -164,51 +172,13 @@ public class ScheduleSummaryServiceTests
         Assert.Equal("Mor", line.ShiftTypeShortName);
     }
 
-    private static AppDbContext CreateContext()
+    [Fact]
+    public async Task QueryScopesShiftTypesToCompany()
     {
-        var connection = new SqliteConnection("Filename=:memory:");
-        connection.Open();
+        using var context = CreateContext();
+        var companyA = await SeedCompanyAsync(context, "Company A");
+        var companyB = await SeedCompanyAsync(context, "Company B");
 
-        var options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseSqlite(connection)
-            .Options;
-
-        var context = new TestAppDbContext(options, connection);
-        context.Database.EnsureCreated();
-        return context;
-    }
-
-    private sealed class TestAppDbContext : AppDbContext
-    {
-        private readonly SqliteConnection _connection;
-
-        public TestAppDbContext(DbContextOptions<AppDbContext> options, SqliteConnection connection)
-            : base(options)
-        {
-            _connection = connection;
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            base.Dispose(disposing);
-            if (disposing)
-            {
-                _connection.Dispose();
-            }
-        }
-
-        public override async ValueTask DisposeAsync()
-        {
-            await base.DisposeAsync();
-            await _connection.DisposeAsync();
-        }
-    }
-
-    private static async Task<Company> SeedCompanyAsync(AppDbContext context)
-    {
-        var company = new Company { Name = "Test Co" };
-        context.Companies.Add(company);
-        await context.SaveChangesAsync();
-        return company;
-    }
-}
+        var date = new DateOnly(2024, 10, 4);
+        var shiftTypeA = new ShiftType { CompanyId = companyA.Id, Key = "A", Name = "A Shift", Start = new TimeOnly(6, 0), End = new TimeOnly(14, 0) };
+        var shiftTypeB = new ShiftType { CompanyId = companyB.Id, Key = "B", Name = "B S
