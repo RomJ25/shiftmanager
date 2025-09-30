@@ -1,0 +1,522 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <!-- Navigation and Layout -->
+  <data name="ShiftManager" xml:space="preserve">
+    <value>מנהל משמרות</value>
+  </data>
+  <data name="MySchedule" xml:space="preserve">
+    <value>לוח הזמנים שלי</value>
+  </data>
+  <data name="WelcomeBack" xml:space="preserve">
+    <value>ברוך שובך, {0}!</value>
+  </data>
+  <data name="Calendar" xml:space="preserve">
+    <value>לוח שנה</value>
+  </data>
+  <data name="MonthView" xml:space="preserve">
+    <value>תצוגת חודש</value>
+  </data>
+  <data name="WeekView" xml:space="preserve">
+    <value>תצוגת שבוע</value>
+  </data>
+  <data name="DayView" xml:space="preserve">
+    <value>תצוגת יום</value>
+  </data>
+  <data name="Requests" xml:space="preserve">
+    <value>בקשות</value>
+  </data>
+  <data name="MyShifts" xml:space="preserve">
+    <value>המשמרות שלי</value>
+  </data>
+  <data name="Admin" xml:space="preserve">
+    <value>ניהול</value>
+  </data>
+  <data name="Users" xml:space="preserve">
+    <value>משתמשים</value>
+  </data>
+  <data name="ShiftTypes" xml:space="preserve">
+    <value>סוגי משמרות</value>
+  </data>
+  <data name="TimeOffManagement" xml:space="preserve">
+    <value>ניהול חופשות</value>
+  </data>
+  <data name="Config" xml:space="preserve">
+    <value>הגדרות</value>
+  </data>
+  <data name="Schedule" xml:space="preserve">
+    <value>לוח זמנים</value>
+  </data>
+  <data name="Notifications" xml:space="preserve">
+    <value>התראות</value>
+  </data>
+  <data name="Logout" xml:space="preserve">
+    <value>התנתקות</value>
+  </data>
+
+  <!-- Time-based greetings -->
+  <data name="GoodMorning" xml:space="preserve">
+    <value>בוקר טוב, {0}!</value>
+  </data>
+  <data name="GoodAfternoon" xml:space="preserve">
+    <value>צהריים טובים, {0}!</value>
+  </data>
+  <data name="GoodEvening" xml:space="preserve">
+    <value>ערב טוב, {0}!</value>
+  </data>
+  <data name="ScheduleSubtitle" xml:space="preserve">
+    <value>הנה לוח הזמנים ומידע על המשמרות שלך</value>
+  </data>
+
+  <!-- Common Actions -->
+  <data name="Save" xml:space="preserve">
+    <value>שמור</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>ביטול</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>מחק</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>עריכה</value>
+  </data>
+  <data name="Add" xml:space="preserve">
+    <value>הוסף</value>
+  </data>
+  <data name="Remove" xml:space="preserve">
+    <value>הסר</value>
+  </data>
+  <data name="Submit" xml:space="preserve">
+    <value>שלח</value>
+  </data>
+  <data name="Back" xml:space="preserve">
+    <value>חזור</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>סגור</value>
+  </data>
+  <data name="Search" xml:space="preserve">
+    <value>חיפוש</value>
+  </data>
+  <data name="Filter" xml:space="preserve">
+    <value>סינון</value>
+  </data>
+
+  <!-- Date and Time -->
+  <data name="Date" xml:space="preserve">
+    <value>תאריך</value>
+  </data>
+  <data name="Time" xml:space="preserve">
+    <value>שעה</value>
+  </data>
+  <data name="StartTime" xml:space="preserve">
+    <value>שעת התחלה</value>
+  </data>
+  <data name="EndTime" xml:space="preserve">
+    <value>שעת סיום</value>
+  </data>
+  <data name="Duration" xml:space="preserve">
+    <value>משך זמן</value>
+  </data>
+
+  <!-- Status -->
+  <data name="Active" xml:space="preserve">
+    <value>פעיל</value>
+  </data>
+  <data name="Inactive" xml:space="preserve">
+    <value>לא פעיל</value>
+  </data>
+  <data name="Pending" xml:space="preserve">
+    <value>ממתין</value>
+  </data>
+  <data name="Approved" xml:space="preserve">
+    <value>מאושר</value>
+  </data>
+  <data name="Declined" xml:space="preserve">
+    <value>נדחה</value>
+  </data>
+
+  <!-- Language Toggle -->
+  <data name="Language" xml:space="preserve">
+    <value>שפה</value>
+  </data>
+  <data name="English" xml:space="preserve">
+    <value>English</value>
+  </data>
+  <data name="Hebrew" xml:space="preserve">
+    <value>עברית</value>
+  </data>
+
+  <!-- Notifications -->
+  <data name="NotificationCenter" xml:space="preserve">
+    <value>מרכז התראות</value>
+  </data>
+  <data name="MarkAllAsRead" xml:space="preserve">
+    <value>סמן הכל כנקרא ({0})</value>
+  </data>
+  <data name="NoNotifications" xml:space="preserve">
+    <value>אין התראות</value>
+  </data>
+  <data name="AllCaughtUp" xml:space="preserve">
+    <value>אתה מעודכן! התראות חדשות יופיעו כאן.</value>
+  </data>
+  <data name="MarkAsRead" xml:space="preserve">
+    <value>סמן כנקרא</value>
+  </data>
+  <data name="DeleteConfirm" xml:space="preserve">
+    <value>האם אתה בטוח שברצונך למחוק התראה זו?</value>
+  </data>
+  <data name="Read" xml:space="preserve">
+    <value>נקרא</value>
+  </data>
+
+  <!-- Calendar and Shift -->
+  <data name="AssignShift" xml:space="preserve">
+    <value>הקצה משמרת</value>
+  </data>
+  <data name="ShiftName" xml:space="preserve">
+    <value>שם המשמרת</value>
+  </data>
+  <data name="StaffingRequired" xml:space="preserve">
+    <value>צוות נדרש</value>
+  </data>
+  <data name="SelectUser" xml:space="preserve">
+    <value>בחר משתמש</value>
+  </data>
+  <data name="AssignedUsers" xml:space="preserve">
+    <value>משתמשים שהוקצו</value>
+  </data>
+
+  <!-- Time Off -->
+  <data name="TimeOffRequest" xml:space="preserve">
+    <value>בקשת חופשה</value>
+  </data>
+  <data name="StartDate" xml:space="preserve">
+    <value>תאריך התחלה</value>
+  </data>
+  <data name="EndDate" xml:space="preserve">
+    <value>תאריך סיום</value>
+  </data>
+  <data name="Reason" xml:space="preserve">
+    <value>סיבה</value>
+  </data>
+  <data name="Approve" xml:space="preserve">
+    <value>אשר</value>
+  </data>
+  <data name="Decline" xml:space="preserve">
+    <value>דחה</value>
+  </data>
+
+  <!-- Error Messages -->
+  <data name="ErrorOccurred" xml:space="preserve">
+    <value>אירעה שגיאה. אנא נסה שנית.</value>
+  </data>
+  <data name="SuccessMessage" xml:space="preserve">
+    <value>הפעולה הושלמה בהצלחה.</value>
+  </data>
+
+  <!-- Shift Types -->
+  <data name="MORNING" xml:space="preserve">
+    <value>בוקר</value>
+  </data>
+  <data name="NOON" xml:space="preserve">
+    <value>צהריים</value>
+  </data>
+  <data name="NIGHT" xml:space="preserve">
+    <value>לילה</value>
+  </data>
+  <data name="MIDDLE" xml:space="preserve">
+    <value>אחר הצהריים</value>
+  </data>
+
+  <!-- Days of Week -->
+  <data name="Monday" xml:space="preserve">
+    <value>יום שני</value>
+  </data>
+  <data name="Tuesday" xml:space="preserve">
+    <value>יום שלישי</value>
+  </data>
+  <data name="Wednesday" xml:space="preserve">
+    <value>יום רביעי</value>
+  </data>
+  <data name="Thursday" xml:space="preserve">
+    <value>יום חמישי</value>
+  </data>
+  <data name="Friday" xml:space="preserve">
+    <value>יום שישי</value>
+  </data>
+  <data name="Saturday" xml:space="preserve">
+    <value>יום שבת</value>
+  </data>
+  <data name="Sunday" xml:space="preserve">
+    <value>יום ראשון</value>
+  </data>
+
+  <!-- Months -->
+  <data name="January" xml:space="preserve">
+    <value>ינואר</value>
+  </data>
+  <data name="February" xml:space="preserve">
+    <value>פברואר</value>
+  </data>
+  <data name="March" xml:space="preserve">
+    <value>מרץ</value>
+  </data>
+  <data name="April" xml:space="preserve">
+    <value>אפריל</value>
+  </data>
+  <data name="May" xml:space="preserve">
+    <value>מאי</value>
+  </data>
+  <data name="June" xml:space="preserve">
+    <value>יוני</value>
+  </data>
+  <data name="July" xml:space="preserve">
+    <value>יולי</value>
+  </data>
+  <data name="August" xml:space="preserve">
+    <value>אוגוסט</value>
+  </data>
+  <data name="September" xml:space="preserve">
+    <value>ספטמבר</value>
+  </data>
+  <data name="October" xml:space="preserve">
+    <value>אוקטובר</value>
+  </data>
+  <data name="November" xml:space="preserve">
+    <value>נובמבר</value>
+  </data>
+  <data name="December" xml:space="preserve">
+    <value>דצמבר</value>
+  </data>
+
+  <!-- General Terms -->
+  <data name="Today" xml:space="preserve">
+    <value>היום</value>
+  </data>
+  <data name="Tomorrow" xml:space="preserve">
+    <value>מחר</value>
+  </data>
+  <data name="Yesterday" xml:space="preserve">
+    <value>אתמול</value>
+  </data>
+  <data name="ThisWeek" xml:space="preserve">
+    <value>השבוע</value>
+  </data>
+  <data name="NextWeek" xml:space="preserve">
+    <value>השבוע הבא</value>
+  </data>
+  <data name="ThisMonth" xml:space="preserve">
+    <value>החודש</value>
+  </data>
+  <data name="NextMonth" xml:space="preserve">
+    <value>החודש הבא</value>
+  </data>
+
+  <!-- User Roles -->
+  <data name="AdminRole" xml:space="preserve">
+    <value>מנהל מערכת</value>
+  </data>
+  <data name="Manager" xml:space="preserve">
+    <value>מנהל</value>
+  </data>
+  <data name="Employee" xml:space="preserve">
+    <value>עובד</value>
+  </data>
+
+  <!-- Access Control -->
+  <data name="AccessDenied" xml:space="preserve">
+    <value>גישה נדחתה</value>
+  </data>
+  <data name="Unauthorized" xml:space="preserve">
+    <value>אין לך הרשאה לגשת לעמוד זה.</value>
+  </data>
+  <data name="Login" xml:space="preserve">
+    <value>התחברות</value>
+  </data>
+  <data name="Email" xml:space="preserve">
+    <value>אימייל</value>
+  </data>
+  <data name="Password" xml:space="preserve">
+    <value>סיסמה</value>
+  </data>
+  <data name="RedirectingBack" xml:space="preserve">
+    <value>מעביר אותך חזרה...</value>
+  </data>
+
+  <!-- Additional UI Elements -->
+  <data name="RestHours" xml:space="preserve">
+    <value>שעות מנוחה (בין משמרות)</value>
+  </data>
+  <data name="WeeklyCap" xml:space="preserve">
+    <value>מגבלת שעות שבועית</value>
+  </data>
+  <data name="DisplayName" xml:space="preserve">
+    <value>שם תצוגה</value>
+  </data>
+  <data name="Role" xml:space="preserve">
+    <value>תפקיד</value>
+  </data>
+  <data name="ResetPassword" xml:space="preserve">
+    <value>איפוס סיסמה</value>
+  </data>
+  <data name="DeleteUser" xml:space="preserve">
+    <value>מחיקת משתמש</value>
+  </data>
+  <data name="SuccessMessage" xml:space="preserve">
+    <value>הצלחה</value>
+  </data>
+  <data name="AddShift" xml:space="preserve">
+    <value>הוספת משמרת</value>
+  </data>
+  <data name="HoursByWeek" xml:space="preserve">
+    <value>שעות לפי שבוע</value>
+  </data>
+  <data name="DecreaseStaffing" xml:space="preserve">
+    <value>הקטנת כוח אדם נדרש</value>
+  </data>
+  <data name="IncreaseStaffing" xml:space="preserve">
+    <value>הגדלת כוח אדם נדרש</value>
+  </data>
+  <data name="AddRequiredStaffing" xml:space="preserve">
+    <value>הוספת כוח אדם נדרש</value>
+  </data>
+  <data name="ToggleDarkMode" xml:space="preserve">
+    <value>החלפת מצב כהה</value>
+  </data>
+  <data name="Demo" xml:space="preserve">
+    <value>הדגמה</value>
+  </data>
+
+  <!-- Calendar Page Text -->
+  <data name="ClickShiftBadges" xml:space="preserve">
+    <value>לחץ על תגיות המשמרות לניהול הקצאות</value>
+  </data>
+  <data name="UseButtonsToAdjust" xml:space="preserve">
+    <value>השתמש ב + / − כדי להתאים כוח אדם</value>
+  </data>
+  <data name="ViewAssignedShifts" xml:space="preserve">
+    <value>צפה במשמרות שלך ובלוח הזמנים של הצוות</value>
+  </data>
+  <data name="Month" xml:space="preserve">
+    <value>חודש</value>
+  </data>
+  <data name="Week" xml:space="preserve">
+    <value>שבוע</value>
+  </data>
+  <data name="Day" xml:space="preserve">
+    <value>יום</value>
+  </data>
+  <data name="Mon" xml:space="preserve">
+    <value>יום ב'</value>
+  </data>
+  <data name="Tue" xml:space="preserve">
+    <value>יום ג'</value>
+  </data>
+  <data name="Wed" xml:space="preserve">
+    <value>יום ד'</value>
+  </data>
+  <data name="Thu" xml:space="preserve">
+    <value>יום ה'</value>
+  </data>
+  <data name="Fri" xml:space="preserve">
+    <value>יום ו'</value>
+  </data>
+  <data name="Sat" xml:space="preserve">
+    <value>שבת</value>
+  </data>
+  <data name="Sun" xml:space="preserve">
+    <value>יום א'</value>
+  </data>
+  <data name="Staffing" xml:space="preserve">
+    <value>כוח אדם</value>
+  </data>
+  <data name="NoStaffingRequired" xml:space="preserve">
+    <value>אין צורך בכוח אדם</value>
+  </data>
+  <data name="Staffed" xml:space="preserve">
+    <value>מאוישים</value>
+  </data>
+  <data name="FullyStaffed" xml:space="preserve">
+    <value>✓ מאויש במלואו</value>
+  </data>
+  <data name="NeedsMore" xml:space="preserve">
+    <value>⚠ נדרשים {0} נוספים</value>
+  </data>
+  <data name="Empty" xml:space="preserve">
+    <value>ריק</value>
+  </data>
+
+  <!-- Shift Types Page -->
+  <data name="Key" xml:space="preserve">
+    <value>מפתח</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>שם</value>
+  </data>
+  <data name="Start" xml:space="preserve">
+    <value>התחלה</value>
+  </data>
+  <data name="End" xml:space="preserve">
+    <value>סיום</value>
+  </data>
+</root>

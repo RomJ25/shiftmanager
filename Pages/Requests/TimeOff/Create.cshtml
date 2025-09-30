@@ -1,18 +1,16 @@
 @page
 @model ShiftManager.Pages.Requests.TimeOff.CreateModel
-@using Microsoft.Extensions.Localization
-@inject IStringLocalizer<ShiftManager.Resources.SharedResources> Localizer
 @{
     Layout = "_Layout";
 }
-<h2>@Localizer["RequestTimeOffPage"]</h2>
+<h2>Request Time-off</h2>
 <div class="card" style="max-width:560px">
     <form method="post">
         <div style="display:grid; gap:.75rem">
-            <label>@Localizer["StartDate"]<br /><input class="input" asp-for="StartDate" type="date" /></label>
-            <label>@Localizer["EndDate"]<br /><input class="input" asp-for="EndDate" type="date" /></label>
-            <label>@Localizer["ReasonOptional"]<br /><input class="input" asp-for="Reason" /></label>
-            <button class="btn btn-primary" type="submit">@Localizer["Submit"]</button>
+            <label>Start date<br /><input class="input" asp-for="StartDate" type="date" /></label>
+            <label>End date<br /><input class="input" asp-for="EndDate" type="date" /></label>
+            <label>Reason (optional)<br /><input class="input" asp-for="Reason" /></label>
+            <button class="btn btn-primary" type="submit">Submit</button>
         </div>
     </form>
 </div>

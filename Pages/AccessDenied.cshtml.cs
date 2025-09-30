@@ -7,7 +7,7 @@ public class AccessDeniedModel : PageModel
 {
     public string ReturnUrl { get; set; } = "/Calendar/Month";
 
-    public IActionResult OnGet(string returnUrl = null)
+    public IActionResult OnGet(string? returnUrl = null)
     {
         // Use the referring page or default to calendar
         ReturnUrl = returnUrl ?? Request.Headers["Referer"].FirstOrDefault() ?? "/Calendar/Month";

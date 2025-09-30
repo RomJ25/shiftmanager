@@ -1,156 +1,30 @@
 @page
 @model ShiftManager.Pages.Admin.ShiftTypesModel
 @using Microsoft.Extensions.Localization
-@inject IStringLocalizer<ShiftManager.Resources.SharedResources> Localizer
+@using ShiftManager.Resources
+@inject IStringLocalizer<SharedResource> Localizer
 @{
     Layout = "_Layout";
 }
-
-<h2>סוגי משמרות</h2>
-
-@if (!string.IsNullOrEmpty(Model.ErrorMessage))
-{
-    <div class="alert alert-error" style="background-color: var(--danger); color: white; padding: 12px; border-radius: 4px; margin-bottom: 16px;">
-        ⚠️ @Model.ErrorMessage
-    </div>
-}
-
-@if (!string.IsNullOrEmpty(Model.SuccessMessage))
-{
-    <div class="alert alert-success" style="background-color: var(--success); color: white; padding: 12px; border-radius: 4px; margin-bottom: 16px;">
-        ✓ @Model.SuccessMessage
-    </div>
-}
-
+<h2>@Localizer["ShiftTypes"]</h2>
 <div class="card">
-    <h3 style="margin-top:0">סוגי משמרות קיימים</h3>
     <form method="post">
-        <table style="width: 100%;">
-            <thead>
-                <tr>
-                    <th>מפתח</th>
-                    <th style="width: 25%;">שם</th>
-                    <th style="width: 30%;">תיאור</th>
-                    <th>שעת התחלה</th>
-                    <th>שעת סיום</th>
-                    <th>פעולות</th>
-                </tr>
-            </thead>
+        <table>
+            <thead><tr><th>@Localizer["Key"]</th><th>@Localizer["Name"]</th><th>@Localizer["Start"]</th><th>@Localizer["End"]</th></tr></thead>
             <tbody>
             @for (int i = 0; i < Model.Items.Count; i++)
             {
                 <tr>
-                    <td>
-                        <input class="input" name="items[@i].Key" value="@Model.Items[i].Key" style="width: 100px;" required />
-                    </td>
-                    <td>
-                        <input class="input" name="items[@i].Name" value="@Model.Items[i].Name" required
-                               placeholder="שם סוג המשמרת" />
-                    </td>
-                    <td>
-                        <input class="input" name="items[@i].Description" value="@Model.Items[i].Description"
-                               placeholder="תיאור אופציונלי" />
-                    </td>
-                    <td>
-                        <input class="input" name="items[@i].Start" type="time" value="@Model.Items[i].Start" required />
-                    </td>
-                    <td>
-                        <input class="input" name="items[@i].End" type="time" value="@Model.Items[i].End" required />
-                    </td>
-                    <td>
-                        <form method="post" asp-page-handler="Delete" style="display: inline;">
-                            <input type="hidden" name="id" value="@Model.Items[i].Id" />
-                            <button class="btn btn-danger" type="submit"
-                                    onclick="return confirm('האם אתה בטוח שברצונך למחוק את סוג המשמרת הזה?')">
-                                🗑️ מחק
-                            </button>
-                        </form>
-                    </td>
+                    <td>@Model.Items[i].Key</td>
+                    <td><input class="input" name="items[@i].Name" value="@Model.Items[i].Name" /></td>
+                    <td><input class="input" name="items[@i].Start" type="time" value="@Model.Items[i].Start" /></td>
+                    <td><input class="input" name="items[@i].End" type="time" value="@Model.Items[i].End" /></td>
                     <input type="hidden" name="items[@i].Id" value="@Model.Items[i].Id" />
+                    <input type="hidden" name="items[@i].Key" value="@Model.Items[i].Key" />
                 </tr>
             }
             </tbody>
         </table>
-        <div style="margin-top: 16px;">
-            <button class="btn btn-primary" type="submit">💾 שמור שינויים</button>
-        </div>
+        <button class="btn btn-primary" type="submit">@Localizer["Save"]</button>
     </form>
 </div>
-
-<div class="card" style="margin-top: 24px;">
-    <h3 style="margin-top:0">הוסף סוג משמרת חדש</h3>
-    <form method="post" asp-page-handler="Add">
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 16px;">
-            <div>
-                <label class="label">מפתח *</label>
-                <input class="input" name="key" required placeholder="MORNING"
-                       pattern="[A-Z_]+" title="אותיות גדולות באנגלית וקו תחתון בלבד" />
-                <small style="color: var(--text-secondary);">אותיות גדולות באנגלית בלבד</small>
-            </div>
-            <div>
-                <label class="label">שם *</label>
-                <input class="input" name="name" required placeholder="משמרת בוקר" />
-            </div>
-            <div>
-                <label class="label">תיאור</label>
-                <input class="input" name="description" placeholder="תיאור אופציונלי" />
-            </div>
-            <div>
-                <label class="label">שעת התחלה *</label>
-                <input class="input" name="start" type="time" required value="08:00" />
-            </div>
-            <div>
-                <label class="label">שעת סיום *</label>
-                <input class="input" name="end" type="time" required value="16:00" />
-            </div>
-        </div>
-        <button class="btn btn-success" type="submit">➕ הוסף סוג משמרת</button>
-    </form>
-</div>
-
-<style>
-.alert {
-    animation: slideIn 0.3s ease-out;
-}
-
-@@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.btn-danger {
-    background-color: var(--danger);
-    color: white;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-}
-
-.btn-danger:hover {
-    opacity: 0.9;
-}
-
-.btn-success {
-    background-color: var(--success);
-    color: white;
-}
-
-.label {
-    display: block;
-    margin-bottom: 4px;
-    font-weight: 500;
-    color: var(--text-primary);
-}
-
-table input.input {
-    width: 100%;
-}
-</style>

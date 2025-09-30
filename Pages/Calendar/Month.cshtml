@@ -1,7 +1,8 @@
 @page
 @model ShiftManager.Pages.Calendar.MonthModel
 @using Microsoft.Extensions.Localization
-@inject IStringLocalizer<ShiftManager.Resources.SharedResources> Localizer
+@using ShiftManager.Resources
+@inject IStringLocalizer<SharedResource> Localizer
 @{
     Layout = "_Layout";
     var weeks = Model.Weeks;
@@ -18,7 +19,7 @@
                 </div>
                 <div class="help-item">
                     <span class="help-icon">⚡</span>
-                    <span>@Localizer["UseButtons"]</span>
+                    <span>@Localizer["UseButtonsToAdjust"]</span>
                 </div>
             </div>
         }
@@ -57,13 +58,13 @@
 <div class="calendar-grid">
     <!-- Weekday headers -->
     <div class="calendar-weekdays">
-        <div class="weekday-header">@Localizer["Monday"]</div>
-        <div class="weekday-header">@Localizer["Tuesday"]</div>
-        <div class="weekday-header">@Localizer["Wednesday"]</div>
-        <div class="weekday-header">@Localizer["Thursday"]</div>
-        <div class="weekday-header">@Localizer["Friday"]</div>
-        <div class="weekday-header">@Localizer["Saturday"]</div>
-        <div class="weekday-header">@Localizer["Sunday"]</div>
+        <div class="weekday-header">@Localizer["Mon"]</div>
+        <div class="weekday-header">@Localizer["Tue"]</div>
+        <div class="weekday-header">@Localizer["Wed"]</div>
+        <div class="weekday-header">@Localizer["Thu"]</div>
+        <div class="weekday-header">@Localizer["Fri"]</div>
+        <div class="weekday-header">@Localizer["Sat"]</div>
+        <div class="weekday-header">@Localizer["Sun"]</div>
     </div>
 
     @foreach (var w in weeks)
@@ -133,7 +134,7 @@
                                     </div>
 
                                     <div class="tooltip-stats">
-                                        <span class="tooltip-stat">@l.Assigned/@l.Required</span>
+                                        <span class="tooltip-stat">@l.Assigned/@l.Required @Localizer["Staffed"]</span>
                                         @if (l.Assigned >= l.Required)
                                         {
                                             <span class="tooltip-status-ok">@Localizer["FullyStaffed"]</span>
@@ -148,9 +149,9 @@
                             @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
                             {
                                 <div class="shift-counter" data-si="@l.InstanceId" data-conc="@l.Concurrency">
-                                    <button class="counter-btn" aria-label="Decrease required staffing"
+                                    <button class="counter-btn" aria-label="@Localizer["DecreaseStaffing"]"
                                         onclick="window.adjustStaffing('@Url.Page("Month", "Adjust")', { date: '@day.Date.ToString("yyyy-MM-dd")', shiftTypeId:@l.ShiftTypeId, delta:-1, concurrency:@l.Concurrency }, (d)=>{ this.parentElement.dataset.conc=d.concurrency; this.parentElement.nextElementSibling.innerText = d.assigned + '/' + d.required; }, (e)=>alert(e.message))">−</button>
-                                    <button class="counter-btn" aria-label="Increase required staffing"
+                                    <button class="counter-btn" aria-label="@Localizer["IncreaseStaffing"]"
                                         onclick="window.adjustStaffing('@Url.Page("Month", "Adjust")', { date: '@day.Date.ToString("yyyy-MM-dd")', shiftTypeId:@l.ShiftTypeId, delta:1, concurrency:@l.Concurrency }, (d)=>{ this.parentElement.dataset.conc=d.concurrency; this.parentElement.nextElementSibling.innerText = d.assigned + '/' + d.required; }, (e)=>alert(e.message))">+</button>
                                 </div>
                             }

@@ -1,37 +1,36 @@
 @using System.Security.Claims
 @using Microsoft.Extensions.Localization
-@using ShiftManager.Models.Support
+@using ShiftManager.Resources
 @using System.Globalization
 @inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
-@inject IStringLocalizer<ShiftManager.Resources.SharedResources> Localizer
+@inject IStringLocalizer<SharedResource> Localizer
 @{
     var user = HttpContextAccessor?.HttpContext?.User;
     var name = user?.FindFirst(ClaimTypes.Name)?.Value ?? "";
-    var roleString = user?.FindFirst(ClaimTypes.Role)?.Value ?? "";
+    var role = user?.FindFirst(ClaimTypes.Role)?.Value ?? "";
     var isAdmin = User.IsInRole("Admin") || User.IsInRole("Manager");
     var firstName = name.Split(' ').FirstOrDefault() ?? name;
-
-    // Get localized role name
-    var role = "";
-    if (Enum.TryParse<UserRole>(roleString, out var userRole))
-    {
-        role = userRole.GetDisplayName(Localizer);
-    }
-
-    // Get current culture for lang and dir attributes
     var currentCulture = CultureInfo.CurrentUICulture.Name;
-    var isRtl = currentCulture == "he-IL";
-    var lang = isRtl ? "he" : "en";
-    var dir = isRtl ? "rtl" : "ltr";
+    var isHebrew = currentCulture.StartsWith("he");
+    var direction = isHebrew ? "rtl" : "ltr";
+    var lang = isHebrew ? "he" : "en";
 }
 <!DOCTYPE html>
-<html lang="@lang" dir="@dir" data-theme="light">
+<html lang="@lang" dir="@direction" data-theme="light" class="@(isHebrew ? "hebrew" : "english")">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>@(isAdmin ? Localizer["ShiftManager"] : $"{Localizer["MySchedule"]} - {firstName}")</title>
     <link rel="stylesheet" href="~/css/site.css" />
+    @if (isHebrew)
+    {
+        <link rel="stylesheet" href="~/css/rtl.css" />
+    }
     <script defer src="~/js/site.js"></script>
+    @if (isHebrew)
+    {
+        <script defer src="~/js/hebrew-audit.js"></script>
+    }
 </head>
 <body>
 <header class="@(isAdmin ? "topbar" : "topbar employee-topbar")">
@@ -46,7 +45,7 @@
                 <span class="brand-icon">📅</span>
                 <div class="brand-text">
                     <div class="brand-title">@Localizer["MySchedule"]</div>
-                    <div class="brand-subtitle">@string.Format(Localizer["WelcomeBack"], firstName)</div>
+                    <div class="brand-subtitle">@Localizer["WelcomeBack", firstName]</div>
                 </div>
             </div>
         }
@@ -100,19 +99,11 @@
     <div class="spacer"></div>
 
     <div class="topbar-actions">
-        <button class="action-btn" id="themeToggle" aria-label="Toggle dark mode">
+        @await Component.InvokeAsync("LanguageToggle")
+
+        <button class="action-btn" id="themeToggle" aria-label="@Localizer["ToggleDarkMode"]">
             <span class="theme-icon">🌓</span>
         </button>
-
-        <div class="dropdown">
-            <button class="action-btn" aria-label="@Localizer["Language"]">
-                <span>🌐</span>
-            </button>
-            <div class="menu" style="right: 0; min-width: 120px;">
-                <a href="@Url.Page(null, null, new { culture = "en-US", uiculture = "en-US" })">@Localizer["English"]</a>
-                <a href="@Url.Page(null, null, new { culture = "he-IL", uiculture = "he-IL" })">@Localizer["Hebrew"]</a>
-            </div>
-        </div>
 
         @if (User?.Identity?.IsAuthenticated == true)
         {
@@ -145,11 +136,10 @@
 
 @if (!isAdmin)
 {
-    var timeOfDay = DateTime.Now.Hour < 12 ? Localizer["GoodMorning"] : DateTime.Now.Hour < 18 ? Localizer["GoodAfternoon"] : Localizer["GoodEvening"];
     <div class="employee-welcome">
         <div class="container">
             <div class="welcome-content">
-                <h1 class="welcome-title">@timeOfDay, @firstName!</h1>
+                <h1 class="welcome-title">@Localizer[DateTime.Now.Hour < 12 ? "GoodMorning" : DateTime.Now.Hour < 18 ? "GoodAfternoon" : "GoodEvening", firstName]</h1>
                 <p class="welcome-subtitle">@Localizer["ScheduleSubtitle"]</p>
             </div>
             <div class="quick-stats">

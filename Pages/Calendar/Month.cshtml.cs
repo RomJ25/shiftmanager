@@ -2,10 +2,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;               // ensure this using is present
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Localization;
 using ShiftManager.Data;
 using ShiftManager.Models;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Localization;
+using ShiftManager.Resources;
 
 namespace ShiftManager.Pages.Calendar;
 
@@ -16,13 +17,8 @@ public class MonthModel : PageModel
 {
     private readonly AppDbContext _db;
     private readonly ILogger<MonthModel> _logger;
-    private readonly IStringLocalizer<Resources.SharedResources> _localizer;
-    public MonthModel(AppDbContext db, ILogger<MonthModel> logger, IStringLocalizer<Resources.SharedResources> localizer)
-    {
-        _db = db;
-        _logger = logger;
-        _localizer = localizer;
-    }
+    private readonly IStringLocalizer<SharedResource> _localizer;
+    public MonthModel(AppDbContext db, ILogger<MonthModel> logger, IStringLocalizer<SharedResource> localizer) { _db = db; _logger = logger; _localizer = localizer; }
 
 
     public DateOnly CurrentMonth { get; set; }
@@ -64,18 +60,15 @@ public class MonthModel : PageModel
 
         var companyId = int.Parse(User.FindFirst("CompanyId")!.Value);
 
-        // Load shift types for this company
-        var types = await _db.ShiftTypes
-            .Where(st => st.CompanyId == companyId)
-            .OrderBy(s => s.Key)
-            .ToListAsync();
+        // Load shift types
+        var types = await _db.ShiftTypes.OrderBy(s => s.Key).ToListAsync();
 
-        // Prepare shift types for JavaScript with localized names
+        // Prepare shift types for JavaScript
         ViewData["ShiftTypes"] = types.Select(t => new
         {
             id = t.Id,
             key = t.Key,
-            name = t.GetLocalizedName(_localizer),
+            name = t.Name,
             start = t.Start.ToString("HH:mm"),
             end = t.End.ToString("HH:mm")
         }).ToList();
@@ -123,17 +116,16 @@ public class MonthModel : PageModel
                     var assignedCount = inst != null && dictAssigned.ContainsKey(inst.Id) ? dictAssigned[inst.Id] : 0;
                     var requiredCount = inst?.StaffingRequired ?? 0;
                     var assignedNames = inst != null && dictAssignedNames.ContainsKey(inst.Id) ? dictAssignedNames[inst.Id] : new List<string>();
-                    var emptySlots = Enumerable.Repeat("Empty", Math.Max(0, requiredCount - assignedCount)).ToList();
+                    var emptySlots = Enumerable.Repeat(_localizer["Empty"].Value, Math.Max(0, requiredCount - assignedCount)).ToList();
 
-                    var localizedName = t.GetLocalizedName(_localizer);
                     vm.Lines.Add(new LineVM
                     {
                         ShiftTypeId = t.Id,
                         InstanceId = inst?.Id ?? 0,
                         Concurrency = inst?.Concurrency ?? 0,
-                        ShortName = localizedName[..Math.Min(3, localizedName.Length)],
+                        ShortName = t.Name[..Math.Min(3, t.Name.Length)],
                         ShiftTypeKey = t.Key.ToLower(),
-                        ShiftTypeName = localizedName,
+                        ShiftTypeName = t.Name,
                         ShiftName = inst?.Name ?? "",
                         Assigned = assignedCount,
                         Required = requiredCount,

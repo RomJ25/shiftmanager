@@ -1,7 +1,5 @@
 @page
 @model ShiftManager.Pages.Calendar.DayModel
-@using Microsoft.Extensions.Localization
-@inject IStringLocalizer<ShiftManager.Resources.SharedResources> Localizer
 @{
     Layout = "_Layout";
 }
@@ -16,7 +14,7 @@
         <a class="btn btn-ghost" href="/Calendar/Day?year=@Model.Previous.Date.Year&month=@Model.Previous.Date.Month&day=@Model.Previous.Date.Day">
             ← @Model.Previous.Label
         </a>
-        <a class="btn btn-primary" href="/Calendar/Day">@Localizer["Today"]</a>
+        <a class="btn btn-primary" href="/Calendar/Day">Today</a>
         <a class="btn btn-ghost" href="/Calendar/Day?year=@Model.Next.Date.Year&month=@Model.Next.Date.Month&day=@Model.Next.Date.Day">
             @Model.Next.Label →
         </a>
@@ -24,22 +22,22 @@
     @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
     {
         <div class="calendar-help">
-            @Localizer["ClickShiftBadges"]<br>
-            @Localizer["UseButtons"]
+            Click a shift badge to manage assignments.<br>
+            Use + / − to adjust required staffing.
         </div>
     }
     else
     {
         <div class="calendar-help">
-            @Localizer["ViewAssignedShifts"]
+            View your assigned shifts and detailed schedule.
         </div>
     }
 </div>
 
 <div class="calendar-view-switcher">
-    <a class="btn btn-ghost" href="/Calendar/Month">@Localizer["Month"]</a>
-    <a class="btn btn-ghost" href="/Calendar/Week">@Localizer["Week"]</a>
-    <a class="btn btn-primary" href="/Calendar/Day">@Localizer["Day"]</a>
+    <a class="btn btn-ghost" href="/Calendar/Month">Month</a>
+    <a class="btn btn-ghost" href="/Calendar/Week">Week</a>
+    <a class="btn btn-primary" href="/Calendar/Day">Day</a>
 </div>
 
 <div class="day-view">
@@ -168,7 +166,7 @@
                             @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
                             {
                                 <a class="btn btn-primary" href="/Assignments/Manage?date=@Model.CurrentDate.ToString("yyyy-MM-dd")&shiftTypeId=@l.ShiftTypeId&returnUrl=@Uri.EscapeDataString("/Calendar/Day?year=" + Model.CurrentDate.Year + "&month=" + Model.CurrentDate.Month + "&day=" + Model.CurrentDate.Day)">
-                                    @Localizer["ManageAssignments"]
+                                    Manage Assignments
                                 </a>
                             }
                         </div>
@@ -178,21 +176,21 @@
                 {
                     <div class="shift-staffing">
                         <div class="no-activity">
-                            <span class="muted-text">@Localizer["NoShiftsScheduled"]</span>
+                            <span class="muted-text">No shifts scheduled</span>
                         </div>
 
                         <div class="shift-controls">
                             @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
                             {
                                 <div class="shift-counter" data-si="@l.InstanceId" data-conc="@l.Concurrency">
-                                    <button class="counter-btn large" aria-label="@Localizer["AddShift"]"
-                                        onclick="window.adjustStaffing('@Url.Page("Day", "Adjust")', { date: '@Model.CurrentDate.ToString("yyyy-MM-dd")', shiftTypeId:@l.ShiftTypeId, delta:1, concurrency:@l.Concurrency }, (d)=>{ location.reload(); }, (e)=>alert(e.message))">+ @Localizer["AddShift"]</button>
+                                    <button class="counter-btn large" aria-label="Add required staffing"
+                                        onclick="window.adjustStaffing('@Url.Page("Day", "Adjust")', { date: '@Model.CurrentDate.ToString("yyyy-MM-dd")', shiftTypeId:@l.ShiftTypeId, delta:1, concurrency:@l.Concurrency }, (d)=>{ location.reload(); }, (e)=>alert(e.message))">+ Add Shift</button>
                                 </div>
                             }
                             else
                             {
                                 <div class="no-shift-message">
-                                    <span class="muted-text">@Localizer["NoShiftsScheduled"]</span>
+                                    <span class="muted-text">No shifts scheduled for this time</span>
                                 </div>
                             }
                         </div>
@@ -210,7 +208,7 @@
                     <div class="empty-state-icon">➕</div>
                     <button class="add-shift-btn" style="margin: 0 auto;" onclick="openShiftModal('@Model.CurrentDate.ToString("yyyy-MM-dd")')">
                         <span>+</span>
-                        <span>@Localizer["CreateNewShift"]</span>
+                        <span>Create New Shift</span>
                     </button>
                 </div>
             </div>

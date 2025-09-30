@@ -1,17 +1,23 @@
 @page
 @model ShiftManager.Pages.AccessDeniedModel
 @using Microsoft.Extensions.Localization
-@inject IStringLocalizer<ShiftManager.Resources.SharedResources> Localizer
+@using ShiftManager.Resources
+@using System.Globalization
+@inject IStringLocalizer<SharedResource> Localizer
 @{
     Layout = null;
+    var currentCulture = CultureInfo.CurrentUICulture.Name;
+    var isHebrew = currentCulture.StartsWith("he");
+    var direction = isHebrew ? "rtl" : "ltr";
+    var lang = isHebrew ? "he" : "en";
 }
 
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="@lang" dir="@direction" data-theme="light" class="@(isHebrew ? "hebrew" : "english")">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>@Localizer["AccessDenied"] - Shift Manager</title>
+    <title>Access Denied - Shift Manager</title>
     <link rel="stylesheet" href="~/css/site.css" />
     <script>
         // Automatically redirect with popup after 2 seconds

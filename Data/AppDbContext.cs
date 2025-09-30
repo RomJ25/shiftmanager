@@ -33,12 +33,6 @@ public class AppDbContext : DbContext
             .Property(p => p.Start).HasConversion(timeConverter);
         modelBuilder.Entity<ShiftType>()
             .Property(p => p.End).HasConversion(timeConverter);
-        modelBuilder.Entity<ShiftType>()
-            .HasOne(st => st.Company)
-            .WithMany()
-            .HasForeignKey(st => st.CompanyId);
-        modelBuilder.Entity<ShiftType>()
-            .HasIndex(st => new { st.CompanyId, st.Key });
 
         modelBuilder.Entity<ShiftInstance>()
             .Property(p => p.WorkDate).HasConversion(dateConverter);

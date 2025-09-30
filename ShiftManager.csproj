@@ -6,33 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="shiftmanager\**" />
-    <Content Remove="shiftmanager\**" />
-    <EmbeddedResource Remove="shiftmanager\**" />
-    <None Remove="shiftmanager\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.9">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Localization" Version="9.0.9" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Update="Resources\**\*.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>%(Filename).Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Update="Resources\**\*.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>%(Filename).resx</DependentUpon>
-    </Compile>
   </ItemGroup>
 </Project>

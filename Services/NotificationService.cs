@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using ShiftManager.Data;
 using ShiftManager.Models;
@@ -20,13 +19,11 @@ public class NotificationService : INotificationService
 {
     private readonly AppDbContext _db;
     private readonly ILogger<NotificationService> _logger;
-    private readonly IStringLocalizer<Resources.SharedResources> _localizer;
 
-    public NotificationService(AppDbContext db, ILogger<NotificationService> logger, IStringLocalizer<Resources.SharedResources> localizer)
+    public NotificationService(AppDbContext db, ILogger<NotificationService> logger)
     {
         _db = db;
         _logger = logger;
-        _localizer = localizer;
     }
 
     public async Task CreateNotificationAsync(int userId, NotificationType type, string title, string message, int? relatedEntityId = null, string? relatedEntityType = null)
@@ -58,28 +55,26 @@ public class NotificationService : INotificationService
 
     public async Task CreateShiftAddedNotificationAsync(int userId, string shiftTypeName, DateOnly shiftDate, TimeOnly startTime, TimeOnly endTime)
     {
-        var title = _localizer["NewShiftAssignment"];
-        var message = string.Format(_localizer["ShiftAssignedMessage"], shiftTypeName, shiftDate, startTime, endTime);
+        var title = "New Shift Assignment";
+        var message = $"You have been assigned to work {shiftTypeName} on {shiftDate:MMM dd, yyyy} from {startTime:HH:mm} to {endTime:HH:mm}.";
 
         await CreateNotificationAsync(userId, NotificationType.ShiftAdded, title, message, null, "ShiftAssignment");
     }
 
     public async Task CreateShiftRemovedNotificationAsync(int userId, string shiftTypeName, DateOnly shiftDate, TimeOnly startTime, TimeOnly endTime)
     {
-        var title = _localizer["ShiftAssignmentRemoved"];
-        var message = string.Format(_localizer["ShiftRemovedMessage"], shiftTypeName, shiftDate, startTime, endTime);
+        var title = "Shift Assignment Removed";
+        var message = $"Your {shiftTypeName} shift on {shiftDate:MMM dd, yyyy} from {startTime:HH:mm} to {endTime:HH:mm} has been removed.";
 
         await CreateNotificationAsync(userId, NotificationType.ShiftRemoved, title, message, null, "ShiftAssignment");
     }
 
     public async Task CreateTimeOffNotificationAsync(int userId, RequestStatus status, DateOnly startDate, DateOnly endDate, int requestId)
     {
-        var statusText = status == RequestStatus.Approved ? _localizer["Approved"] : _localizer["Declined"];
-        var title = status == RequestStatus.Approved ? _localizer["TimeOffRequestApproved"] : _localizer["TimeOffRequestDeclined"];
-        var dateRange = startDate == endDate ? startDate.ToString("dd/MM/yyyy") : $"{startDate:dd/MM} - {endDate:dd/MM/yyyy}";
-        var message = status == RequestStatus.Approved
-            ? string.Format(_localizer["TimeOffApprovedMessage"], dateRange)
-            : string.Format(_localizer["TimeOffDeclinedMessage"], dateRange);
+        var statusText = status == RequestStatus.Approved ? "Approved" : "Declined";
+        var title = $"Time-Off Request {statusText}";
+        var dateRange = startDate == endDate ? startDate.ToString("MMM dd, yyyy") : $"{startDate:MMM dd} - {endDate:MMM dd, yyyy}";
+        var message = $"Your time-off request for {dateRange} has been {statusText.ToLower()}.";
 
         var notificationType = status == RequestStatus.Approved ? NotificationType.TimeOffApproved : NotificationType.TimeOffDeclined;
 
@@ -88,10 +83,9 @@ public class NotificationService : INotificationService
 
     public async Task CreateSwapRequestNotificationAsync(int userId, RequestStatus status, string shiftInfo, int requestId)
     {
-        var title = status == RequestStatus.Approved ? _localizer["ShiftSwapRequestApproved"] : _localizer["ShiftSwapRequestDeclined"];
-        var message = status == RequestStatus.Approved
-            ? string.Format(_localizer["ShiftSwapApprovedMessage"], shiftInfo)
-            : string.Format(_localizer["ShiftSwapDeclinedMessage"], shiftInfo);
+        var statusText = status == RequestStatus.Approved ? "Approved" : "Declined";
+        var title = $"Shift Swap Request {statusText}";
+        var message = $"Your shift swap request for {shiftInfo} has been {statusText.ToLower()}.";
 
         var notificationType = status == RequestStatus.Approved ? NotificationType.SwapRequestApproved : NotificationType.SwapRequestDeclined;
 

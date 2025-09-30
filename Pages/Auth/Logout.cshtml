@@ -1,7 +1,5 @@
 @page
 @model ShiftManager.Pages.Auth.LogoutModel
-@using Microsoft.Extensions.Localization
-@inject IStringLocalizer<ShiftManager.Resources.SharedResources> Localizer
 @{
     Layout = null;
 }
@@ -11,7 +9,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>@Localizer["LoggedOut"] - Shift Manager</title>
+    <title>Logged Out - Shift Manager</title>
     <link rel="stylesheet" href="~/css/site.css" />
     @if (Model.LoggedOut)
     {
@@ -24,15 +22,15 @@
             @if (Model.LoggedOut)
             {
                 <div style="color: var(--success); font-size: 3rem; margin-bottom: 1rem;">✓</div>
-                <h2 style="color: var(--text); margin-bottom: 1rem;">@Localizer["SuccessfullyLoggedOut"]</h2>
-                <p style="color: var(--muted); margin-bottom: 2rem;">@Localizer["LoggedOutMessage"]</p>
-                <p style="color: var(--muted); font-size: 0.9rem;">@Localizer["RedirectingToLogin"]</p>
-                <a href="/Auth/Login" style="display: inline-block; margin-top: 1rem; padding: 0.75rem 1.5rem; background: var(--primary); color: white; text-decoration: none; border-radius: 0.5rem; font-weight: 500;">@Localizer["GoToLoginNow"]</a>
+                <h2 style="color: var(--text); margin-bottom: 1rem;">Successfully Logged Out</h2>
+                <p style="color: var(--muted); margin-bottom: 2rem;">You have been securely logged out of the Shift Manager.</p>
+                <p style="color: var(--muted); font-size: 0.9rem;">Redirecting to login page in 3 seconds...</p>
+                <a href="/Auth/Login" style="display: inline-block; margin-top: 1rem; padding: 0.75rem 1.5rem; background: var(--primary); color: white; text-decoration: none; border-radius: 0.5rem; font-weight: 500;">Go to Login Now</a>
             }
             else
             {
-                <h2 style="color: var(--text);">@Localizer["LoggingOut"]</h2>
-                <p style="color: var(--muted);">@Localizer["LoggingOutMessage"]</p>
+                <h2 style="color: var(--text);">Logging out...</h2>
+                <p style="color: var(--muted);">Please wait while we log you out securely.</p>
             }
         </div>
     </div>

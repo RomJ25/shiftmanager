@@ -161,12 +161,6 @@ namespace ShiftManager.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("CompanyId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("End")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -175,17 +169,11 @@ namespace ShiftManager.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("Start")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CompanyId", "Key");
 
                     b.ToTable("ShiftTypes");
                 });
@@ -317,17 +305,6 @@ namespace ShiftManager.Migrations
                         .IsRequired();
 
                     b.Navigation("ShiftType");
-                });
-
-            modelBuilder.Entity("ShiftManager.Models.ShiftType", b =>
-                {
-                    b.HasOne("ShiftManager.Models.Company", "Company")
-                        .WithMany()
-                        .HasForeignKey("CompanyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Company");
                 });
 
             modelBuilder.Entity("ShiftManager.Models.UserNotification", b =>

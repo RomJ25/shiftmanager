@@ -1,7 +1,8 @@
 @page
 @model ShiftManager.Pages.My.NotificationCenterModel
 @using Microsoft.Extensions.Localization
-@inject IStringLocalizer<ShiftManager.Resources.SharedResources> Localizer
+@using ShiftManager.Resources
+@inject IStringLocalizer<SharedResource> Localizer
 @{
     Layout = "_Layout";
 }
@@ -15,7 +16,7 @@
             <form method="post" asp-page-handler="MarkAllAsRead" style="display: inline;">
                 @Html.AntiForgeryToken()
                 <button type="submit" style="background: var(--primary); color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; cursor: pointer;">
-                    @string.Format(Localizer["MarkAllAsReadCount"], Model.UnreadCount)
+                    @Localizer["MarkAllAsRead", Model.UnreadCount]
                 </button>
             </form>
         }
@@ -89,7 +90,7 @@
                                 }
 
                                 <form method="post" asp-page-handler="Delete" style="display: inline;"
-                                      onsubmit="return confirm('@Localizer["NotificationDeletionConfirmation"]');">
+                                      onsubmit="return confirm('@Localizer["DeleteConfirm"]');">
                                     @Html.AntiForgeryToken()
                                     <input type="hidden" name="id" value="@notification.Id" />
                                     <button type="submit" style="background: var(--danger); color: white; border: none; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-size: 0.8rem; cursor: pointer;">
@@ -108,7 +109,7 @@
         <div class="empty-state" style="text-align: center; padding: 4rem 2rem; color: var(--muted);">
             <div style="font-size: 3rem; margin-bottom: 1rem;">📭</div>
             <h3 style="margin: 0 0 0.5rem 0; color: var(--text);">@Localizer["NoNotifications"]</h3>
-            <p style="margin: 0;">@Localizer["NoNotificationsMessage"]</p>
+            <p style="margin: 0;">@Localizer["AllCaughtUp"]</p>
         </div>
     }
 </div>
