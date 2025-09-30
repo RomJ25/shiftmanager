@@ -1,18 +1,35 @@
 @using System.Security.Claims
+@using Microsoft.Extensions.Localization
+@using ShiftManager.Models.Support
+@using System.Globalization
 @inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@inject IStringLocalizer<ShiftManager.Resources.SharedResources> Localizer
 @{
     var user = HttpContextAccessor?.HttpContext?.User;
     var name = user?.FindFirst(ClaimTypes.Name)?.Value ?? "";
-    var role = user?.FindFirst(ClaimTypes.Role)?.Value ?? "";
+    var roleString = user?.FindFirst(ClaimTypes.Role)?.Value ?? "";
     var isAdmin = User.IsInRole("Admin") || User.IsInRole("Manager");
     var firstName = name.Split(' ').FirstOrDefault() ?? name;
+
+    // Get localized role name
+    var role = "";
+    if (Enum.TryParse<UserRole>(roleString, out var userRole))
+    {
+        role = userRole.GetDisplayName(Localizer);
+    }
+
+    // Get current culture for lang and dir attributes
+    var currentCulture = CultureInfo.CurrentUICulture.Name;
+    var isRtl = currentCulture == "he-IL";
+    var lang = isRtl ? "he" : "en";
+    var dir = isRtl ? "rtl" : "ltr";
 }
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="@lang" dir="@dir" data-theme="light">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>@(isAdmin ? "Shift Manager" : $"My Schedule - {firstName}")</title>
+    <title>@(isAdmin ? Localizer["ShiftManager"] : $"{Localizer["MySchedule"]} - {firstName}")</title>
     <link rel="stylesheet" href="~/css/site.css" />
     <script defer src="~/js/site.js"></script>
 </head>
@@ -21,15 +38,15 @@
     <div class="brand">
         @if (isAdmin)
         {
-            <span>Shift Manager</span>
+            <span>@Localizer["ShiftManager"]</span>
         }
         else
         {
             <div class="employee-brand">
                 <span class="brand-icon">📅</span>
                 <div class="brand-text">
-                    <div class="brand-title">My Schedule</div>
-                    <div class="brand-subtitle">Welcome back, @firstName!</div>
+                    <div class="brand-title">@Localizer["MySchedule"]</div>
+                    <div class="brand-subtitle">@string.Format(Localizer["WelcomeBack"], firstName)</div>
                 </div>
             </div>
         }
@@ -39,22 +56,22 @@
         @if (isAdmin)
         {
             <div class="dropdown">
-                <button class="linklike">Calendar ▾</button>
+                <button class="linklike">@Localizer["Calendar"] ▾</button>
                 <div class="menu">
-                    <a href="/Calendar/Month">Month View</a>
-                    <a href="/Calendar/Week">Week View</a>
-                    <a href="/Calendar/Day">Day View</a>
+                    <a href="/Calendar/Month">@Localizer["MonthView"]</a>
+                    <a href="/Calendar/Week">@Localizer["WeekView"]</a>
+                    <a href="/Calendar/Day">@Localizer["DayView"]</a>
                 </div>
             </div>
-            <a href="/Requests/Index">Requests</a>
-            <a href="/My/Index">My Shifts</a>
+            <a href="/Requests/Index">@Localizer["Requests"]</a>
+            <a href="/My/Index">@Localizer["MyShifts"]</a>
             <div class="dropdown">
-                <button class="linklike">Admin ▾</button>
+                <button class="linklike">@Localizer["Admin"] ▾</button>
                 <div class="menu">
-                    <a href="/Admin/Users">Users</a>
-                    <a href="/Admin/ShiftTypes">Shift Types</a>
-                    <a href="/Admin/TimeOff">Time-Off Management</a>
-                    <a href="/Admin/Config">Config</a>
+                    <a href="/Admin/Users">@Localizer["Users"]</a>
+                    <a href="/Admin/ShiftTypes">@Localizer["ShiftTypes"]</a>
+                    <a href="/Admin/TimeOff">@Localizer["TimeOffManagement"]</a>
+                    <a href="/Admin/Config">@Localizer["Config"]</a>
                 </div>
             </div>
         }
@@ -62,19 +79,19 @@
         {
             <a href="/My/Index" class="nav-item primary">
                 <span class="nav-icon">🏠</span>
-                <span class="nav-text">My Shifts</span>
+                <span class="nav-text">@Localizer["MyShifts"]</span>
             </a>
             <a href="/Calendar/Month" class="nav-item">
                 <span class="nav-icon">📅</span>
-                <span class="nav-text">Schedule</span>
+                <span class="nav-text">@Localizer["Schedule"]</span>
             </a>
             <a href="/My/Requests" class="nav-item">
                 <span class="nav-icon">📝</span>
-                <span class="nav-text">Requests</span>
+                <span class="nav-text">@Localizer["Requests"]</span>
             </a>
             <a href="/My/NotificationCenter" class="nav-item notification-nav" style="position: relative;">
                 <span class="nav-icon">🔔</span>
-                <span class="nav-text">Notifications</span>
+                <span class="nav-text">@Localizer["Notifications"]</span>
                 @await Component.InvokeAsync("UnreadNotificationCount")
             </a>
         }
@@ -86,6 +103,16 @@
         <button class="action-btn" id="themeToggle" aria-label="Toggle dark mode">
             <span class="theme-icon">🌓</span>
         </button>
+
+        <div class="dropdown">
+            <button class="action-btn" aria-label="@Localizer["Language"]">
+                <span>🌐</span>
+            </button>
+            <div class="menu" style="right: 0; min-width: 120px;">
+                <a href="@Url.Page(null, null, new { culture = "en-US", uiculture = "en-US" })">@Localizer["English"]</a>
+                <a href="@Url.Page(null, null, new { culture = "he-IL", uiculture = "he-IL" })">@Localizer["Hebrew"]</a>
+            </div>
+        </div>
 
         @if (User?.Identity?.IsAuthenticated == true)
         {
@@ -108,7 +135,7 @@
                     @Html.AntiForgeryToken()
                     <button class="logout-btn" type="submit">
                         <span class="logout-icon">🚪</span>
-                        <span class="logout-text">Logout</span>
+                        <span class="logout-text">@Localizer["Logout"]</span>
                     </button>
                 </form>
             </div>
@@ -118,11 +145,12 @@
 
 @if (!isAdmin)
 {
+    var timeOfDay = DateTime.Now.Hour < 12 ? Localizer["GoodMorning"] : DateTime.Now.Hour < 18 ? Localizer["GoodAfternoon"] : Localizer["GoodEvening"];
     <div class="employee-welcome">
         <div class="container">
             <div class="welcome-content">
-                <h1 class="welcome-title">Good @(DateTime.Now.Hour < 12 ? "morning" : DateTime.Now.Hour < 18 ? "afternoon" : "evening"), @firstName!</h1>
-                <p class="welcome-subtitle">Here's your schedule and shift information</p>
+                <h1 class="welcome-title">@timeOfDay, @firstName!</h1>
+                <p class="welcome-subtitle">@Localizer["ScheduleSubtitle"]</p>
             </div>
             <div class="quick-stats">
                 <!-- Quick stats will be populated by individual pages -->

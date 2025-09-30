@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 using ShiftManager.Data;
 using ShiftManager.Models;
 using ShiftManager.Models.Support;
@@ -17,8 +18,9 @@ public class ManageModel : PageModel
     private readonly IConflictChecker _checker;
     private readonly INotificationService _notificationService;
     private readonly ILogger<ManageModel> _logger;
-    public ManageModel(AppDbContext db, IConflictChecker checker, INotificationService notificationService, ILogger<ManageModel> logger)
-    { _db = db; _checker = checker; _notificationService = notificationService; _logger = logger; }
+    private readonly IStringLocalizer<Resources.SharedResources> _localizer;
+    public ManageModel(AppDbContext db, IConflictChecker checker, INotificationService notificationService, ILogger<ManageModel> logger, IStringLocalizer<Resources.SharedResources> localizer)
+    { _db = db; _checker = checker; _notificationService = notificationService; _logger = logger; _localizer = localizer; }
 
 
     [BindProperty(SupportsGet = true)] public DateOnly Date { get; set; }
@@ -26,6 +28,7 @@ public class ManageModel : PageModel
     [BindProperty(SupportsGet = true)] public string? ReturnUrl { get; set; }
 
     public ShiftType? Type { get; set; }
+    public string LocalizedTypeName => Type?.GetLocalizedName(_localizer) ?? "";
     public ShiftInstance Instance { get; set; } = default!;
     public List<(int AssignmentId, string UserLabel)> Assigned { get; set; } = new();
 
@@ -38,7 +41,7 @@ public class ManageModel : PageModel
     public async Task<IActionResult> OnGetAsync()
     {
         var companyId = int.Parse(User.FindFirst("CompanyId")!.Value);
-        Type = await _db.ShiftTypes.FindAsync(ShiftTypeId);
+        Type = await _db.ShiftTypes.FirstOrDefaultAsync(st => st.Id == ShiftTypeId && st.CompanyId == companyId);
         if (Type == null) return RedirectToPage("/Calendar/Month");
 
         Instance = await _db.ShiftInstances.FirstOrDefaultAsync(i => i.CompanyId == companyId && i.WorkDate == Date && i.ShiftTypeId == ShiftTypeId)

@@ -9,10 +9,19 @@
       "ShiftManager/1.0.0": {
         "dependencies": {
           "Microsoft.EntityFrameworkCore.Design": "9.0.9",
-          "Microsoft.EntityFrameworkCore.Sqlite": "9.0.0"
+          "Microsoft.EntityFrameworkCore.Sqlite": "9.0.0",
+          "Microsoft.Extensions.Localization": "9.0.9"
         },
         "runtime": {
           "ShiftManager.dll": {}
+        },
+        "resources": {
+          "en-US/ShiftManager.resources.dll": {
+            "locale": "en-US"
+          },
+          "he-IL/ShiftManager.resources.dll": {
+            "locale": "he-IL"
+          }
         }
       },
       "Humanizer.Core/2.14.1": {
@@ -485,6 +494,28 @@
           "lib/net8.0/Microsoft.Extensions.DependencyModel.dll": {
             "assemblyVersion": "9.0.0.9",
             "fileVersion": "9.0.925.41916"
+          }
+        }
+      },
+      "Microsoft.Extensions.Localization/9.0.9": {
+        "dependencies": {
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "9.0.9",
+          "Microsoft.Extensions.Localization.Abstractions": "9.0.9",
+          "Microsoft.Extensions.Logging.Abstractions": "9.0.9",
+          "Microsoft.Extensions.Options": "9.0.9"
+        },
+        "runtime": {
+          "lib/netstandard2.0/Microsoft.Extensions.Localization.dll": {
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.925.42003"
+          }
+        }
+      },
+      "Microsoft.Extensions.Localization.Abstractions/9.0.9": {
+        "runtime": {
+          "lib/netstandard2.0/Microsoft.Extensions.Localization.Abstractions.dll": {
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.925.42003"
           }
         }
       },
@@ -983,6 +1014,20 @@
       "sha512": "sha512-fNGvKct2De8ghm0Bpfq0iWthtzIWabgOTi+gJhNOPhNJIowXNEUE2eZNW/zNCzrHVA3PXg2yZ+3cWZndC2IqYA==",
       "path": "microsoft.extensions.dependencymodel/9.0.9",
       "hashPath": "microsoft.extensions.dependencymodel.9.0.9.nupkg.sha512"
+    },
+    "Microsoft.Extensions.Localization/9.0.9": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-ENTRZoBIi429tkjf18uThYKr+nnxp8/HcZO4jwz3PeAqL0oQvede6++/2/+dU7B1D6jubfdoFzsBTaZ4CauD2g==",
+      "path": "microsoft.extensions.localization/9.0.9",
+      "hashPath": "microsoft.extensions.localization.9.0.9.nupkg.sha512"
+    },
+    "Microsoft.Extensions.Localization.Abstractions/9.0.9": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-O/gqB03vqOvbTIQCvO2HIVMxV0xTtYL7p8kWIV0qnm7dkMP+BloZ6Tg7iMFw3sy1T63zSLdyDaZkwjwd5xmteg==",
+      "path": "microsoft.extensions.localization.abstractions/9.0.9",
+      "hashPath": "microsoft.extensions.localization.abstractions.9.0.9.nupkg.sha512"
     },
     "Microsoft.Extensions.Logging/9.0.9": {
       "type": "package",

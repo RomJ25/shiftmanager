@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using ShiftManager.Data;
 using ShiftManager.Models;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Localization;
 
 namespace ShiftManager.Pages.Calendar;
 
@@ -14,7 +15,8 @@ public class WeekModel : PageModel
 {
     private readonly AppDbContext _db;
     private readonly ILogger<WeekModel> _logger;
-    public WeekModel(AppDbContext db, ILogger<WeekModel> logger) { _db = db; _logger = logger; }
+    private readonly IStringLocalizer<Resources.SharedResources> _localizer;
+    public WeekModel(AppDbContext db, ILogger<WeekModel> logger, IStringLocalizer<Resources.SharedResources> localizer) { _db = db; _logger = logger; _localizer = localizer; }
 
     public DateOnly CurrentWeekStart { get; set; }
     public (DateOnly WeekStart, string Label) Previous { get; set; }
@@ -61,8 +63,11 @@ public class WeekModel : PageModel
 
         var companyId = int.Parse(User.FindFirst("CompanyId")!.Value);
 
-        // Load shift types
-        var types = await _db.ShiftTypes.OrderBy(s => s.Key).ToListAsync();
+        // Load shift types for this company
+        var types = await _db.ShiftTypes
+            .Where(st => st.CompanyId == companyId)
+            .OrderBy(s => s.Key)
+            .ToListAsync();
 
         // Prepare shift types for JavaScript
         ViewData["ShiftTypes"] = types.Select(t => new
@@ -106,7 +111,7 @@ public class WeekModel : PageModel
             var dayVm = new DayVM
             {
                 Date = date,
-                DayName = date.DayOfWeek.ToString()
+                DayName = _localizer[date.DayOfWeek.ToString()]
             };
 
             foreach (var t in types)

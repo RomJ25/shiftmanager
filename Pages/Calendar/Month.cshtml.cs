@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;               // ensure this using is present
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 using ShiftManager.Data;
 using ShiftManager.Models;
 using Microsoft.Extensions.Logging;
@@ -15,7 +16,13 @@ public class MonthModel : PageModel
 {
     private readonly AppDbContext _db;
     private readonly ILogger<MonthModel> _logger;
-    public MonthModel(AppDbContext db, ILogger<MonthModel> logger) { _db = db; _logger = logger; }
+    private readonly IStringLocalizer<Resources.SharedResources> _localizer;
+    public MonthModel(AppDbContext db, ILogger<MonthModel> logger, IStringLocalizer<Resources.SharedResources> localizer)
+    {
+        _db = db;
+        _logger = logger;
+        _localizer = localizer;
+    }
 
 
     public DateOnly CurrentMonth { get; set; }
@@ -57,15 +64,18 @@ public class MonthModel : PageModel
 
         var companyId = int.Parse(User.FindFirst("CompanyId")!.Value);
 
-        // Load shift types
-        var types = await _db.ShiftTypes.OrderBy(s => s.Key).ToListAsync();
+        // Load shift types for this company
+        var types = await _db.ShiftTypes
+            .Where(st => st.CompanyId == companyId)
+            .OrderBy(s => s.Key)
+            .ToListAsync();
 
-        // Prepare shift types for JavaScript
+        // Prepare shift types for JavaScript with localized names
         ViewData["ShiftTypes"] = types.Select(t => new
         {
             id = t.Id,
             key = t.Key,
-            name = t.Name,
+            name = t.GetLocalizedName(_localizer),
             start = t.Start.ToString("HH:mm"),
             end = t.End.ToString("HH:mm")
         }).ToList();
@@ -115,14 +125,15 @@ public class MonthModel : PageModel
                     var assignedNames = inst != null && dictAssignedNames.ContainsKey(inst.Id) ? dictAssignedNames[inst.Id] : new List<string>();
                     var emptySlots = Enumerable.Repeat("Empty", Math.Max(0, requiredCount - assignedCount)).ToList();
 
+                    var localizedName = t.GetLocalizedName(_localizer);
                     vm.Lines.Add(new LineVM
                     {
                         ShiftTypeId = t.Id,
                         InstanceId = inst?.Id ?? 0,
                         Concurrency = inst?.Concurrency ?? 0,
-                        ShortName = t.Name[..Math.Min(3, t.Name.Length)],
+                        ShortName = localizedName[..Math.Min(3, localizedName.Length)],
                         ShiftTypeKey = t.Key.ToLower(),
-                        ShiftTypeName = t.Name,
+                        ShiftTypeName = localizedName,
                         ShiftName = inst?.Name ?? "",
                         Assigned = assignedCount,
                         Required = requiredCount,

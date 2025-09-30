@@ -1,10 +1,12 @@
 @page
 @model ShiftManager.Pages.Admin.TimeOffModel
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<ShiftManager.Resources.SharedResources> Localizer
 @{
     Layout = "_Layout";
 }
 
-<h2>Manage Approved Time-Off</h2>
+<h2>@Localizer["ManageApprovedTimeOffPage"]</h2>
 
 @if (!string.IsNullOrEmpty(Model.Message))
 {
@@ -21,7 +23,7 @@
 }
 
 <div class="card">
-    <h3 style="margin-top:0; color: var(--text);">Approved Time-Off Requests</h3>
+    <h3 style="margin-top:0; color: var(--text);">@Localizer["ApprovedTimeOffRequests"]</h3>
 
     @if (Model.ApprovedTimeOffs.Any())
     {
@@ -29,11 +31,11 @@
             <table style="width: 100%; border-collapse: collapse;">
                 <thead>
                     <tr style="border-bottom: 2px solid var(--border);">
-                        <th style="text-align: left; padding: 0.75rem; color: var(--text); font-weight: 600;">Employee</th>
-                        <th style="text-align: left; padding: 0.75rem; color: var(--text); font-weight: 600;">Dates</th>
-                        <th style="text-align: left; padding: 0.75rem; color: var(--text); font-weight: 600;">Reason</th>
-                        <th style="text-align: left; padding: 0.75rem; color: var(--text); font-weight: 600;">Requested On</th>
-                        <th style="text-align: center; padding: 0.75rem; color: var(--text); font-weight: 600;">Actions</th>
+                        <th style="text-align: left; padding: 0.75rem; color: var(--text); font-weight: 600;">@Localizer["Employee"]</th>
+                        <th style="text-align: left; padding: 0.75rem; color: var(--text); font-weight: 600;">@Localizer["Dates"]</th>
+                        <th style="text-align: left; padding: 0.75rem; color: var(--text); font-weight: 600;">@Localizer["Reason"]</th>
+                        <th style="text-align: left; padding: 0.75rem; color: var(--text); font-weight: 600;">@Localizer["RequestedOn"]</th>
+                        <th style="text-align: center; padding: 0.75rem; color: var(--text); font-weight: 600;">@Localizer["Actions"]</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -54,7 +56,7 @@
                                     @{
                                         var days = timeOff.EndDate.DayNumber - timeOff.StartDate.DayNumber + 1;
                                     }
-                                    (@days day@(days == 1 ? "" : "s"))
+                                    (@days @(days == 1 ? Localizer["DayDuration"] : Localizer["DaysDuration"]))
                                 </small>
                             </td>
                             <td style="padding: 0.75rem; color: var(--text); max-width: 200px;">
@@ -64,7 +66,7 @@
                                 }
                                 else
                                 {
-                                    <em style="color: var(--muted);">No reason provided</em>
+                                    <em style="color: var(--muted);">@Localizer["NoReasonProvided"]</em>
                                 }
                             </td>
                             <td style="padding: 0.75rem; color: var(--text);">
@@ -76,10 +78,10 @@
                                 @if (timeOff.StartDate > DateOnly.FromDateTime(DateTime.Today))
                                 {
                                     <form method="post" asp-page-handler="Delete" style="display: inline;"
-                                          onsubmit="return confirm('Are you sure you want to delete this approved time-off for @timeOff.UserName? This action cannot be undone.');">
+                                          onsubmit="return confirm('@string.Format(Localizer["TimeOffDeletionConfirmation"], timeOff.UserName)');">
                                         <input type="hidden" name="id" value="@timeOff.Id" />
                                         <button type="submit" class="btn btn-danger" style="font-size: 0.85rem; padding: 0.4rem 0.8rem;">
-                                            🗑️ Delete
+                                            @Localizer["Delete"]
                                         </button>
                                     </form>
                                 }
@@ -88,11 +90,11 @@
                                     <span style="color: var(--muted); font-size: 0.85rem;">
                                         @if (timeOff.StartDate == DateOnly.FromDateTime(DateTime.Today))
                                         {
-                                            <text>Active Today</text>
+                                            <text>@Localizer["ActiveToday"]</text>
                                         }
                                         else
                                         {
-                                            <text>Past</text>
+                                            <text>@Localizer["Past"]</text>
                                         }
                                     </span>
                                 }
@@ -105,24 +107,23 @@
 
         <div style="margin-top: 1rem; padding: 1rem; background: var(--surface); border-left: 4px solid var(--primary); border-radius: 0.5rem;">
             <small style="color: var(--muted);">
-                <strong>Note:</strong> You can only delete future time-off requests. Requests that have already started or are in the past cannot be deleted.
-                Deleting a time-off request will not automatically restore any shift assignments that were removed when it was approved.
+                <strong>@Localizer["Note"]:</strong> @Localizer["TimeOffDeletionNote"]
             </small>
         </div>
     }
     else
     {
         <div style="text-align: center; padding: 3rem; color: var(--muted);">
-            <h4 style="margin-bottom: 1rem; color: var(--muted);">No Approved Time-Off Requests</h4>
-            <p>There are currently no approved time-off requests in the system.</p>
+            <h4 style="margin-bottom: 1rem; color: var(--muted);">@Localizer["NoApprovedTimeOffRequests"]</h4>
+            <p>@Localizer["NoApprovedTimeOffMessage"]</p>
             <a href="/Requests" class="btn btn-primary" style="margin-top: 1rem;">
-                View Pending Requests
+                @Localizer["ViewPendingRequests"]
             </a>
         </div>
     }
 </div>
 
 <div style="margin-top: 2rem; text-align: center;">
-    <a href="/Requests" class="btn btn-ghost">← Back to Pending Requests</a>
-    <a href="/Admin/Users" class="btn btn-ghost" style="margin-left: 1rem;">Manage Users</a>
+    <a href="/Requests" class="btn btn-ghost">@Localizer["BackToPendingRequests"]</a>
+    <a href="/Admin/Users" class="btn btn-ghost" style="margin-left: 1rem;">@Localizer["ManageUsers"]</a>
 </div>

@@ -1,10 +1,12 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using ShiftManager.Data;
 using ShiftManager.Models;
 using ShiftManager.Services;
 using ShiftManager.Models.Support;
+using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,13 +15,32 @@ builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
 
+// Localization
+builder.Services.AddLocalization();
 
+builder.Services.Configure<RequestLocalizationOptions>(options =>
+{
+    var supportedCultures = new[] { new CultureInfo("en-US"), new CultureInfo("he-IL") };
+    options.DefaultRequestCulture = new RequestCulture("en-US"); // Use English as default/fallback
+    options.SupportedCultures = supportedCultures;
+    options.SupportedUICultures = supportedCultures;
+    options.FallBackToParentCultures = true;
+    options.FallBackToParentUICultures = true;
+
+    // Use cookie-based culture provider (persists across requests) and query string (for switching)
+    options.RequestCultureProviders.Clear();
+    options.RequestCultureProviders.Add(new QueryStringRequestCultureProvider());
+    options.RequestCultureProviders.Add(new CookieRequestCultureProvider());
+    options.RequestCultureProviders.Add(new AcceptLanguageHeaderRequestCultureProvider());
+});
 
 builder.Services.AddRazorPages(options =>
 {
     options.Conventions.AuthorizeFolder("/");
     options.Conventions.AllowAnonymousToPage("/Auth/Login");
-});
+})
+.AddViewLocalization()
+.AddDataAnnotationsLocalization();
 
 builder.Services.AddHttpContextAccessor(); // ⬅ add this
 
@@ -66,14 +87,42 @@ using (var scope = app.Services.CreateScope())
 
     var company = db.Companies.First();
 
-    // Seed shift types (fixed keys)
-    if (!db.ShiftTypes.Any())
+    // Seed shift types per company (using Keys for localization)
+    if (!db.ShiftTypes.Any(st => st.CompanyId == company.Id))
     {
         db.ShiftTypes.AddRange(new[] {
-            new ShiftType{ Key="MORNING", Start=new TimeOnly(8,0), End=new TimeOnly(16,0)},
-            new ShiftType{ Key="NOON", Start=new TimeOnly(16,0), End=new TimeOnly(0,0)},
-            new ShiftType{ Key="NIGHT", Start=new TimeOnly(0,0), End=new TimeOnly(8,0)},
-            new ShiftType{ Key="MIDDLE", Start=new TimeOnly(12,0), End=new TimeOnly(20,0)},
+            new ShiftType{
+                CompanyId = company.Id,
+                Key = "MORNING",
+                Name = "MORNING",
+                Description = null,
+                Start = new TimeOnly(8,0),
+                End = new TimeOnly(16,0)
+            },
+            new ShiftType{
+                CompanyId = company.Id,
+                Key = "NOON",
+                Name = "NOON",
+                Description = null,
+                Start = new TimeOnly(16,0),
+                End = new TimeOnly(0,0)
+            },
+            new ShiftType{
+                CompanyId = company.Id,
+                Key = "NIGHT",
+                Name = "NIGHT",
+                Description = null,
+                Start = new TimeOnly(0,0),
+                End = new TimeOnly(8,0)
+            },
+            new ShiftType{
+                CompanyId = company.Id,
+                Key = "MIDDLE",
+                Name = "MIDDLE",
+                Description = null,
+                Start = new TimeOnly(12,0),
+                End = new TimeOnly(20,0)
+            },
         });
         await db.SaveChangesAsync();
     }
@@ -123,6 +172,27 @@ if (enableHttps)
 {
     app.UseHttpsRedirection();
 }
+
+// Use the configured localization options
+var localizationOptions = app.Services.GetRequiredService<Microsoft.Extensions.Options.IOptions<RequestLocalizationOptions>>().Value;
+app.UseRequestLocalization(localizationOptions);
+
+// Middleware to persist culture selection via cookie when query string is used
+app.Use(async (context, next) =>
+{
+    if (context.Request.Query.ContainsKey("culture"))
+    {
+        var culture = context.Request.Query["culture"].ToString();
+        var uiCulture = context.Request.Query["uiculture"].ToString();
+
+        context.Response.Cookies.Append(
+            CookieRequestCultureProvider.DefaultCookieName,
+            CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture, uiCulture)),
+            new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1) }
+        );
+    }
+    await next();
+});
 
 app.UseStaticFiles();
 app.UseRouting();

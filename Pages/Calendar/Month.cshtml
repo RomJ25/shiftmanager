@@ -1,5 +1,7 @@
 @page
 @model ShiftManager.Pages.Calendar.MonthModel
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<ShiftManager.Resources.SharedResources> Localizer
 @{
     Layout = "_Layout";
     var weeks = Model.Weeks;
@@ -12,11 +14,11 @@
             <div class="calendar-help">
                 <div class="help-item">
                     <span class="help-icon">🎯</span>
-                    <span>Click shift badges to manage assignments</span>
+                    <span>@Localizer["ClickShiftBadges"]</span>
                 </div>
                 <div class="help-item">
                     <span class="help-icon">⚡</span>
-                    <span>Use + / − to adjust staffing</span>
+                    <span>@Localizer["UseButtons"]</span>
                 </div>
             </div>
         }
@@ -25,7 +27,7 @@
             <div class="calendar-help">
                 <div class="help-item">
                     <span class="help-icon">👀</span>
-                    <span>View your assigned shifts and team schedule</span>
+                    <span>@Localizer["ViewAssignedShifts"]</span>
                 </div>
             </div>
         }
@@ -37,7 +39,7 @@
         </a>
         <a class="btn btn-primary" href="/Calendar/Month">
             <span class="nav-icon">📅</span>
-            <span class="nav-text">Today</span>
+            <span class="nav-text">@Localizer["Today"]</span>
         </a>
         <a class="btn btn-ghost" href="/Calendar/Month?year=@Model.Next.MonthYear.Year&month=@Model.Next.MonthYear.Month">
             <span class="nav-text">@Model.Next.Label</span>
@@ -47,21 +49,21 @@
 </div>
 
 <div class="calendar-view-switcher">
-    <a class="btn btn-primary" href="/Calendar/Month">Month</a>
-    <a class="btn btn-ghost" href="/Calendar/Week">Week</a>
-    <a class="btn btn-ghost" href="/Calendar/Day">Day</a>
+    <a class="btn btn-primary" href="/Calendar/Month">@Localizer["Month"]</a>
+    <a class="btn btn-ghost" href="/Calendar/Week">@Localizer["Week"]</a>
+    <a class="btn btn-ghost" href="/Calendar/Day">@Localizer["Day"]</a>
 </div>
 
 <div class="calendar-grid">
     <!-- Weekday headers -->
     <div class="calendar-weekdays">
-        <div class="weekday-header">Mon</div>
-        <div class="weekday-header">Tue</div>
-        <div class="weekday-header">Wed</div>
-        <div class="weekday-header">Thu</div>
-        <div class="weekday-header">Fri</div>
-        <div class="weekday-header">Sat</div>
-        <div class="weekday-header">Sun</div>
+        <div class="weekday-header">@Localizer["Monday"]</div>
+        <div class="weekday-header">@Localizer["Tuesday"]</div>
+        <div class="weekday-header">@Localizer["Wednesday"]</div>
+        <div class="weekday-header">@Localizer["Thursday"]</div>
+        <div class="weekday-header">@Localizer["Friday"]</div>
+        <div class="weekday-header">@Localizer["Saturday"]</div>
+        <div class="weekday-header">@Localizer["Sunday"]</div>
     </div>
 
     @foreach (var w in weeks)
@@ -107,7 +109,7 @@
                                     </div>
 
                                     <div class="tooltip-section">
-                                        <div class="tooltip-section-title">Staffing</div>
+                                        <div class="tooltip-section-title">@Localizer["Staffing"]</div>
                                         <div class="tooltip-names">
                                             @if (l.AssignedNames.Any())
                                             {
@@ -125,20 +127,20 @@
                                             }
                                             @if (!l.AssignedNames.Any() && !l.EmptySlots.Any())
                                             {
-                                                <span class="tooltip-empty">No staffing required</span>
+                                                <span class="tooltip-empty">@Localizer["NoStaffingRequired"]</span>
                                             }
                                         </div>
                                     </div>
 
                                     <div class="tooltip-stats">
-                                        <span class="tooltip-stat">@l.Assigned/@l.Required staffed</span>
+                                        <span class="tooltip-stat">@l.Assigned/@l.Required</span>
                                         @if (l.Assigned >= l.Required)
                                         {
-                                            <span class="tooltip-status-ok">✓ Fully Staffed</span>
+                                            <span class="tooltip-status-ok">@Localizer["FullyStaffed"]</span>
                                         }
                                         else
                                         {
-                                            <span class="tooltip-status-warn">⚠ Needs @(l.Required - l.Assigned) more</span>
+                                            <span class="tooltip-status-warn">@string.Format(Localizer["NeedsMore"], l.Required - l.Assigned)</span>
                                         }
                                     </div>
                                 </div>
@@ -166,7 +168,7 @@
                 {
                     <button class="add-shift-btn" onclick="openShiftModal('@day.Date.ToString("yyyy-MM-dd")')">
                         <span>+</span>
-                        <span>Add Shift</span>
+                        <span>@Localizer["AddShift"]</span>
                     </button>
                 }
             </div>

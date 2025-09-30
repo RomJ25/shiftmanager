@@ -624,6 +624,38 @@
           "buildTransitive/net8.0/_._": {}
         }
       },
+      "Microsoft.Extensions.Localization/9.0.9": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "9.0.9",
+          "Microsoft.Extensions.Localization.Abstractions": "9.0.9",
+          "Microsoft.Extensions.Logging.Abstractions": "9.0.9",
+          "Microsoft.Extensions.Options": "9.0.9"
+        },
+        "compile": {
+          "lib/netstandard2.0/Microsoft.Extensions.Localization.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.0/Microsoft.Extensions.Localization.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "Microsoft.Extensions.Localization.Abstractions/9.0.9": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.0/Microsoft.Extensions.Localization.Abstractions.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.0/Microsoft.Extensions.Localization.Abstractions.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "Microsoft.Extensions.Logging/9.0.9": {
         "type": "package",
         "dependencies": {
@@ -2426,6 +2458,44 @@
         "useSharedDesignerContext.txt"
       ]
     },
+    "Microsoft.Extensions.Localization/9.0.9": {
+      "sha512": "ENTRZoBIi429tkjf18uThYKr+nnxp8/HcZO4jwz3PeAqL0oQvede6++/2/+dU7B1D6jubfdoFzsBTaZ4CauD2g==",
+      "type": "package",
+      "path": "microsoft.extensions.localization/9.0.9",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "THIRD-PARTY-NOTICES.TXT",
+        "lib/net462/Microsoft.Extensions.Localization.dll",
+        "lib/net462/Microsoft.Extensions.Localization.xml",
+        "lib/net9.0/Microsoft.Extensions.Localization.dll",
+        "lib/net9.0/Microsoft.Extensions.Localization.xml",
+        "lib/netstandard2.0/Microsoft.Extensions.Localization.dll",
+        "lib/netstandard2.0/Microsoft.Extensions.Localization.xml",
+        "microsoft.extensions.localization.9.0.9.nupkg.sha512",
+        "microsoft.extensions.localization.nuspec"
+      ]
+    },
+    "Microsoft.Extensions.Localization.Abstractions/9.0.9": {
+      "sha512": "O/gqB03vqOvbTIQCvO2HIVMxV0xTtYL7p8kWIV0qnm7dkMP+BloZ6Tg7iMFw3sy1T63zSLdyDaZkwjwd5xmteg==",
+      "type": "package",
+      "path": "microsoft.extensions.localization.abstractions/9.0.9",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "THIRD-PARTY-NOTICES.TXT",
+        "lib/net462/Microsoft.Extensions.Localization.Abstractions.dll",
+        "lib/net462/Microsoft.Extensions.Localization.Abstractions.xml",
+        "lib/net9.0/Microsoft.Extensions.Localization.Abstractions.dll",
+        "lib/net9.0/Microsoft.Extensions.Localization.Abstractions.xml",
+        "lib/netstandard2.0/Microsoft.Extensions.Localization.Abstractions.dll",
+        "lib/netstandard2.0/Microsoft.Extensions.Localization.Abstractions.xml",
+        "microsoft.extensions.localization.abstractions.9.0.9.nupkg.sha512",
+        "microsoft.extensions.localization.abstractions.nuspec"
+      ]
+    },
     "Microsoft.Extensions.Logging/9.0.9": {
       "sha512": "MaCB0Y9hNDs4YLu3HCJbo199WnJT8xSgajG1JYGANz9FkseQ5f3v/llu3HxLI6mjDlu7pa7ps9BLPWjKzsAAzQ==",
       "type": "package",
@@ -3182,7 +3252,8 @@
   "projectFileDependencyGroups": {
     "net8.0": [
       "Microsoft.EntityFrameworkCore.Design >= 9.0.9",
-      "Microsoft.EntityFrameworkCore.Sqlite >= 9.0.0"
+      "Microsoft.EntityFrameworkCore.Sqlite >= 9.0.0",
+      "Microsoft.Extensions.Localization >= 9.0.9"
     ]
   },
   "packageFolders": {
@@ -3236,6 +3307,10 @@
           "Microsoft.EntityFrameworkCore.Sqlite": {
             "target": "Package",
             "version": "[9.0.0, )"
+          },
+          "Microsoft.Extensions.Localization": {
+            "target": "Package",
+            "version": "[9.0.9, )"
           }
         },
         "imports": [

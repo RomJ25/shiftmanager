@@ -1,22 +1,24 @@
 @page
 @model ShiftManager.Pages.Assignments.ManageModel
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<ShiftManager.Resources.SharedResources> Localizer
 @{
     Layout = "_Layout";
 }
-<h2>Assignments — @Model.Date.ToString("ddd, MMM d") — @Model.Type?.Name</h2>
+<h2>@Localizer["Assignments"] — @Model.Date.ToString("ddd, MMM d") — @Model.LocalizedTypeName</h2>
 
 <div class="card">
     <div style="display:flex; gap:1rem; align-items:center; justify-content:space-between">
         <div>
-            Required: <b>@Model.Instance.StaffingRequired</b> &nbsp;|&nbsp;
-            Assigned: <b>@Model.Assigned.Count</b>
+            @Localizer["Required"]: <b>@Model.Instance.StaffingRequired</b> &nbsp;|&nbsp;
+            @Localizer["Assigned"]: <b>@Model.Assigned.Count</b>
         </div>
-        <a class="btn btn-ghost" href="@(!string.IsNullOrEmpty(Model.ReturnUrl) ? Model.ReturnUrl : "/Calendar/Month")">Back to Calendar</a>
+        <a class="btn btn-ghost" href="@(!string.IsNullOrEmpty(Model.ReturnUrl) ? Model.ReturnUrl : "/Calendar/Month")">@Localizer["BackToCalendar"]</a>
     </div>
 </div>
 
 <div class="card">
-    <h3 style="margin-top:0">Assigned</h3>
+    <h3 style="margin-top:0">@Localizer["Assigned"]</h3>
     <ul class="list">
         @foreach (var a in Model.Assigned)
         {
@@ -25,7 +27,7 @@
                 <form method="post" asp-page-handler="Remove">
                     <input type="hidden" name="assignmentId" value="@a.AssignmentId" />
                     <input type="hidden" asp-for="ReturnUrl" />
-                    <button class="btn btn-danger">Remove</button>
+                    <button class="btn btn-danger">@Localizer["Remove"]</button>
                 </form>
             </li>
         }
@@ -33,7 +35,7 @@
 </div>
 
 <div class="card">
-    <h3 style="margin-top:0">Add person</h3>
+    <h3 style="margin-top:0">@Localizer["AddPerson"]</h3>
     @if (!string.IsNullOrEmpty(Model.Error))
     {
         <div class="small" style="color:var(--danger)">@Model.Error</div>
@@ -46,27 +48,27 @@
         @if (Model.Assigned.Count == 0)
         {
             <div style="margin-bottom: 1rem;">
-                <label for="ShiftName" class="form-label">Shift Name (optional)</label>
-                <input type="text" id="shiftNameInput" class="input" asp-for="ShiftName" placeholder="e.g., Store Opening, Security Round, etc." />
+                <label for="ShiftName" class="form-label">@Localizer["ShiftNameOptional"]</label>
+                <input type="text" id="shiftNameInput" class="input" asp-for="ShiftName" placeholder="@Localizer["ShiftNamePlaceholder"]" />
                 <div class="small" style="color:var(--muted); margin-top:0.25rem;">
-                    This name will be displayed as "@Model.Type?.Key.ToLower()-'your name'" in the calendar
+                    @string.Format(Localizer["ShiftNameDisplayInfo"], Model.LocalizedTypeName.ToLower(), "your name")
                 </div>
             </div>
         }
         else if (!string.IsNullOrEmpty(Model.ShiftName))
         {
             <div style="margin-bottom: 1rem;">
-                <strong>Shift Name:</strong> @Model.Type?.Key.ToLower()-'@Model.ShiftName'
+                <strong>@Localizer["ShiftName"]:</strong> @Model.LocalizedTypeName.ToLower()-'@Model.ShiftName'
             </div>
         }
 
         <select class="input" asp-for="SelectedUserId">
-            <option value="">-- choose an active user --</option>
+            <option value="">@Localizer["ChooseActiveUser"]</option>
             @foreach (var u in Model.ActiveUsers)
             {
                 @if (Model.UsersOnTimeOff.Contains(u.Id))
                 {
-                    <option value="@u.Id" style="background-color: var(--warning); color: var(--warning-text);">🏖️ @u.DisplayName (@u.Email) - ON TIME OFF</option>
+                    <option value="@u.Id" style="background-color: var(--warning); color: var(--warning-text);">@u.DisplayName (@u.Email) - @Localizer["OnTimeOff"].Value.ToUpper()</option>
                 }
                 else
                 {
@@ -74,7 +76,7 @@
                 }
             }
         </select>
-        <button class="btn btn-primary" type="submit">Add</button>
+        <button class="btn btn-primary" type="submit">@Localizer["Add"]</button>
     </form>
 </div>
 

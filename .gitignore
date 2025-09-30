@@ -1,0 +1,55 @@
+# Ignore Visual Studio user-specific files
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Ignore build outputs
+bin/
+obj/
+out/
+
+# Ignore build results
+*.dll
+*.exe
+*.pdb
+*.cache
+*.log
+*.vspscc
+*.dbmdl
+*.bak
+*.db
+*.ldf
+
+# Ignore dotnet publish outputs
+*.publishsettings
+*.pubxml
+*.pubxml.user
+Properties/PublishProfiles/
+
+# Ignore other IDE/tooling files
+*.swp
+*.tmp
+*.temp
+*.vscode/
+
+# Ignore generated JSON settings
+*.local.json
+
+# Ignore NuGet packages
+*.nupkg
+*.snupkg
+*.nuspec
+project.lock.json
+artifacts/
+
+# Ignore Rider / JetBrains files
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Ignore Mac / Linux system files
+.DS_Store
+*.swp

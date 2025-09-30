@@ -1,32 +1,34 @@
 @page
 @model ShiftManager.Pages.Requests.Swaps.CreateModel
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<ShiftManager.Resources.SharedResources> Localizer
 @{
     Layout = "_Layout";
 }
-<h2>Propose Swap</h2>
+<h2>@Localizer["ProposeSwap"]</h2>
 
 <div class="card" style="max-width:680px">
     <form method="post">
         <div style="display:grid; gap:.75rem">
-            <label>My assignment<br />
+            <label>@Localizer["MyAssignment"]<br />
                 <select class="input" asp-for="SelectedAssignmentId">
-                    <option value="">-- choose one of your upcoming shifts --</option>
+                    <option value="">@Localizer["ChooseYourShift"]</option>
                     @foreach (var a in Model.MyAssignments)
                     {
                         <option value="@a.AssignmentId">@a.Label</option>
                     }
                 </select>
             </label>
-            <label>Proposed to user<br />
+            <label>@Localizer["ProposedToUser"]<br />
                 <select class="input" asp-for="ToUserId">
-                    <option value="">-- choose a user --</option>
+                    <option value="">@Localizer["ChooseUser"]</option>
                     @foreach (var u in Model.OtherUsers)
                     {
                         <option value="@u.Id">@u.DisplayName (@u.Email)</option>
                     }
                 </select>
             </label>
-            <button class="btn btn-primary" type="submit">Submit</button>
+            <button class="btn btn-primary" type="submit">@Localizer["Submit"]</button>
         </div>
     </form>
 </div>

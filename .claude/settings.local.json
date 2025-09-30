@@ -13,7 +13,17 @@
       "Read(//c/Users/katzi/Pictures/Screenshots/**)",
       "Bash(powershell Stop-Process:*)",
       "Bash(dir:*)",
-      "Bash(del app.db)"
+      "Bash(del app.db)",
+      "Bash(for key in Manager NoApprovedTimeOffMessage NotificationDeletionConfirmation TimeOffDeletionConfirmation UserDeletionConfirmation MarkAllAsReadCount)",
+      "Bash(do echo \"Checking $key:\")",
+      "Bash(grep:*)",
+      "Bash(done)",
+      "Bash(for key in Manager NoApprovedTimeOffMessage NotificationDeletionConfirmation TimeOffDeletionConfirmation UserDeletionConfirmation MarkAllAsReadCount DayDuration DaysDuration)",
+      "Bash(for key in MORNING NOON NIGHT MIDDLE Evening)",
+      "Bash(dotnet msbuild:*)",
+      "Bash(dotnet clean:*)",
+      "Bash(dotnet build:*)",
+      "Bash(powershell:*)"
     ],
     "defaultMode": "acceptEdits"
   }
