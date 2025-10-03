@@ -12,7 +12,7 @@
     var name = user?.FindFirst(ClaimTypes.Name)?.Value ?? "";
     var role = user?.FindFirst(ClaimTypes.Role)?.Value ?? "";
     var isAdmin = User.IsInRole("Owner") || User.IsInRole("Manager") || User.IsInRole("Director");
-    var isDirector = User.IsInRole("Director");
+    var isDirector = User.IsInRole("Owner") || User.IsInRole("Director");
     var firstName = name.Split(' ').FirstOrDefault() ?? name;
     var currentCulture = CultureInfo.CurrentUICulture.Name;
     var isHebrew = currentCulture.StartsWith("he");

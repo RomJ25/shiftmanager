@@ -77,7 +77,7 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("IsManagerOrAdmin",
         policy => policy.RequireRole(nameof(UserRole.Manager), nameof(UserRole.Owner), nameof(UserRole.Director)));
     options.AddPolicy("IsAdmin", policy => policy.RequireRole(nameof(UserRole.Owner)));
-    options.AddPolicy("IsDirector", policy => policy.RequireRole(nameof(UserRole.Director)));
+    options.AddPolicy("IsDirector", policy => policy.RequireRole(nameof(UserRole.Owner), nameof(UserRole.Director)));
     options.AddPolicy("IsOwnerOrDirector", policy => policy.RequireRole(nameof(UserRole.Owner), nameof(UserRole.Director)));
 });
 

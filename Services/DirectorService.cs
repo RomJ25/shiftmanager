@@ -29,13 +29,18 @@ public class DirectorService : IDirectorService
 
     public bool IsDirector()
     {
-        return CurrentUser?.IsInRole(nameof(UserRole.Director)) ?? false;
+        return (CurrentUser?.IsInRole(nameof(UserRole.Owner)) ?? false)
+            || (CurrentUser?.IsInRole(nameof(UserRole.Director)) ?? false);
     }
 
     public async Task<bool> IsDirectorOfAsync(int companyId)
     {
         if (!IsDirector() || CurrentUserId == null)
             return false;
+
+        // Owner has access to all companies
+        if (CurrentUser?.IsInRole(nameof(UserRole.Owner)) ?? false)
+            return true;
 
         return await _db.DirectorCompanies
             .AnyAsync(dc => dc.UserId == CurrentUserId.Value
