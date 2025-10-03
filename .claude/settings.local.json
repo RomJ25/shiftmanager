@@ -14,7 +14,15 @@
       "Bash(powershell Stop-Process:*)",
       "Bash(dir:*)",
       "Bash(del app.db)",
-      "Bash(del TestsHebrewLocalizationTests.cs)"
+      "Bash(del TestsHebrewLocalizationTests.cs)",
+      "Bash(git checkout:*)",
+      "Bash(timeout:*)",
+      "Bash(find:*)",
+      "Bash(dotnet build:*)",
+      "Bash(cat:*)",
+      "Bash(git log:*)",
+      "Bash(powershell:*)",
+      "Bash(exit 0)"
     ],
     "defaultMode": "acceptEdits"
   }

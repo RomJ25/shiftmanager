@@ -519,4 +519,251 @@
   <data name="End" xml:space="preserve">
     <value>סיום</value>
   </data>
+
+  <!-- Shift Type Names -->
+  <data name="ShiftType_MORNING" xml:space="preserve">
+    <value>בוקר</value>
+  </data>
+  <data name="ShiftType_NOON" xml:space="preserve">
+    <value>צהריים</value>
+  </data>
+  <data name="ShiftType_NIGHT" xml:space="preserve">
+    <value>לילה</value>
+  </data>
+  <data name="ShiftType_MIDDLE" xml:space="preserve">
+    <value>אמצע</value>
+  </data>
+
+  <!-- Companies Page -->
+  <data name="Companies" xml:space="preserve">
+    <value>חברות</value>
+  </data>
+  <data name="AddNewCompany" xml:space="preserve">
+    <value>הוסף חברה חדשה</value>
+  </data>
+  <data name="CompanyDetails" xml:space="preserve">
+    <value>פרטי החברה</value>
+  </data>
+  <data name="CompanyName" xml:space="preserve">
+    <value>שם החברה</value>
+  </data>
+  <data name="Slug" xml:space="preserve">
+    <value>מזהה</value>
+  </data>
+  <data name="ManagerAccount" xml:space="preserve">
+    <value>חשבון מנהל</value>
+  </data>
+  <data name="ManagerEmail" xml:space="preserve">
+    <value>אימייל מנהל</value>
+  </data>
+  <data name="ManagerDisplayName" xml:space="preserve">
+    <value>שם תצוגה של מנהל</value>
+  </data>
+  <data name="ManagerPassword" xml:space="preserve">
+    <value>סיסמת מנהל</value>
+  </data>
+  <data name="CreateCompanyManager" xml:space="preserve">
+    <value>צור חברה ומנהל</value>
+  </data>
+  <data name="Note" xml:space="preserve">
+    <value>הערה</value>
+  </data>
+  <data name="CreatingCompanyWill" xml:space="preserve">
+    <value>יצירת חברה תכלול:</value>
+  </data>
+  <data name="CreateCompanyWithDetails" xml:space="preserve">
+    <value>יצירת החברה עם השם והמזהה שצוינו</value>
+  </data>
+  <data name="CreateManagerAccount" xml:space="preserve">
+    <value>יצירת חשבון משתמש מנהל לחברה זו</value>
+  </data>
+  <data name="GenerateDefaultShiftTypes" xml:space="preserve">
+    <value>יצירת סוגי משמרות ברירת מחדל (בוקר, צהריים, לילה, אמצע)</value>
+  </data>
+  <data name="SetupDefaultConfig" xml:space="preserve">
+    <value>הגדרת תצורת ברירת מחדל (שעות מנוחה, תקרת שעות שבועית)</value>
+  </data>
+  <data name="AllCompanies" xml:space="preserve">
+    <value>כל החברות</value>
+  </data>
+  <data name="NoCompaniesYet" xml:space="preserve">
+    <value>אין חברות עדיין. צור אחת למעלה כדי להתחיל.</value>
+  </data>
+  <data name="RenameCompany" xml:space="preserve">
+    <value>שנה שם חברה</value>
+  </data>
+  <data name="DeleteCompany" xml:space="preserve">
+    <value>מחק חברה</value>
+  </data>
+  <data name="NewCompanyName" xml:space="preserve">
+    <value>שם חברה חדש</value>
+  </data>
+  <data name="ConfirmDeleteCompany" xml:space="preserve">
+    <value>האם אתה בטוח שברצונך למחוק חברה זו? פעולה זו תמחק לצמיתות את כל סוגי המשמרות, מופעי המשמרות, ההקצאות, בקשות החופש ובקשות ההחלפה הקשורים לחברה זו. לא ניתן לבטל פעולה זו.</value>
+  </data>
+  <data name="CompanyDeleted" xml:space="preserve">
+    <value>החברה נמחקה בהצלחה</value>
+  </data>
+  <data name="CompanyRenamed" xml:space="preserve">
+    <value>החברה שונתה בהצלחה</value>
+  </data>
+  <data name="CannotDeleteCompanyWithOwner" xml:space="preserve">
+    <value>לא ניתן למחוק חברה: משתמשי בעלים חייבים להיות מוסרים או מועברים תחילה</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>ערוך</value>
+  </data>
+  <data name="Rename" xml:space="preserve">
+    <value>שנה שם</value>
+  </data>
+  <data name="OrAssignExistingDirector" xml:space="preserve">
+    <value>או הקצה מנהל קיים</value>
+  </data>
+  <data name="ExistingDirector" xml:space="preserve">
+    <value>מנהל קיים</value>
+  </data>
+  <data name="SelectExistingDirector" xml:space="preserve">
+    <value>-- בחר מנהל קיים (אופציונלי) --</value>
+  </data>
+  <data name="IfDirectorSelected" xml:space="preserve">
+    <value>אם נבחר מנהל, הוא יוקצה לחברה זו במקום ליצור מנהל חדש.</value>
+  </data>
+
+  <!-- Directors Page -->
+  <data name="DirectorAssignments" xml:space="preserve">
+    <value>הקצאות מנהלים</value>
+  </data>
+  <data name="AssignDirectorToCompany" xml:space="preserve">
+    <value>הקצה מנהל לחברה</value>
+  </data>
+  <data name="SelectDirector" xml:space="preserve">
+    <value>-- בחר מנהל --</value>
+  </data>
+  <data name="SelectCompany" xml:space="preserve">
+    <value>-- בחר חברה --</value>
+  </data>
+  <data name="CurrentDirectorAssignments" xml:space="preserve">
+    <value>הקצאות מנהלים נוכחיות</value>
+  </data>
+  <data name="GrantedBy" xml:space="preserve">
+    <value>הוענק על ידי</value>
+  </data>
+  <data name="GrantedAt" xml:space="preserve">
+    <value>הוענק ב</value>
+  </data>
+  <data name="Revoke" xml:space="preserve">
+    <value>בטל</value>
+  </data>
+  <data name="RevokeDirectorConfirm" xml:space="preserve">
+    <value>האם אתה בטוח שברצונך לבטל את גישת המנהל עבור {0} מ-{1}?</value>
+  </data>
+  <data name="NoDirectorAssignments" xml:space="preserve">
+    <value>אין הקצאות מנהלים עדיין. הקצה מנהלים לחברות למעלה.</value>
+  </data>
+  <data name="AboutDirectorRole" xml:space="preserve">
+    <value>אודות תפקיד המנהל:</value>
+  </data>
+  <data name="DirectorsCanOversee" xml:space="preserve">
+    <value>מנהלים יכולים לפקח על מספר חברות ויש להם את ההרשאות הבאות בחברות שהוקצו להם:</value>
+  </data>
+  <data name="DirectorPerm1" xml:space="preserve">
+    <value>הוספה/הסרה של משתמשים (תפקידי עובד ומנהל בלבד)</value>
+  </data>
+  <data name="DirectorPerm2" xml:space="preserve">
+    <value>הקצאה/ביטול תפקיד מנהל</value>
+  </data>
+  <data name="DirectorPerm3" xml:space="preserve">
+    <value>אישור/דחיה של בקשות חופשה והחלפת משמרות</value>
+  </data>
+  <data name="DirectorPerm4" xml:space="preserve">
+    <value>צפייה בלוחות מחוונים ודוחות של מספר חברות</value>
+  </data>
+  <data name="DirectorsCannot" xml:space="preserve">
+    <value>מנהלים לא יכולים ליצור/למחוק חברות או להקצות את תפקיד הבעלים.</value>
+  </data>
+
+  <!-- Signup Page -->
+  <data name="RequestAccess" xml:space="preserve">
+    <value>בקש גישה</value>
+  </data>
+  <data name="RequestSubmitted" xml:space="preserve">
+    <value>הבקשה נשלחה</value>
+  </data>
+  <data name="PasswordMinCharacters" xml:space="preserve">
+    <value>סיסמה (מינימום 6 תווים)</value>
+  </data>
+  <data name="RequestedRole" xml:space="preserve">
+    <value>תפקיד מבוקש</value>
+  </data>
+  <data name="RequestNeedsApproval" xml:space="preserve">
+    <value>בקשתך תצטרך לקבל אישור מאנשי צוות מורשים.</value>
+  </data>
+  <data name="SubmitRequest" xml:space="preserve">
+    <value>שלח בקשה</value>
+  </data>
+  <data name="AlreadyHaveAccount" xml:space="preserve">
+    <value>כבר יש לך חשבון?</value>
+  </data>
+  <data name="LoginHere" xml:space="preserve">
+    <value>התחבר כאן</value>
+  </data>
+
+  <!-- Users Page - Join Requests -->
+  <data name="JoinRequests" xml:space="preserve">
+    <value>בקשות הצטרפות</value>
+  </data>
+  <data name="Submitted" xml:space="preserve">
+    <value>נשלח</value>
+  </data>
+  <data name="Rejected" xml:space="preserve">
+    <value>נדחה</value>
+  </data>
+  <data name="ClearFilters" xml:space="preserve">
+    <value>נקה מסננים</value>
+  </data>
+  <data name="Approve" xml:space="preserve">
+    <value>אשר</value>
+  </data>
+  <data name="Reject" xml:space="preserve">
+    <value>דחה</value>
+  </data>
+  <data name="NoJoinRequestsFound" xml:space="preserve">
+    <value>לא נמצאו בקשות הצטרפות עם המסננים הנוכחיים.</value>
+  </data>
+  <data name="ExistingUsers" xml:space="preserve">
+    <value>משתמשים קיימים</value>
+  </data>
+  <data name="ClearUserFilters" xml:space="preserve">
+    <value>נקה מסנני משתמשים</value>
+  </data>
+  <data name="Password" xml:space="preserve">
+    <value>סיסמה</value>
+  </data>
+  <data name="UserDeletionWarning" xml:space="preserve">
+    <value>אזהרת מחיקת משתמש:</value>
+  </data>
+  <data name="DeletingUserWillRemove" xml:space="preserve">
+    <value>מחיקת משתמש תסיר לצמיתות:</value>
+  </data>
+  <data name="AllTheirShiftAssignments" xml:space="preserve">
+    <value>את כל הקצאות המשמרות שלהם (משמרות יהפכו לריקות)</value>
+  </data>
+  <data name="AllTheirTimeOffRequests" xml:space="preserve">
+    <value>את כל בקשות החופשה שלהם (מאושרות, ממתינות ונדחות)</value>
+  </data>
+  <data name="AllTheirSwapRequests" xml:space="preserve">
+    <value>את כל בקשות החלפת המשמרות שלהם (גם ממנו וגם אליו)</value>
+  </data>
+  <data name="TheUserAccountItself" xml:space="preserve">
+    <value>את חשבון המשתמש עצמו</value>
+  </data>
+  <data name="ActionCannotBeUndone" xml:space="preserve">
+    <value>פעולה זו אינה ניתנת לביטול. השתמש בזהירות רבה.</value>
+  </data>
+  <data name="AddUser" xml:space="preserve">
+    <value>הוסף משתמש</value>
+  </data>
+  <data name="Set" xml:space="preserve">
+    <value>הגדר</value>
+  </data>
 </root>

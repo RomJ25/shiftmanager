@@ -1,0 +1,114 @@
+@page
+@model ShiftManager.Pages.Admin.DirectorsModel
+@using Microsoft.Extensions.Localization
+@using ShiftManager.Resources
+@inject IStringLocalizer<SharedResources> Localizer
+@{
+    Layout = "_Layout";
+}
+<h2>@Localizer["DirectorAssignments"]</h2>
+
+@if (!string.IsNullOrEmpty(Model.Success))
+{
+    <div class="alert alert-success" style="margin-bottom: 2rem; padding: 1rem; background: var(--success); color: white; border-radius: 0.5rem;">
+        @Model.Success
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(Model.Error))
+{
+    <div class="alert alert-error" style="margin-bottom: 2rem; padding: 1rem; background: var(--danger); color: white; border-radius: 0.5rem;">
+        @Model.Error
+    </div>
+}
+
+<div class="card">
+    <h3 style="margin-top:0">@Localizer["AssignDirectorToCompany"]</h3>
+    <form method="post" asp-page-handler="Assign">
+        @Html.AntiForgeryToken()
+        <div style="display:grid; grid-template-columns: 1fr 1fr auto; gap:.5rem; align-items:end">
+            <label>@Localizer["Director"]<br />
+                <select class="input" asp-for="DirectorUserId">
+                    <option value="0">@Localizer["SelectDirector"]</option>
+                    @foreach (var director in Model.AvailableDirectors)
+                    {
+                        <option value="@director.Id">@director.DisplayName (@director.Email)</option>
+                    }
+                </select>
+            </label>
+            <label>@Localizer["Company"]<br />
+                <select class="input" asp-for="CompanyId">
+                    <option value="0">@Localizer["SelectCompany"]</option>
+                    @foreach (var company in Model.AvailableCompanies)
+                    {
+                        <option value="@company.Id">@company.Name (@company.Slug)</option>
+                    }
+                </select>
+            </label>
+            <button class="btn btn-primary" type="submit">@Localizer["Assign"]</button>
+        </div>
+    </form>
+</div>
+
+<div class="card">
+    <h3 style="margin-top:0">@Localizer["CurrentDirectorAssignments"]</h3>
+    @if (Model.Assignments.Any())
+    {
+        <table>
+            <thead>
+                <tr>
+                    <th>@Localizer["Director"]</th>
+                    <th>@Localizer["Email"]</th>
+                    <th>@Localizer["Company"]</th>
+                    <th>@Localizer["Slug"]</th>
+                    <th>@Localizer["GrantedBy"]</th>
+                    <th>@Localizer["GrantedAt"]</th>
+                    <th style="width:1%">@Localizer["Actions"]</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var assignment in Model.Assignments)
+                {
+                    <tr>
+                        <td>@assignment.DirectorName</td>
+                        <td>@assignment.DirectorEmail</td>
+                        <td>@assignment.CompanyName</td>
+                        <td><code>@assignment.CompanySlug</code></td>
+                        <td>@assignment.GrantedByName</td>
+                        <td>@assignment.GrantedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                        <td>
+                            <form method="post" asp-page-handler="Revoke" style="display:inline"
+                                  onsubmit="return confirm('Are you sure you want to revoke Director access for @assignment.DirectorName from @assignment.CompanyName?');">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@assignment.Id" />
+                                <button type="submit" class="btn btn-danger" style="font-size: 0.8rem; padding: 0.3rem 0.6rem;">
+                                    @Localizer["Revoke"]
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p style="color: var(--muted); text-align: center; padding: 2rem;">
+            @Localizer["NoDirectorAssignments"]
+        </p>
+    }
+</div>
+
+<div style="margin-top: 1rem; padding: 1rem; background: var(--surface); border-left: 4px solid var(--primary); border-radius: 0.5rem;">
+    <small style="color: var(--muted);">
+        <strong>@Localizer["AboutDirectorRole"]</strong><br />
+        @Localizer["DirectorsCanOversee"]
+        <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">
+            <li>@Localizer["DirectorPerm1"]</li>
+            <li>@Localizer["DirectorPerm2"]</li>
+            <li>@Localizer["DirectorPerm3"]</li>
+            <li>@Localizer["DirectorPerm4"]</li>
+        </ul>
+        @Localizer["DirectorsCannot"]
+    </small>
+</div>

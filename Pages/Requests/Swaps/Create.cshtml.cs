@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using ShiftManager.Data;
 using ShiftManager.Models;
+using ShiftManager.Services;
 
 namespace ShiftManager.Pages.Requests.Swaps;
 
@@ -11,7 +12,13 @@ namespace ShiftManager.Pages.Requests.Swaps;
 public class CreateModel : PageModel
 {
     private readonly AppDbContext _db;
-    public CreateModel(AppDbContext db) => _db = db;
+    private readonly ICompanyContext _companyContext;
+
+    public CreateModel(AppDbContext db, ICompanyContext companyContext)
+    {
+        _db = db;
+        _companyContext = companyContext;
+    }
 
     public record AssignmentVM(int AssignmentId, string Label);
     public List<AssignmentVM> MyAssignments { get; set; } = new();
@@ -31,7 +38,7 @@ public class CreateModel : PageModel
                               select new AssignmentVM(a.Id, $"{si.WorkDate:yyyy-MM-dd} {st.Key}")).ToListAsync();
         MyAssignments = upcoming;
 
-        var companyId = int.Parse(User.FindFirst("CompanyId")!.Value);
+        var companyId = _companyContext.GetCompanyIdOrThrow();
         OtherUsers = await _db.Users.Where(u => u.CompanyId == companyId && u.IsActive && u.Id != userId).OrderBy(u => u.DisplayName).ToListAsync();
     }
 

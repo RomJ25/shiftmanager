@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using ShiftManager.Data;
 using ShiftManager.Models;
+using ShiftManager.Services;
 using Microsoft.Extensions.Logging;
 
 namespace ShiftManager.Pages.Calendar;
@@ -13,8 +14,15 @@ namespace ShiftManager.Pages.Calendar;
 public class DayModel : PageModel
 {
     private readonly AppDbContext _db;
+    private readonly ICompanyContext _companyContext;
     private readonly ILogger<DayModel> _logger;
-    public DayModel(AppDbContext db, ILogger<DayModel> logger) { _db = db; _logger = logger; }
+
+    public DayModel(AppDbContext db, ICompanyContext companyContext, ILogger<DayModel> logger)
+    {
+        _db = db;
+        _companyContext = companyContext;
+        _logger = logger;
+    }
 
     public DateOnly CurrentDate { get; set; }
     public (DateOnly Date, string Label) Previous { get; set; }
@@ -51,7 +59,7 @@ public class DayModel : PageModel
         Previous = (CurrentDate.AddDays(-1), CurrentDate.AddDays(-1).ToString("MMM dd"));
         Next = (CurrentDate.AddDays(1), CurrentDate.AddDays(1).ToString("MMM dd"));
 
-        var companyId = int.Parse(User.FindFirst("CompanyId")!.Value);
+        var companyId = _companyContext.GetCompanyIdOrThrow();
 
         // Load shift types with custom ordering: morning, middle, noon, night
         var types = await _db.ShiftTypes.ToListAsync();
@@ -140,7 +148,7 @@ public class DayModel : PageModel
     public async Task<IActionResult> OnPostAdjustAsync([FromBody] AdjustPayload payload)
     {
         _logger.LogInformation("Adjust staffing: date={Date} shiftTypeId={ShiftTypeId} delta={Delta}", payload.date, payload.shiftTypeId, payload.delta);
-        var companyId = int.Parse(User.FindFirst("CompanyId")!.Value);
+        var companyId = _companyContext.GetCompanyIdOrThrow();
         var date = DateOnly.Parse(payload.date);
 
         var inst = await _db.ShiftInstances.FirstOrDefaultAsync(i => i.CompanyId == companyId && i.WorkDate == date && i.ShiftTypeId == payload.shiftTypeId);

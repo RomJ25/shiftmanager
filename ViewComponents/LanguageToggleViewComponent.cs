@@ -7,9 +7,9 @@ namespace ShiftManager.ViewComponents;
 
 public class LanguageToggleViewComponent : ViewComponent
 {
-    private readonly IStringLocalizer<SharedResource> _localizer;
+    private readonly IStringLocalizer<SharedResources> _localizer;
 
-    public LanguageToggleViewComponent(IStringLocalizer<SharedResource> localizer)
+    public LanguageToggleViewComponent(IStringLocalizer<SharedResources> localizer)
     {
         _localizer = localizer;
     }

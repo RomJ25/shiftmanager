@@ -30,8 +30,16 @@ build_property._RazorSourceGeneratorDebug =
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWNjZXNzRGVuaWVkLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/katzi/Downloads/ShiftManager/Pages/Admin/Companies.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRtaW5cQ29tcGFuaWVzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/katzi/Downloads/ShiftManager/Pages/Admin/Config.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRtaW5cQ29uZmlnLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/katzi/Downloads/ShiftManager/Pages/Admin/Directors.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRtaW5cRGlyZWN0b3JzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/katzi/Downloads/ShiftManager/Pages/Admin/ShiftTypes.cshtml]
@@ -58,6 +66,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQXV0aFxMb2dvdXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/katzi/Downloads/ShiftManager/Pages/Auth/Signup.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQXV0aFxTaWdudXAuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/katzi/Downloads/ShiftManager/Pages/Calendar/Day.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQ2FsZW5kYXJcRGF5LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
@@ -68,6 +80,18 @@ build_metadata.AdditionalFiles.CssScope =
 
 [C:/Users/katzi/Downloads/ShiftManager/Pages/Calendar/Week.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQ2FsZW5kYXJcV2Vlay5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/katzi/Downloads/ShiftManager/Pages/Director/CompanyFilter.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRGlyZWN0b3JcQ29tcGFueUZpbHRlci5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/katzi/Downloads/ShiftManager/Pages/Director/NotificationHub.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRGlyZWN0b3JcTm90aWZpY2F0aW9uSHViLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/katzi/Downloads/ShiftManager/Pages/Director/ViewAsMode.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRGlyZWN0b3JcVmlld0FzTW9kZS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/katzi/Downloads/ShiftManager/Pages/Error.cshtml]
@@ -100,6 +124,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [C:/Users/katzi/Downloads/ShiftManager/Pages/Requests/TimeOff/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUmVxdWVzdHNcVGltZU9mZlxDcmVhdGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/katzi/Downloads/ShiftManager/Pages/Shared/Components/LanguageToggle/Default.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcU2hhcmVkXENvbXBvbmVudHNcTGFuZ3VhZ2VUb2dnbGVcRGVmYXVsdC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/katzi/Downloads/ShiftManager/Pages/Shared/Components/UnreadNotificationCount/Default.cshtml]

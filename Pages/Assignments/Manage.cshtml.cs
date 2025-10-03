@@ -17,8 +17,16 @@ public class ManageModel : PageModel
     private readonly IConflictChecker _checker;
     private readonly INotificationService _notificationService;
     private readonly ILogger<ManageModel> _logger;
-    public ManageModel(AppDbContext db, IConflictChecker checker, INotificationService notificationService, ILogger<ManageModel> logger)
-    { _db = db; _checker = checker; _notificationService = notificationService; _logger = logger; }
+    private readonly ICompanyContext _companyContext;
+
+    public ManageModel(AppDbContext db, IConflictChecker checker, INotificationService notificationService, ILogger<ManageModel> logger, ICompanyContext companyContext)
+    {
+        _db = db;
+        _checker = checker;
+        _notificationService = notificationService;
+        _logger = logger;
+        _companyContext = companyContext;
+    }
 
 
     [BindProperty(SupportsGet = true)] public DateOnly Date { get; set; }
@@ -37,7 +45,7 @@ public class ManageModel : PageModel
 
     public async Task<IActionResult> OnGetAsync()
     {
-        var companyId = int.Parse(User.FindFirst("CompanyId")!.Value);
+        var companyId = _companyContext.GetCompanyIdOrThrow();
         Type = await _db.ShiftTypes.FindAsync(ShiftTypeId);
         if (Type == null) return RedirectToPage("/Calendar/Month");
 

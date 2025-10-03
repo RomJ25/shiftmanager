@@ -84,19 +84,73 @@ namespace ShiftManager.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("DisplayName")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("SettingsJson")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Slug")
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
 
+                    b.HasIndex("Slug")
+                        .IsUnique();
+
                     b.ToTable("Companies");
+                });
+
+            modelBuilder.Entity("ShiftManager.Models.DirectorCompany", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("CompanyId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("GrantedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("GrantedBy")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CompanyId");
+
+                    b.HasIndex("GrantedBy");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("UserId", "CompanyId")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
+
+                    b.ToTable("DirectorCompanies");
                 });
 
             modelBuilder.Entity("ShiftManager.Models.ShiftAssignment", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("CompanyId")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("CreatedAt")
@@ -110,9 +164,11 @@ namespace ShiftManager.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ShiftInstanceId");
+
                     b.HasIndex("UserId");
 
-                    b.HasIndex("ShiftInstanceId", "UserId")
+                    b.HasIndex("CompanyId", "ShiftInstanceId", "UserId")
                         .IsUnique();
 
                     b.ToTable("ShiftAssignments");
@@ -161,6 +217,9 @@ namespace ShiftManager.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("CompanyId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("End")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -175,6 +234,8 @@ namespace ShiftManager.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CompanyId", "Key");
+
                     b.ToTable("ShiftTypes");
                 });
 
@@ -182,6 +243,9 @@ namespace ShiftManager.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("CompanyId")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("CreatedAt")
@@ -198,6 +262,8 @@ namespace ShiftManager.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CompanyId", "Status", "CreatedAt");
+
                     b.ToTable("SwapRequests");
                 });
 
@@ -205,6 +271,9 @@ namespace ShiftManager.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("CompanyId")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("CreatedAt")
@@ -229,13 +298,77 @@ namespace ShiftManager.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CompanyId", "UserId", "StartDate");
+
                     b.ToTable("TimeOffRequests");
+                });
+
+            modelBuilder.Entity("ShiftManager.Models.UserJoinRequest", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("CompanyId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("CreatedUserId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<byte[]>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("BLOB");
+
+                    b.Property<byte[]>("PasswordSalt")
+                        .IsRequired()
+                        .HasColumnType("BLOB");
+
+                    b.Property<string>("RejectionReason")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("RequestedRole")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("ReviewedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("ReviewedBy")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedUserId");
+
+                    b.HasIndex("ReviewedBy");
+
+                    b.HasIndex("CompanyId", "Status", "CreatedAt");
+
+                    b.HasIndex("Email", "CompanyId", "Status");
+
+                    b.ToTable("UserJoinRequests");
                 });
 
             modelBuilder.Entity("ShiftManager.Models.UserNotification", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("CompanyId")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("CreatedAt")
@@ -272,9 +405,38 @@ namespace ShiftManager.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId", "CreatedAt");
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("CompanyId", "UserId", "CreatedAt");
 
                     b.ToTable("UserNotifications");
+                });
+
+            modelBuilder.Entity("ShiftManager.Models.DirectorCompany", b =>
+                {
+                    b.HasOne("ShiftManager.Models.Company", "Company")
+                        .WithMany()
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ShiftManager.Models.AppUser", "GrantedByUser")
+                        .WithMany()
+                        .HasForeignKey("GrantedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ShiftManager.Models.AppUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Company");
+
+                    b.Navigation("GrantedByUser");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("ShiftManager.Models.ShiftAssignment", b =>
@@ -305,6 +467,31 @@ namespace ShiftManager.Migrations
                         .IsRequired();
 
                     b.Navigation("ShiftType");
+                });
+
+            modelBuilder.Entity("ShiftManager.Models.UserJoinRequest", b =>
+                {
+                    b.HasOne("ShiftManager.Models.Company", "Company")
+                        .WithMany()
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ShiftManager.Models.AppUser", "CreatedUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("ShiftManager.Models.AppUser", "ReviewedByUser")
+                        .WithMany()
+                        .HasForeignKey("ReviewedBy")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Company");
+
+                    b.Navigation("CreatedUser");
+
+                    b.Navigation("ReviewedByUser");
                 });
 
             modelBuilder.Entity("ShiftManager.Models.UserNotification", b =>

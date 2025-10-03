@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using ShiftManager.Data;
 using ShiftManager.Models;
 using ShiftManager.Models.Support;
+using ShiftManager.Services;
 
 namespace ShiftManager.Pages.Admin;
 
@@ -13,11 +14,13 @@ namespace ShiftManager.Pages.Admin;
 public class TimeOffModel : PageModel
 {
     private readonly AppDbContext _db;
+    private readonly ICompanyContext _companyContext;
     private readonly ILogger<TimeOffModel> _logger;
 
-    public TimeOffModel(AppDbContext db, ILogger<TimeOffModel> logger)
+    public TimeOffModel(AppDbContext db, ICompanyContext companyContext, ILogger<TimeOffModel> logger)
     {
         _db = db;
+        _companyContext = companyContext;
         _logger = logger;
     }
 
@@ -33,8 +36,9 @@ public class TimeOffModel : PageModel
         {
             _logger.LogInformation("Loading approved time-off requests for admin management");
 
-            var companyId = int.Parse(User.FindFirst("CompanyId")!.Value);
+            var companyId = _companyContext.GetCompanyIdOrThrow();
 
+            // Query filters automatically scope TimeOffRequests by CompanyId
             ApprovedTimeOffs = await (from r in _db.TimeOffRequests
                                      join u in _db.Users on r.UserId equals u.Id
                                      where r.Status == RequestStatus.Approved && u.CompanyId == companyId
@@ -64,11 +68,16 @@ public class TimeOffModel : PageModel
         {
             _logger.LogInformation("Admin attempting to delete approved time-off request {RequestId}", id);
 
-            var request = await _db.TimeOffRequests.FindAsync(id);
+            var companyId = _companyContext.GetCompanyIdOrThrow();
+
+            // Important: Validate tenant ownership before deletion
+            var request = await _db.TimeOffRequests
+                .FirstOrDefaultAsync(r => r.Id == id && r.CompanyId == companyId);
+
             if (request == null)
             {
-                _logger.LogWarning("Time-off request {RequestId} not found", id);
-                Error = "Time-off request not found.";
+                _logger.LogWarning("Time-off request {RequestId} not found or not owned by company {CompanyId}", id, companyId);
+                Error = "Time-off request not found or access denied.";
                 await OnGetAsync();
                 return Page();
             }

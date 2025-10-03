@@ -2,9 +2,10 @@ namespace ShiftManager.Models.Support;
 
 public enum UserRole
 {
-    Admin = 0,
+    Owner = 0,
     Manager = 1,
-    Employee = 2
+    Employee = 2,
+    Director = 3
 }
 
 public enum RequestStatus
@@ -22,4 +23,11 @@ public enum NotificationType
     TimeOffDeclined = 3,
     SwapRequestApproved = 4,
     SwapRequestDeclined = 5
+}
+
+public enum JoinRequestStatus
+{
+    Pending = 0,
+    Approved = 1,
+    Rejected = 2
 }

@@ -1,9 +1,12 @@
 @page
 @model ShiftManager.Pages.Assignments.ManageModel
+@using Microsoft.Extensions.Localization
+@using ShiftManager.Resources
+@inject IStringLocalizer<SharedResources> Localizer
 @{
     Layout = "_Layout";
 }
-<h2>Assignments — @Model.Date.ToString("ddd, MMM d") — @Model.Type?.Name</h2>
+<h2>Assignments — @Model.Date.ToString("ddd, MMM d") — @(Model.Type != null ? Localizer[$"ShiftType_{Model.Type.Key}"] : "")</h2>
 
 <div class="card">
     <div style="display:flex; gap:1rem; align-items:center; justify-content:space-between">

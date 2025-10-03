@@ -1,0 +1,128 @@
+@page
+@model ShiftManager.Pages.Director.NotificationHubModel
+@{
+    Layout = "_Layout";
+}
+<h2>Notification Hub</h2>
+<p style="color: var(--muted); margin-bottom: 2rem;">
+    Cross-company overview of all notifications and pending requests from your assigned companies.
+</p>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
+    <div class="card">
+        <h3 style="margin-top:0">Pending Time-Off Requests</h3>
+        @if (Model.PendingTimeOffRequests.Any())
+        {
+            <table>
+                <thead>
+                    <tr>
+                        <th>Company</th>
+                        <th>User</th>
+                        <th>Details</th>
+                        <th>Requested</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var request in Model.PendingTimeOffRequests)
+                    {
+                        <tr>
+                            <td>
+                                <span title="@request.CompanyName">
+                                    <code>@request.CompanySlug</code>
+                                </span>
+                            </td>
+                            <td>@request.UserName</td>
+                            <td>@request.Details</td>
+                            <td>@request.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <p style="color: var(--muted); text-align: center; padding: 1rem;">No pending time-off requests.</p>
+        }
+    </div>
+
+    <div class="card">
+        <h3 style="margin-top:0">Pending Swap Requests</h3>
+        @if (Model.PendingSwapRequests.Any())
+        {
+            <table>
+                <thead>
+                    <tr>
+                        <th>Company</th>
+                        <th>User</th>
+                        <th>Details</th>
+                        <th>Requested</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var request in Model.PendingSwapRequests)
+                    {
+                        <tr>
+                            <td>
+                                <span title="@request.CompanyName">
+                                    <code>@request.CompanySlug</code>
+                                </span>
+                            </td>
+                            <td>@request.UserName</td>
+                            <td>@request.Details</td>
+                            <td>@request.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <p style="color: var(--muted); text-align: center; padding: 1rem;">No pending swap requests.</p>
+        }
+    </div>
+</div>
+
+<div class="card">
+    <h3 style="margin-top:0">Recent Notifications (Last 50)</h3>
+    @if (Model.RecentNotifications.Any())
+    {
+        <table>
+            <thead>
+                <tr>
+                    <th>Company</th>
+                    <th>Type</th>
+                    <th>Message</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var notification in Model.RecentNotifications)
+                {
+                    <tr style="@(notification.IsRead ? "opacity: 0.6;" : "font-weight: 600;")">
+                        <td>
+                            <span title="@notification.CompanyName">
+                                <code>@notification.CompanySlug</code>
+                            </span>
+                        </td>
+                        <td>@notification.Type</td>
+                        <td>@notification.Message</td>
+                        <td>@notification.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                        <td>@(notification.IsRead ? "Read" : "Unread")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p style="color: var(--muted); text-align: center; padding: 2rem;">No notifications yet.</p>
+    }
+</div>
+
+<div style="margin-top: 1rem; padding: 1rem; background: var(--surface); border-left: 4px solid var(--primary); border-radius: 0.5rem;">
+    <small style="color: var(--muted);">
+        <strong>Note:</strong> This hub aggregates data from all companies you oversee as a Director.
+        Company slugs are shown inline with full names on hover.
+    </small>
+</div>

@@ -3,9 +3,12 @@ using ShiftManager.Models.Support;
 
 namespace ShiftManager.Models;
 
-public class UserNotification
+public class UserNotification : IBelongsToCompany
 {
     public int Id { get; set; }
+
+    // Multitenancy Phase 1: Tenant scoping
+    public int CompanyId { get; set; }
 
     [Required]
     public int UserId { get; set; }

@@ -7,6 +7,7 @@ using ShiftManager.Services;
 using ShiftManager.Models.Support;
 using Microsoft.AspNetCore.Localization;
 using System.Globalization;
+using ShiftManager.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,7 +19,7 @@ builder.Logging.AddDebug();
 
 
 // Configure localization
-builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+builder.Services.AddLocalization();
 builder.Services.Configure<RequestLocalizationOptions>(options =>
 {
     var supportedCultures = new[] { "en-US", "he-IL" };
@@ -27,6 +28,7 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
     options.SupportedUICultures = supportedCultures.Select(c => new CultureInfo(c)).ToList();
 
     options.RequestCultureProviders.Clear();
+    options.RequestCultureProviders.Add(new QueryStringRequestCultureProvider());
     options.RequestCultureProviders.Add(new CookieRequestCultureProvider());
     options.RequestCultureProviders.Add(new AcceptLanguageHeaderRequestCultureProvider());
 });
@@ -35,17 +37,29 @@ builder.Services.AddRazorPages(options =>
 {
     options.Conventions.AuthorizeFolder("/");
     options.Conventions.AllowAnonymousToPage("/Auth/Login");
+    options.Conventions.AllowAnonymousToPage("/Auth/Signup");
 })
 .AddViewLocalization()
 .AddDataAnnotationsLocalization();
 
-builder.Services.AddHttpContextAccessor(); // ⬅ add this
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ILocalizationService, LocalizationService>();
 
-builder.Services.AddDbContext<AppDbContext>(opt =>
+// Multitenancy Phase 2: Register tenant resolver and company context
+builder.Services.AddScoped<ITenantResolver, TenantResolver>();
+builder.Services.AddScoped<ICompanyContext, CompanyContext>();
+
+// Multitenancy Phase 2: Register CompanyId interceptor
+builder.Services.AddSingleton<CompanyIdInterceptor>();
+
+builder.Services.AddDbContext<AppDbContext>((serviceProvider, opt) =>
+{
+    var interceptor = serviceProvider.GetRequiredService<CompanyIdInterceptor>();
     opt.UseSqlite(builder.Configuration.GetConnectionString("Default"))
        .EnableDetailedErrors()
-       .EnableSensitiveDataLogging(builder.Environment.IsDevelopment()));
+       .EnableSensitiveDataLogging(builder.Environment.IsDevelopment())
+       .AddInterceptors(interceptor);
+});
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(opt =>
@@ -61,12 +75,17 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("IsManagerOrAdmin",
-        policy => policy.RequireRole(nameof(UserRole.Manager), nameof(UserRole.Admin)));
-    options.AddPolicy("IsAdmin", policy => policy.RequireRole(nameof(UserRole.Admin)));
+        policy => policy.RequireRole(nameof(UserRole.Manager), nameof(UserRole.Owner), nameof(UserRole.Director)));
+    options.AddPolicy("IsAdmin", policy => policy.RequireRole(nameof(UserRole.Owner)));
+    options.AddPolicy("IsDirector", policy => policy.RequireRole(nameof(UserRole.Director)));
+    options.AddPolicy("IsOwnerOrDirector", policy => policy.RequireRole(nameof(UserRole.Owner), nameof(UserRole.Director)));
 });
 
 builder.Services.AddScoped<IConflictChecker, ConflictChecker>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<IDirectorService, DirectorService>();
+builder.Services.AddScoped<ICompanyFilterService, CompanyFilterService>();
+builder.Services.AddScoped<IViewAsModeService, ViewAsModeService>();
 
 var app = builder.Build();
 
@@ -85,14 +104,14 @@ using (var scope = app.Services.CreateScope())
 
     var company = db.Companies.First();
 
-    // Seed shift types (fixed keys)
+    // Seed shift types (fixed keys) - company-specific
     if (!db.ShiftTypes.Any())
     {
         db.ShiftTypes.AddRange(new[] {
-            new ShiftType{ Key="MORNING", Start=new TimeOnly(8,0), End=new TimeOnly(16,0)},
-            new ShiftType{ Key="NOON", Start=new TimeOnly(16,0), End=new TimeOnly(0,0)},
-            new ShiftType{ Key="NIGHT", Start=new TimeOnly(0,0), End=new TimeOnly(8,0)},
-            new ShiftType{ Key="MIDDLE", Start=new TimeOnly(12,0), End=new TimeOnly(20,0)},
+            new ShiftType{ CompanyId=company.Id, Key="MORNING", Start=new TimeOnly(8,0), End=new TimeOnly(16,0)},
+            new ShiftType{ CompanyId=company.Id, Key="NOON", Start=new TimeOnly(16,0), End=new TimeOnly(0,0)},
+            new ShiftType{ CompanyId=company.Id, Key="NIGHT", Start=new TimeOnly(0,0), End=new TimeOnly(8,0)},
+            new ShiftType{ CompanyId=company.Id, Key="MIDDLE", Start=new TimeOnly(12,0), End=new TimeOnly(20,0)},
         });
         await db.SaveChangesAsync();
     }
@@ -107,7 +126,7 @@ using (var scope = app.Services.CreateScope())
         await db.SaveChangesAsync();
     }
 
-    // Seed admin user
+    // Seed owner user
     if (!db.Users.Any())
     {
         var (hash, salt) = PasswordHasher.CreateHash("admin123");
@@ -115,13 +134,79 @@ using (var scope = app.Services.CreateScope())
         {
             CompanyId = company.Id,
             Email = "admin@local",
-            DisplayName = "Admin",
-            Role = UserRole.Admin,
+            DisplayName = "Owner",
+            Role = UserRole.Owner,
             IsActive = true,
             PasswordHash = hash,
             PasswordSalt = salt
         });
         await db.SaveChangesAsync();
+    }
+
+    // Seed test Director user and companies (for QA)
+    var enableDirectorRole = app.Configuration.GetValue<bool>("Features:EnableDirectorRole", false);
+    if (enableDirectorRole && app.Environment.IsDevelopment())
+    {
+        // Create second company if it doesn't exist
+        if (db.Companies.Count() < 2)
+        {
+            var company2 = new Company { Name = "Test Corp", Slug = "test-corp", DisplayName = "Test Corporation" };
+            db.Companies.Add(company2);
+            await db.SaveChangesAsync();
+
+            // Seed shift types for second company
+            db.ShiftTypes.AddRange(new[] {
+                new ShiftType{ CompanyId=company2.Id, Key="MORNING", Start=new TimeOnly(8,0), End=new TimeOnly(16,0)},
+                new ShiftType{ CompanyId=company2.Id, Key="NOON", Start=new TimeOnly(16,0), End=new TimeOnly(0,0)},
+                new ShiftType{ CompanyId=company2.Id, Key="NIGHT", Start=new TimeOnly(0,0), End=new TimeOnly(8,0)},
+                new ShiftType{ CompanyId=company2.Id, Key="MIDDLE", Start=new TimeOnly(12,0), End=new TimeOnly(20,0)},
+            });
+            await db.SaveChangesAsync();
+
+            // Seed config for second company
+            db.Configs.AddRange(new[] {
+                new AppConfig{ CompanyId = company2.Id, Key = "RestHours", Value = "8" },
+                new AppConfig{ CompanyId = company2.Id, Key = "WeeklyHoursCap", Value = "40" },
+            });
+            await db.SaveChangesAsync();
+        }
+
+        // Create Director user if doesn't exist
+        if (!db.Users.Any(u => u.Role == UserRole.Director))
+        {
+            var (dirHash, dirSalt) = PasswordHasher.CreateHash("director123");
+            var director = new AppUser
+            {
+                CompanyId = company.Id,
+                Email = "director@local",
+                DisplayName = "Test Director",
+                Role = UserRole.Director,
+                IsActive = true,
+                PasswordHash = dirHash,
+                PasswordSalt = dirSalt
+            };
+            db.Users.Add(director);
+            await db.SaveChangesAsync();
+
+            // Assign Director to both companies
+            var ownerUser = db.Users.First(u => u.Role == UserRole.Owner);
+            var allCompanies = db.Companies.ToList();
+
+            foreach (var comp in allCompanies)
+            {
+                if (!db.DirectorCompanies.Any(dc => dc.UserId == director.Id && dc.CompanyId == comp.Id))
+                {
+                    db.DirectorCompanies.Add(new DirectorCompany
+                    {
+                        UserId = director.Id,
+                        CompanyId = comp.Id,
+                        GrantedBy = ownerUser.Id,
+                        GrantedAt = DateTime.UtcNow
+                    });
+                }
+            }
+            await db.SaveChangesAsync();
+        }
     }
 }
 
@@ -148,6 +233,9 @@ app.UseRouting();
 
 // Add request localization middleware
 app.UseRequestLocalization();
+
+// Multitenancy Phase 2: Add company context middleware
+app.UseMiddleware<CompanyContextMiddleware>();
 
 app.UseAuthentication();
 app.UseAuthorization();

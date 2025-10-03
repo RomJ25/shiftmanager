@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using ShiftManager.Data;
 using ShiftManager.Models;
+using ShiftManager.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Localization;
 using ShiftManager.Resources;
@@ -16,9 +17,17 @@ namespace ShiftManager.Pages.Calendar;
 public class MonthModel : PageModel
 {
     private readonly AppDbContext _db;
+    private readonly ICompanyContext _companyContext;
     private readonly ILogger<MonthModel> _logger;
-    private readonly IStringLocalizer<SharedResource> _localizer;
-    public MonthModel(AppDbContext db, ILogger<MonthModel> logger, IStringLocalizer<SharedResource> localizer) { _db = db; _logger = logger; _localizer = localizer; }
+    private readonly IStringLocalizer<SharedResources> _localizer;
+
+    public MonthModel(AppDbContext db, ICompanyContext companyContext, ILogger<MonthModel> logger, IStringLocalizer<SharedResources> localizer)
+    {
+        _db = db;
+        _companyContext = companyContext;
+        _logger = logger;
+        _localizer = localizer;
+    }
 
 
     public DateOnly CurrentMonth { get; set; }
@@ -58,7 +67,7 @@ public class MonthModel : PageModel
         Previous = (target.AddMonths(-1), target.AddMonths(-1).ToString("MMM yyyy"));
         Next = (target.AddMonths(1), target.AddMonths(1).ToString("MMM yyyy"));
 
-        var companyId = int.Parse(User.FindFirst("CompanyId")!.Value);
+        var companyId = _companyContext.GetCompanyIdOrThrow();
 
         // Load shift types
         var types = await _db.ShiftTypes.OrderBy(s => s.Key).ToListAsync();
@@ -153,7 +162,7 @@ public class MonthModel : PageModel
     public async Task<IActionResult> OnPostAdjustAsync([FromBody] AdjustPayload payload)
     {
         _logger.LogInformation("Adjust staffing: date={Date} shiftTypeId={ShiftTypeId} delta={Delta}", payload.date, payload.shiftTypeId, payload.delta);
-        var companyId = int.Parse(User.FindFirst("CompanyId")!.Value);
+        var companyId = _companyContext.GetCompanyIdOrThrow();
         var date = DateOnly.Parse(payload.date);
 
         var inst = await _db.ShiftInstances.FirstOrDefaultAsync(i => i.CompanyId == companyId && i.WorkDate == date && i.ShiftTypeId == payload.shiftTypeId);

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using ShiftManager.Data;
 using ShiftManager.Models;
+using ShiftManager.Services;
 using Microsoft.Extensions.Logging;
 
 namespace ShiftManager.Pages.Calendar;
@@ -13,8 +14,15 @@ namespace ShiftManager.Pages.Calendar;
 public class WeekModel : PageModel
 {
     private readonly AppDbContext _db;
+    private readonly ICompanyContext _companyContext;
     private readonly ILogger<WeekModel> _logger;
-    public WeekModel(AppDbContext db, ILogger<WeekModel> logger) { _db = db; _logger = logger; }
+
+    public WeekModel(AppDbContext db, ICompanyContext companyContext, ILogger<WeekModel> logger)
+    {
+        _db = db;
+        _companyContext = companyContext;
+        _logger = logger;
+    }
 
     public DateOnly CurrentWeekStart { get; set; }
     public (DateOnly WeekStart, string Label) Previous { get; set; }
@@ -59,7 +67,7 @@ public class WeekModel : PageModel
         Previous = (CurrentWeekStart.AddDays(-7), CurrentWeekStart.AddDays(-7).ToString("MMM dd"));
         Next = (CurrentWeekStart.AddDays(7), CurrentWeekStart.AddDays(7).ToString("MMM dd"));
 
-        var companyId = int.Parse(User.FindFirst("CompanyId")!.Value);
+        var companyId = _companyContext.GetCompanyIdOrThrow();
 
         // Load shift types
         var types = await _db.ShiftTypes.OrderBy(s => s.Key).ToListAsync();
@@ -150,7 +158,7 @@ public class WeekModel : PageModel
     public async Task<IActionResult> OnPostAdjustAsync([FromBody] AdjustPayload payload)
     {
         _logger.LogInformation("Adjust staffing: date={Date} shiftTypeId={ShiftTypeId} delta={Delta}", payload.date, payload.shiftTypeId, payload.delta);
-        var companyId = int.Parse(User.FindFirst("CompanyId")!.Value);
+        var companyId = _companyContext.GetCompanyIdOrThrow();
         var date = DateOnly.Parse(payload.date);
 
         var inst = await _db.ShiftInstances.FirstOrDefaultAsync(i => i.CompanyId == companyId && i.WorkDate == date && i.ShiftTypeId == payload.shiftTypeId);
