@@ -34,7 +34,6 @@ public class ManageModel : PageModel
     [BindProperty(SupportsGet = true)] public DateOnly Date { get; set; }
     [BindProperty(SupportsGet = true)] public int ShiftTypeId { get; set; }
     [BindProperty(SupportsGet = true)] public string? ReturnUrl { get; set; }
-    [BindProperty(SupportsGet = true)] public int? SelectedCompanyId { get; set; }
 
     public ShiftType? Type { get; set; }
     public ShiftInstance Instance { get; set; } = default!;
@@ -44,74 +43,47 @@ public class ManageModel : PageModel
     [BindProperty] public string ShiftName { get; set; } = string.Empty;
     public List<AppUser> ActiveUsers { get; set; } = new();
     public HashSet<int> UsersOnTimeOff { get; set; } = new();
-    public List<Company> AvailableCompanies { get; set; } = new();
-    public bool CanSelectCompany { get; set; }
     public string? Error { get; set; }
 
     public async Task<IActionResult> OnGetAsync()
     {
-        // Determine available companies based on user role
+        // Load the shift type (across all companies using IgnoreQueryFilters)
+        Type = await _db.ShiftTypes
+            .IgnoreQueryFilters()
+            .FirstOrDefaultAsync(st => st.Id == ShiftTypeId);
+
+        if (Type == null)
+        {
+            _logger.LogWarning("ShiftType {ShiftTypeId} not found", ShiftTypeId);
+            return RedirectToPage("/Calendar/Month");
+        }
+
+        // Company is determined by the shift type's CompanyId
+        var companyId = Type.CompanyId;
+
+        // Validate user has access to this company
         var currentUserId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
         var currentUser = await _db.Users.FindAsync(currentUserId);
 
+        bool hasAccess = false;
         if (currentUser!.Role == UserRole.Owner)
         {
-            CanSelectCompany = true;
-            AvailableCompanies = await _db.Companies.OrderBy(c => c.Name).ToListAsync();
+            hasAccess = true;
         }
         else if (currentUser.Role == UserRole.Director)
         {
-            var directorCompanyIds = await _directorService.GetDirectorCompanyIdsAsync(currentUserId);
-            if (directorCompanyIds.Count > 1)
-            {
-                CanSelectCompany = true;
-                AvailableCompanies = await _db.Companies
-                    .Where(c => directorCompanyIds.Contains(c.Id))
-                    .OrderBy(c => c.Name)
-                    .ToListAsync();
-            }
+            hasAccess = await _directorService.IsDirectorOfAsync(companyId);
         }
-
-        // Determine which company to use
-        int companyId;
-        if (SelectedCompanyId.HasValue && CanSelectCompany)
+        else if (currentUser.Role == UserRole.Manager)
         {
-            companyId = SelectedCompanyId.Value;
-
-            // Validate user has access to selected company
-            if (currentUser.Role == UserRole.Owner)
-            {
-                // Owner has access to all companies
-            }
-            else if (currentUser.Role == UserRole.Director)
-            {
-                var hasAccess = await _directorService.IsDirectorOfAsync(companyId);
-                if (!hasAccess)
-                {
-                    Error = "You don't have access to the selected company.";
-                    return Page();
-                }
-            }
-            else
-            {
-                // Manager can only use their own company
-                if (companyId != currentUser.CompanyId)
-                {
-                    Error = "You can only create shifts for your own company.";
-                    return Page();
-                }
-            }
+            hasAccess = currentUser.CompanyId == companyId;
         }
-        else
+
+        if (!hasAccess)
         {
-            companyId = _companyContext.GetCompanyIdOrThrow();
-            SelectedCompanyId = companyId;
+            _logger.LogWarning("User {UserId} attempted to access shift for company {CompanyId} without permission", currentUserId, companyId);
+            return RedirectToPage("/AccessDenied");
         }
-
-        Type = await _db.ShiftTypes
-            .IgnoreQueryFilters()
-            .FirstOrDefaultAsync(st => st.Id == ShiftTypeId && st.CompanyId == companyId);
-        if (Type == null) return RedirectToPage("/Calendar/Month");
 
         Instance = await _db.ShiftInstances
             .IgnoreQueryFilters()
@@ -134,12 +106,13 @@ public class ManageModel : PageModel
         // Load current shift name for display
         ShiftName = Instance.Name ?? string.Empty;
 
+        // Only show users from the shift's company
         ActiveUsers = await _db.Users
             .Where(u => u.IsActive && u.CompanyId == companyId)
             .OrderBy(u => u.DisplayName)
             .ToListAsync();
 
-        // Check which users have approved time off on this date
+        // Check which users have approved time off on this date (from same company)
         UsersOnTimeOff = (await _db.TimeOffRequests
             .IgnoreQueryFilters()
             .Where(r => r.CompanyId == companyId &&
@@ -160,7 +133,25 @@ public class ManageModel : PageModel
 
         if (SelectedUserId is null) { Error = "Select a user."; return Page(); }
 
-        int assigned = await _db.ShiftAssignments.CountAsync(a => a.ShiftInstanceId == Instance.Id);
+        // Validate user belongs to the shift's company
+        var selectedUser = await _db.Users.FindAsync(SelectedUserId.Value);
+        if (selectedUser == null)
+        {
+            Error = "Selected user not found.";
+            return Page();
+        }
+
+        if (selectedUser.CompanyId != Instance.CompanyId)
+        {
+            _logger.LogWarning("Attempted cross-company assignment: User {UserId} (Company {UserCompanyId}) to Shift (Company {ShiftCompanyId})",
+                SelectedUserId.Value, selectedUser.CompanyId, Instance.CompanyId);
+            Error = "Cannot assign user from a different company to this shift.";
+            return Page();
+        }
+
+        int assigned = await _db.ShiftAssignments
+            .IgnoreQueryFilters()
+            .CountAsync(a => a.ShiftInstanceId == Instance.Id);
         if (assigned >= Instance.StaffingRequired)
         {
             Error = "Cannot over-assign. Increase required first.";
@@ -205,7 +196,7 @@ public class ManageModel : PageModel
             Type.End
         );
 
-        return RedirectToPage(new { date = Date, shiftTypeId = ShiftTypeId, returnUrl = ReturnUrl, selectedCompanyId = SelectedCompanyId });
+        return RedirectToPage(new { date = Date, shiftTypeId = ShiftTypeId, returnUrl = ReturnUrl });
     }
 
     public async Task<IActionResult> OnPostRemoveAsync(int assignmentId)
@@ -237,6 +228,6 @@ public class ManageModel : PageModel
             _logger.LogWarning("Assignment {AssignmentId} not found for removal", assignmentId);
         }
 
-        return !string.IsNullOrEmpty(ReturnUrl) ? Redirect(ReturnUrl) : RedirectToPage(new { date = Date, shiftTypeId = ShiftTypeId, selectedCompanyId = SelectedCompanyId });
+        return !string.IsNullOrEmpty(ReturnUrl) ? Redirect(ReturnUrl) : RedirectToPage(new { date = Date, shiftTypeId = ShiftTypeId });
     }
 }

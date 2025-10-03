@@ -8,32 +8,6 @@
 }
 <h2>Assignments — @Model.Date.ToString("ddd, MMM d") — @(Model.Type != null ? Localizer[$"ShiftType_{Model.Type.Key}"] : "")</h2>
 
-@if (Model.CanSelectCompany && Model.AvailableCompanies.Any())
-{
-    <div class="card">
-        <h3 style="margin-top:0">@Localizer["Company"]</h3>
-        <form method="get">
-            <input type="hidden" name="date" value="@Model.Date.ToString("yyyy-MM-dd")" />
-            <input type="hidden" name="shiftTypeId" value="@Model.ShiftTypeId" />
-            <input type="hidden" name="returnUrl" value="@Model.ReturnUrl" />
-
-            <div style="display:flex; gap:1rem; align-items:end">
-                <label style="flex:1">
-                    @Localizer["SelectCompany"]<br />
-                    <select class="input" name="selectedCompanyId" onchange="this.form.submit()">
-                        @foreach (var company in Model.AvailableCompanies)
-                        {
-                            <option value="@company.Id" selected="@(Model.SelectedCompanyId == company.Id)">
-                                @company.Name
-                            </option>
-                        }
-                    </select>
-                </label>
-            </div>
-        </form>
-    </div>
-}
-
 <div class="card">
     <div style="display:flex; gap:1rem; align-items:center; justify-content:space-between">
         <div>
@@ -54,7 +28,6 @@
                 <form method="post" asp-page-handler="Remove">
                     <input type="hidden" name="assignmentId" value="@a.AssignmentId" />
                     <input type="hidden" asp-for="ReturnUrl" />
-                    <input type="hidden" asp-for="SelectedCompanyId" />
                     <button class="btn btn-danger">Remove</button>
                 </form>
             </li>
@@ -72,7 +45,6 @@
         <input type="hidden" asp-for="Date" />
         <input type="hidden" asp-for="ShiftTypeId" />
         <input type="hidden" asp-for="ReturnUrl" />
-        <input type="hidden" asp-for="SelectedCompanyId" />
 
         @if (Model.Assigned.Count == 0)
         {
