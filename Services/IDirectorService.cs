@@ -35,4 +35,13 @@ public interface IDirectorService
     /// Directors cannot assign Owner role
     /// </summary>
     bool CanAssignRole(string role);
+
+    /// <summary>
+    /// Check if current user can assign the specified role (strongly-typed)
+    /// Owner: can assign any role
+    /// Director: can assign Employee, Manager, Director only
+    /// Manager: can assign Employee only
+    /// Employee: cannot assign any role
+    /// </summary>
+    bool CanAssignRole(Models.Support.UserRole targetRole);
 }

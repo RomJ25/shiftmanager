@@ -35,6 +35,20 @@ public class UsersModel : PageModel
     public List<JoinRequestVM> JoinRequests { get; set; } = new();
     public List<Company> AvailableCompanies { get; set; } = new();
 
+    // Expose assignable roles for UI filtering
+    public List<UserRole> AssignableRoles
+    {
+        get
+        {
+            var roles = new List<UserRole>();
+            if (_directorService.CanAssignRole(UserRole.Employee)) roles.Add(UserRole.Employee);
+            if (_directorService.CanAssignRole(UserRole.Manager)) roles.Add(UserRole.Manager);
+            if (_directorService.CanAssignRole(UserRole.Director)) roles.Add(UserRole.Director);
+            if (_directorService.CanAssignRole(UserRole.Owner)) roles.Add(UserRole.Owner);
+            return roles;
+        }
+    }
+
     // Filter parameters for join requests
     [BindProperty(SupportsGet = true)]
     public JoinRequestStatus FilterStatus { get; set; } = JoinRequestStatus.Pending;
@@ -222,6 +236,19 @@ public class UsersModel : PageModel
 
         if (await _db.Users.AnyAsync(u => u.Email == NewEmail)) { Error = "Email already exists."; return Page(); }
 
+        // Validate role string and permission to assign
+        if (!Enum.TryParse<UserRole>(NewRole, ignoreCase: true, out var targetRole))
+        {
+            TempData["ErrorMessage"] = "Invalid role specified.";
+            return RedirectToPage();
+        }
+
+        if (!_directorService.CanAssignRole(targetRole))
+        {
+            TempData["ErrorMessage"] = $"You do not have permission to assign the {targetRole} role.";
+            return RedirectToPage();
+        }
+
         var companyId = _companyContext.GetCompanyIdOrThrow();
         var (h, s) = PasswordHasher.CreateHash(NewPassword);
         _db.Users.Add(new AppUser
@@ -229,12 +256,14 @@ public class UsersModel : PageModel
             CompanyId = companyId,
             Email = NewEmail,
             DisplayName = NewDisplayName,
-            Role = Enum.Parse<UserRole>(NewRole),
+            Role = targetRole,
             IsActive = true,
             PasswordHash = h,
             PasswordSalt = s
         });
         await _db.SaveChangesAsync();
+
+        TempData["SuccessMessage"] = $"User {NewDisplayName} created successfully as {targetRole}.";
         return RedirectToPage();
     }
 
@@ -247,8 +276,26 @@ public class UsersModel : PageModel
 
     public async Task<IActionResult> OnPostRoleAsync(int id, string role)
     {
+        // Validate role string and permission to assign
+        if (!Enum.TryParse<UserRole>(role, ignoreCase: true, out var targetRole))
+        {
+            TempData["ErrorMessage"] = "Invalid role specified.";
+            return RedirectToPage();
+        }
+
+        if (!_directorService.CanAssignRole(targetRole))
+        {
+            TempData["ErrorMessage"] = $"You do not have permission to assign the {targetRole} role.";
+            return RedirectToPage();
+        }
+
         var u = await _db.Users.FindAsync(id);
-        if (u != null) { u.Role = Enum.Parse<UserRole>(role); await _db.SaveChangesAsync(); }
+        if (u != null)
+        {
+            u.Role = targetRole;
+            await _db.SaveChangesAsync();
+            TempData["SuccessMessage"] = $"Role updated to {targetRole} for user {u.DisplayName}.";
+        }
         return RedirectToPage();
     }
 
@@ -400,6 +447,13 @@ public class UsersModel : PageModel
         if (await _db.Users.AnyAsync(u => u.Email == joinRequest.Email))
         {
             TempData["ErrorMessage"] = "A user with this email already exists.";
+            return RedirectToPage();
+        }
+
+        // Validate permission to assign the requested role
+        if (!_directorService.CanAssignRole(joinRequest.RequestedRole))
+        {
+            TempData["ErrorMessage"] = $"You do not have permission to assign the {joinRequest.RequestedRole} role.";
             return RedirectToPage();
         }
 

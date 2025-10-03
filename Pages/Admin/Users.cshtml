@@ -200,16 +200,10 @@
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="id" value="@u.Id" />
                     <select class="input" name="role" onchange="this.form.submit()">
-                    @if (u.Role == "Employee")
-                    { <option value="Employee" selected>@Localizer["Employee"]</option> }
-                    else
-                    { <option value="Employee">@Localizer["Employee"]</option> }
-                    @if (u.Role == "Manager")  { <option value="Manager" selected>@Localizer["Manager"]</option> }
-                    else                        { <option value="Manager">@Localizer["Manager"]</option> }
-                    @if (u.Role == "Director") { <option value="Director" selected>@Localizer["Director"]</option> }
-                    else                        { <option value="Director">@Localizer["Director"]</option> }
-                    @if (u.Role == "Owner")    { <option value="Owner" selected>@Localizer["Owner"]</option> }
-                    else                        { <option value="Owner">@Localizer["Owner"]</option> }
+                    @foreach (var role in Model.AssignableRoles)
+                    {
+                        <option value="@role" selected="@(u.Role == role.ToString())">@Localizer[role.ToString()]</option>
+                    }
                     </select>
                     </form>
 
@@ -270,10 +264,10 @@
             <label>@Localizer["DisplayName"]<br /><input class="input" asp-for="NewDisplayName" /></label>
             <label>@Localizer["Role"]<br />
                 <select class="input" asp-for="NewRole">
-                    <option>@Localizer["Employee"]</option>
-                    <option>@Localizer["Manager"]</option>
-                    <option>@Localizer["Director"]</option>
-                    <option>@Localizer["Owner"]</option>
+                    @foreach (var role in Model.AssignableRoles)
+                    {
+                        <option value="@role">@Localizer[role.ToString()]</option>
+                    }
                 </select>
             </label>
             <label>@Localizer["Password"]<br /><input class="input" asp-for="NewPassword" type="password" /></label>

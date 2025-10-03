@@ -88,22 +88,44 @@ public class DirectorService : IDirectorService
 
     public bool CanAssignRole(string role)
     {
-        // Directors cannot assign Owner role
-        if (IsDirector() && role == nameof(UserRole.Owner))
+        // Safe string overload - try parse and delegate to strongly-typed version
+        if (string.IsNullOrWhiteSpace(role))
             return false;
 
-        // Owners can assign any role
-        if (CurrentUser?.IsInRole(nameof(UserRole.Owner)) ?? false)
+        // Try to parse the role string (case-insensitive)
+        if (Enum.TryParse<UserRole>(role.Trim(), ignoreCase: true, out var targetRole))
+        {
+            return CanAssignRole(targetRole);
+        }
+
+        // Invalid role string
+        return false;
+    }
+
+    public bool CanAssignRole(UserRole targetRole)
+    {
+        if (CurrentUser == null)
+            return false;
+
+        // Owner can assign any role
+        if (CurrentUser.IsInRole(nameof(UserRole.Owner)))
             return true;
 
-        // Directors can assign Manager and Employee
-        if (IsDirector() && (role == nameof(UserRole.Manager) || role == nameof(UserRole.Employee)))
-            return true;
+        // Director can assign Employee, Manager, Director (but NOT Owner)
+        if (CurrentUser.IsInRole(nameof(UserRole.Director)))
+        {
+            return targetRole == UserRole.Employee
+                || targetRole == UserRole.Manager
+                || targetRole == UserRole.Director;
+        }
 
-        // Managers can assign Employee
-        if ((CurrentUser?.IsInRole(nameof(UserRole.Manager)) ?? false) && role == nameof(UserRole.Employee))
-            return true;
+        // Manager can assign Employee only
+        if (CurrentUser.IsInRole(nameof(UserRole.Manager)))
+        {
+            return targetRole == UserRole.Employee;
+        }
 
+        // Employee cannot assign any role
         return false;
     }
 }
