@@ -16,12 +16,14 @@ public class DayModel : PageModel
     private readonly AppDbContext _db;
     private readonly ICompanyContext _companyContext;
     private readonly ILogger<DayModel> _logger;
+    private readonly IDirectorService _directorService;
 
-    public DayModel(AppDbContext db, ICompanyContext companyContext, ILogger<DayModel> logger)
+    public DayModel(AppDbContext db, ICompanyContext companyContext, ILogger<DayModel> logger, IDirectorService directorService)
     {
         _db = db;
         _companyContext = companyContext;
         _logger = logger;
+        _directorService = directorService;
     }
 
     public DateOnly CurrentDate { get; set; }
@@ -61,8 +63,45 @@ public class DayModel : PageModel
 
         var companyId = _companyContext.GetCompanyIdOrThrow();
 
-        // Load shift types with custom ordering: morning, middle, noon, night
-        var types = await _db.ShiftTypes.ToListAsync();
+        // Determine accessible companies and load shift types accordingly
+        var currentUserId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
+        var currentUser = await _db.Users.FindAsync(currentUserId);
+
+        List<int> accessibleCompanyIds;
+        List<Company> accessibleCompanies;
+        List<ShiftType> types;
+
+        if (currentUser!.Role == Models.Support.UserRole.Owner)
+        {
+            // Owner: all companies
+            accessibleCompanies = await _db.Companies.OrderBy(c => c.Name).ToListAsync();
+            accessibleCompanyIds = accessibleCompanies.Select(c => c.Id).ToList();
+            types = await _db.ShiftTypes.IgnoreQueryFilters()
+                .Where(st => accessibleCompanyIds.Contains(st.CompanyId))
+                .ToListAsync();
+        }
+        else if (currentUser.Role == Models.Support.UserRole.Director)
+        {
+            // Director: companies they manage
+            accessibleCompanyIds = await _directorService.GetDirectorCompanyIdsAsync(currentUserId);
+            accessibleCompanies = await _db.Companies
+                .Where(c => accessibleCompanyIds.Contains(c.Id))
+                .OrderBy(c => c.Name)
+                .ToListAsync();
+            types = await _db.ShiftTypes.IgnoreQueryFilters()
+                .Where(st => accessibleCompanyIds.Contains(st.CompanyId))
+                .ToListAsync();
+        }
+        else
+        {
+            // Manager/Employee: only their company
+            accessibleCompanyIds = new List<int> { currentUser.CompanyId };
+            accessibleCompanies = await _db.Companies
+                .Where(c => c.Id == currentUser.CompanyId)
+                .ToListAsync();
+            types = await _db.ShiftTypes.ToListAsync(); // Uses query filter
+        }
+
         types = types.OrderBy(s => s.Key switch
         {
             "MORNING" => 1,
@@ -72,14 +111,24 @@ public class DayModel : PageModel
             _ => 99
         }).ToList();
 
-        // Prepare shift types for JavaScript
+        // Prepare companies for JavaScript
+        ViewData["Companies"] = accessibleCompanies.Select(c => new
+        {
+            id = c.Id,
+            name = c.Name
+        }).ToList();
+
+        // Prepare shift types for JavaScript (include company info)
+        var companyDict = accessibleCompanies.ToDictionary(c => c.Id, c => c.Name);
         ViewData["ShiftTypes"] = types.Select(t => new
         {
             id = t.Id,
             key = t.Key,
             name = t.Name,
             start = t.Start.ToString("HH:mm"),
-            end = t.End.ToString("HH:mm")
+            end = t.End.ToString("HH:mm"),
+            companyId = t.CompanyId,
+            companyName = companyDict.ContainsKey(t.CompanyId) ? companyDict[t.CompanyId] : "Unknown"
         }).ToList();
 
         // Load instances and assignments for the day

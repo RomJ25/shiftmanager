@@ -267,6 +267,18 @@ function openShiftModal(date) {
 }
 
 function createShiftModal() {
+  const companies = window.companies || [];
+  const showCompanySelector = companies.length > 1;
+
+  const companySelectorHTML = showCompanySelector ? `
+    <div class="form-group">
+      <label class="form-label">Company</label>
+      <select id="companySelect" class="form-input" onchange="filterShiftTypesByCompany()">
+        ${companies.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}
+      </select>
+    </div>
+  ` : '';
+
   const modalHTML = `
     <div id="shiftModal" class="shift-creation-modal">
       <div class="modal-content">
@@ -279,6 +291,8 @@ function createShiftModal() {
           <label class="form-label">Date</label>
           <div id="modalDate" style="padding: .75rem 1rem; background: var(--surface); border-radius: .75rem; color: var(--text); font-weight: 500;"></div>
         </div>
+
+        ${companySelectorHTML}
 
         <div class="form-group">
           <label class="form-label">Shift Name (Optional)</label>
@@ -339,20 +353,44 @@ function populateShiftTypes(types) {
   const grid = document.getElementById('shiftTypeGrid');
   grid.innerHTML = '';
 
-  types.forEach(type => {
+  // Get selected company if selector exists
+  const companySelect = document.getElementById('companySelect');
+  const selectedCompanyId = companySelect ? parseInt(companySelect.value) : null;
+
+  // Filter types by selected company
+  const filteredTypes = selectedCompanyId
+    ? types.filter(t => t.companyId === selectedCompanyId)
+    : types;
+
+  if (filteredTypes.length === 0) {
+    grid.innerHTML = '<div style="color: var(--muted); text-align: center; padding: 2rem;">No shift types available for this company.</div>';
+    return;
+  }
+
+  filteredTypes.forEach(type => {
     const option = document.createElement('div');
     option.className = 'shift-type-option';
     option.dataset.typeId = type.id;
     option.dataset.typeKey = type.key;
     option.onclick = () => selectShiftType(option);
 
+    const companyLabel = type.companyName && selectedCompanyId === null
+      ? `<div class="shift-type-company">${type.companyName}</div>`
+      : '';
+
     option.innerHTML = `
       <div class="shift-type-name">${type.name}</div>
       <div class="shift-type-time">${type.start} - ${type.end}</div>
+      ${companyLabel}
     `;
 
     grid.appendChild(option);
   });
+}
+
+function filterShiftTypesByCompany() {
+  if (!currentModalData) return;
+  populateShiftTypes(currentModalData.availableTypes);
 }
 
 function selectShiftType(option) {
