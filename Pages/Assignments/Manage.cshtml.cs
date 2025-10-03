@@ -18,20 +18,23 @@ public class ManageModel : PageModel
     private readonly INotificationService _notificationService;
     private readonly ILogger<ManageModel> _logger;
     private readonly ICompanyContext _companyContext;
+    private readonly IDirectorService _directorService;
 
-    public ManageModel(AppDbContext db, IConflictChecker checker, INotificationService notificationService, ILogger<ManageModel> logger, ICompanyContext companyContext)
+    public ManageModel(AppDbContext db, IConflictChecker checker, INotificationService notificationService, ILogger<ManageModel> logger, ICompanyContext companyContext, IDirectorService directorService)
     {
         _db = db;
         _checker = checker;
         _notificationService = notificationService;
         _logger = logger;
         _companyContext = companyContext;
+        _directorService = directorService;
     }
 
 
     [BindProperty(SupportsGet = true)] public DateOnly Date { get; set; }
     [BindProperty(SupportsGet = true)] public int ShiftTypeId { get; set; }
     [BindProperty(SupportsGet = true)] public string? ReturnUrl { get; set; }
+    [BindProperty(SupportsGet = true)] public int? SelectedCompanyId { get; set; }
 
     public ShiftType? Type { get; set; }
     public ShiftInstance Instance { get; set; } = default!;
@@ -41,15 +44,78 @@ public class ManageModel : PageModel
     [BindProperty] public string ShiftName { get; set; } = string.Empty;
     public List<AppUser> ActiveUsers { get; set; } = new();
     public HashSet<int> UsersOnTimeOff { get; set; } = new();
+    public List<Company> AvailableCompanies { get; set; } = new();
+    public bool CanSelectCompany { get; set; }
     public string? Error { get; set; }
 
     public async Task<IActionResult> OnGetAsync()
     {
-        var companyId = _companyContext.GetCompanyIdOrThrow();
-        Type = await _db.ShiftTypes.FindAsync(ShiftTypeId);
+        // Determine available companies based on user role
+        var currentUserId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
+        var currentUser = await _db.Users.FindAsync(currentUserId);
+
+        if (currentUser!.Role == UserRole.Owner)
+        {
+            CanSelectCompany = true;
+            AvailableCompanies = await _db.Companies.OrderBy(c => c.Name).ToListAsync();
+        }
+        else if (currentUser.Role == UserRole.Director)
+        {
+            var directorCompanyIds = await _directorService.GetDirectorCompanyIdsAsync(currentUserId);
+            if (directorCompanyIds.Count > 1)
+            {
+                CanSelectCompany = true;
+                AvailableCompanies = await _db.Companies
+                    .Where(c => directorCompanyIds.Contains(c.Id))
+                    .OrderBy(c => c.Name)
+                    .ToListAsync();
+            }
+        }
+
+        // Determine which company to use
+        int companyId;
+        if (SelectedCompanyId.HasValue && CanSelectCompany)
+        {
+            companyId = SelectedCompanyId.Value;
+
+            // Validate user has access to selected company
+            if (currentUser.Role == UserRole.Owner)
+            {
+                // Owner has access to all companies
+            }
+            else if (currentUser.Role == UserRole.Director)
+            {
+                var hasAccess = await _directorService.IsDirectorOfAsync(companyId);
+                if (!hasAccess)
+                {
+                    Error = "You don't have access to the selected company.";
+                    return Page();
+                }
+            }
+            else
+            {
+                // Manager can only use their own company
+                if (companyId != currentUser.CompanyId)
+                {
+                    Error = "You can only create shifts for your own company.";
+                    return Page();
+                }
+            }
+        }
+        else
+        {
+            companyId = _companyContext.GetCompanyIdOrThrow();
+            SelectedCompanyId = companyId;
+        }
+
+        Type = await _db.ShiftTypes
+            .IgnoreQueryFilters()
+            .FirstOrDefaultAsync(st => st.Id == ShiftTypeId && st.CompanyId == companyId);
         if (Type == null) return RedirectToPage("/Calendar/Month");
 
-        Instance = await _db.ShiftInstances.FirstOrDefaultAsync(i => i.CompanyId == companyId && i.WorkDate == Date && i.ShiftTypeId == ShiftTypeId)
+        Instance = await _db.ShiftInstances
+            .IgnoreQueryFilters()
+            .FirstOrDefaultAsync(i => i.CompanyId == companyId && i.WorkDate == Date && i.ShiftTypeId == ShiftTypeId)
             ?? new ShiftInstance { CompanyId = companyId, WorkDate = Date, ShiftTypeId = ShiftTypeId, StaffingRequired = 0 };
 
         if (Instance.Id == 0)
@@ -58,20 +124,26 @@ public class ManageModel : PageModel
             await _db.SaveChangesAsync();
         }
 
-        var assignments = await (from a in _db.ShiftAssignments
-                                 join u in _db.Users on a.UserId equals u.Id
-                                 where a.ShiftInstanceId == Instance.Id
-                                 select new { a.Id, u.DisplayName, u.Email }).ToListAsync();
+        var assignments = await _db.ShiftAssignments
+            .IgnoreQueryFilters()
+            .Where(a => a.ShiftInstanceId == Instance.Id)
+            .Join(_db.Users, a => a.UserId, u => u.Id, (a, u) => new { a.Id, u.DisplayName, u.Email })
+            .ToListAsync();
         Assigned = assignments.Select(a => (a.Id, $"{a.DisplayName} ({a.Email})")).ToList();
 
         // Load current shift name for display
         ShiftName = Instance.Name ?? string.Empty;
 
-        ActiveUsers = await _db.Users.Where(u => u.IsActive && u.CompanyId == companyId).OrderBy(u => u.DisplayName).ToListAsync();
+        ActiveUsers = await _db.Users
+            .Where(u => u.IsActive && u.CompanyId == companyId)
+            .OrderBy(u => u.DisplayName)
+            .ToListAsync();
 
         // Check which users have approved time off on this date
         UsersOnTimeOff = (await _db.TimeOffRequests
-            .Where(r => r.Status == RequestStatus.Approved &&
+            .IgnoreQueryFilters()
+            .Where(r => r.CompanyId == companyId &&
+                       r.Status == RequestStatus.Approved &&
                        r.StartDate <= Date &&
                        r.EndDate >= Date)
             .Select(r => r.UserId)
@@ -104,7 +176,12 @@ public class ManageModel : PageModel
             return Page();
         }
 
-        _db.ShiftAssignments.Add(new ShiftAssignment { ShiftInstanceId = Instance.Id, UserId = SelectedUserId.Value });
+        _db.ShiftAssignments.Add(new ShiftAssignment
+        {
+            ShiftInstanceId = Instance.Id,
+            UserId = SelectedUserId.Value,
+            CompanyId = Instance.CompanyId
+        });
 
         // Set shift name if provided and this is the first assignment
         // Also check for pending shift name from localStorage (from modal creation)
@@ -128,7 +205,7 @@ public class ManageModel : PageModel
             Type.End
         );
 
-        return RedirectToPage(new { date = Date, shiftTypeId = ShiftTypeId, returnUrl = ReturnUrl });
+        return RedirectToPage(new { date = Date, shiftTypeId = ShiftTypeId, returnUrl = ReturnUrl, selectedCompanyId = SelectedCompanyId });
     }
 
     public async Task<IActionResult> OnPostRemoveAsync(int assignmentId)
@@ -160,6 +237,6 @@ public class ManageModel : PageModel
             _logger.LogWarning("Assignment {AssignmentId} not found for removal", assignmentId);
         }
 
-        return !string.IsNullOrEmpty(ReturnUrl) ? Redirect(ReturnUrl) : RedirectToPage(new { date = Date, shiftTypeId = ShiftTypeId });
+        return !string.IsNullOrEmpty(ReturnUrl) ? Redirect(ReturnUrl) : RedirectToPage(new { date = Date, shiftTypeId = ShiftTypeId, selectedCompanyId = SelectedCompanyId });
     }
 }
