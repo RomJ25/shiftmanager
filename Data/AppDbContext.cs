@@ -27,6 +27,7 @@ public class AppDbContext : DbContext
     public DbSet<AppConfig> Configs => Set<AppConfig>();
     public DbSet<DirectorCompany> DirectorCompanies => Set<DirectorCompany>();
     public DbSet<UserJoinRequest> UserJoinRequests => Set<UserJoinRequest>();
+    public DbSet<RoleAssignmentAudit> RoleAssignmentAudits => Set<RoleAssignmentAudit>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -135,6 +136,13 @@ public class AppDbContext : DbContext
             .WithMany()
             .HasForeignKey(jr => jr.CreatedUserId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        // Configure RoleAssignmentAudit
+        modelBuilder.Entity<RoleAssignmentAudit>()
+            .HasIndex(ra => new { ra.CompanyId, ra.TargetUserId, ra.Timestamp });
+
+        modelBuilder.Entity<RoleAssignmentAudit>()
+            .HasIndex(ra => new { ra.ChangedBy, ra.Timestamp });
 
         // Multitenancy Phase 2: Global query filters for automatic tenant scoping
         if (_tenantResolver != null)

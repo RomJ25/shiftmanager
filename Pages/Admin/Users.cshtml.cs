@@ -251,7 +251,7 @@ public class UsersModel : PageModel
 
         var companyId = _companyContext.GetCompanyIdOrThrow();
         var (h, s) = PasswordHasher.CreateHash(NewPassword);
-        _db.Users.Add(new AppUser
+        var newUser = new AppUser
         {
             CompanyId = companyId,
             Email = NewEmail,
@@ -260,6 +260,20 @@ public class UsersModel : PageModel
             IsActive = true,
             PasswordHash = h,
             PasswordSalt = s
+        };
+        _db.Users.Add(newUser);
+        await _db.SaveChangesAsync();
+
+        // Audit logging
+        var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        _db.RoleAssignmentAudits.Add(new RoleAssignmentAudit
+        {
+            ChangedBy = currentUserId,
+            TargetUserId = newUser.Id,
+            FromRole = null,
+            ToRole = targetRole,
+            CompanyId = companyId,
+            Timestamp = DateTime.UtcNow
         });
         await _db.SaveChangesAsync();
 
@@ -292,8 +306,23 @@ public class UsersModel : PageModel
         var u = await _db.Users.FindAsync(id);
         if (u != null)
         {
+            var oldRole = u.Role;
             u.Role = targetRole;
             await _db.SaveChangesAsync();
+
+            // Audit logging
+            var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            _db.RoleAssignmentAudits.Add(new RoleAssignmentAudit
+            {
+                ChangedBy = currentUserId,
+                TargetUserId = u.Id,
+                FromRole = oldRole,
+                ToRole = targetRole,
+                CompanyId = u.CompanyId,
+                Timestamp = DateTime.UtcNow
+            });
+            await _db.SaveChangesAsync();
+
             TempData["SuccessMessage"] = $"Role updated to {targetRole} for user {u.DisplayName}.";
         }
         return RedirectToPage();
