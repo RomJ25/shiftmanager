@@ -150,6 +150,9 @@ public class AppDbContext : DbContext
             modelBuilder.Entity<ShiftType>()
                 .HasQueryFilter(e => e.CompanyId == _tenantResolver.GetCurrentTenantId());
 
+            modelBuilder.Entity<ShiftInstance>()
+                .HasQueryFilter(e => e.CompanyId == _tenantResolver.GetCurrentTenantId());
+
             modelBuilder.Entity<ShiftAssignment>()
                 .HasQueryFilter(e => e.CompanyId == _tenantResolver.GetCurrentTenantId());
 
