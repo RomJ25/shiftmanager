@@ -102,6 +102,37 @@ public class DayModel : PageModel
             types = await _db.ShiftTypes.ToListAsync(); // Uses query filter
         }
 
+        // ✅ SECURITY FIX (DEFECT-002): Post-query validation for defense-in-depth
+        // Validate every shift type after IgnoreQueryFilters to prevent data leaks
+        var validatedTypes = new List<ShiftType>();
+        foreach (var type in types)
+        {
+            bool hasAccess = false;
+            if (currentUser.Role == Models.Support.UserRole.Owner)
+            {
+                hasAccess = true;
+            }
+            else if (currentUser.Role == Models.Support.UserRole.Director)
+            {
+                hasAccess = await _directorService.IsDirectorOfAsync(type.CompanyId);
+            }
+            else if (currentUser.Role == Models.Support.UserRole.Manager)
+            {
+                hasAccess = currentUser.CompanyId == type.CompanyId;
+            }
+
+            if (hasAccess)
+            {
+                validatedTypes.Add(type);
+            }
+            else
+            {
+                _logger.LogWarning("SECURITY: Filtered unauthorized shift type {ShiftTypeId} from company {CompanyId} for user {UserId}",
+                    type.Id, type.CompanyId, currentUserId);
+            }
+        }
+        types = validatedTypes;
+
         types = types.OrderBy(s => s.Key switch
         {
             "MORNING" => 1,
@@ -206,37 +237,47 @@ public class DayModel : PageModel
         var currentUserId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
         var currentUser = await _db.Users.FindAsync(currentUserId);
 
-        // Determine and validate companyId
-        int targetCompanyId;
-        if (payload.companyId.HasValue)
+        // ✅ SECURITY FIX (DEFECT-003): Always validate company access
+        // Determine target company ID
+        int targetCompanyId = payload.companyId ?? _companyContext.GetCompanyIdOrThrow();
+
+        // ALWAYS validate user has access to target company (even for fallback case)
+        bool hasAccess = false;
+        if (currentUser!.Role == Models.Support.UserRole.Owner)
         {
-            targetCompanyId = payload.companyId.Value;
-
-            // Validate user has access to this company
-            bool hasAccess = false;
-            if (currentUser!.Role == Models.Support.UserRole.Owner)
-            {
-                hasAccess = true;
-            }
-            else if (currentUser.Role == Models.Support.UserRole.Director)
-            {
-                hasAccess = await _directorService.IsDirectorOfAsync(targetCompanyId);
-            }
-            else if (currentUser.Role == Models.Support.UserRole.Manager)
-            {
-                hasAccess = currentUser.CompanyId == targetCompanyId;
-            }
-
-            if (!hasAccess)
-            {
-                _logger.LogWarning("User {UserId} attempted to create shift for unauthorized company {CompanyId}", currentUserId, targetCompanyId);
-                return BadRequest(new { message = "You do not have permission to create shifts for this company." });
-            }
+            hasAccess = true;
         }
-        else
+        else if (currentUser.Role == Models.Support.UserRole.Director)
         {
-            // Fallback to current user's company (for backward compatibility)
-            targetCompanyId = _companyContext.GetCompanyIdOrThrow();
+            hasAccess = await _directorService.IsDirectorOfAsync(targetCompanyId);
+        }
+        else if (currentUser.Role == Models.Support.UserRole.Manager)
+        {
+            hasAccess = currentUser.CompanyId == targetCompanyId;
+        }
+
+        if (!hasAccess)
+        {
+            _logger.LogWarning("SECURITY: User {UserId} ({Role}) attempted unauthorized access to company {CompanyId}",
+                currentUserId, currentUser.Role, targetCompanyId);
+            return StatusCode(403, new { message = $"Access denied to company {targetCompanyId}" });
+        }
+
+        // Additional validation: Verify shift type belongs to target company
+        var shiftType = await _db.ShiftTypes
+            .IgnoreQueryFilters()
+            .FirstOrDefaultAsync(st => st.Id == payload.shiftTypeId);
+
+        if (shiftType == null)
+        {
+            return NotFound(new { message = "Shift type not found" });
+        }
+
+        if (shiftType.CompanyId != targetCompanyId)
+        {
+            _logger.LogWarning("SECURITY: User {UserId} attempted to use shift type {ShiftTypeId} from company {ShiftTypeCompanyId} in company {TargetCompanyId}",
+                currentUserId, payload.shiftTypeId, shiftType.CompanyId, targetCompanyId);
+            return BadRequest(new { message = "Shift type does not belong to the target company" });
         }
 
         var date = DateOnly.Parse(payload.date);
@@ -263,8 +304,9 @@ public class DayModel : PageModel
         }
         else
         {
-            // concurrency check only for existing instances (skip if payload sends 0, meaning "don't care")
-            if (payload.concurrency != 0 && inst.Concurrency != payload.concurrency)
+            // ✅ SECURITY FIX (DEFECT-001): Always validate concurrency for existing instances
+            // Removed "payload.concurrency != 0 &&" to prevent bypass attacks
+            if (inst.Concurrency != payload.concurrency)
             {
                 _logger.LogWarning("Concurrency mismatch for ShiftInstanceId={Id}: sent={Sent}, current={Current}", inst.Id, payload.concurrency, inst.Concurrency);
                 return BadRequest(new { message = "Concurrent update detected. Reload the page." });
