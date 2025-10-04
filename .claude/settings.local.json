@@ -1,29 +1,16 @@
 {
   "permissions": {
     "allow": [
-      "Bash(dotnet run:*)",
-      "Bash(dotnet build)",
-      "Bash(tasklist:*)",
-      "Bash(taskkill:*)",
-      "Bash(dotnet ef:*)",
-      "Bash(dotnet add package:*)",
-      "Bash(sqlite3:*)",
-      "Bash(dotnet tool install:*)",
-      "Bash(findstr:*)",
-      "Read(//c/Users/katzi/Pictures/Screenshots/**)",
-      "Bash(powershell Stop-Process:*)",
-      "Bash(dir:*)",
-      "Bash(del app.db)",
-      "Bash(del TestsHebrewLocalizationTests.cs)",
-      "Bash(git checkout:*)",
-      "Bash(timeout:*)",
-      "Bash(find:*)",
-      "Bash(dotnet build:*)",
-      "Bash(cat:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nPhase 3: Add role assignment audit logging\n\nDatabase changes:\n- Created RoleAssignmentAudit entity with audit trail fields\n  (ChangedBy, TargetUserId, FromRole, ToRole, CompanyId, Timestamp)\n- Added DbSet<RoleAssignmentAudit> to AppDbContext\n- Created migration AuditRoleAssignments\n- Added composite indexes for efficient querying\n\nAudit logging implementation:\n- OnPostAddAsync: Log new user creation with FromRole=null\n- OnPostRoleAsync: Log role changes with old and new roles\n- All audit records include timestamp and acting user\n\nThis provides complete audit trail for security-critical\nrole assignment operations.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
       "Bash(git log:*)",
-      "Bash(powershell:*)",
-      "Bash(exit 0)"
+      "Bash(git commit -m \"$(cat <<''EOF''\nAdd company selection for Directors and Owners when creating shifts\n\nFeatures:\n- Directors can select from companies they manage (if managing multiple)\n- Owners can select from all companies in the system\n- Company dropdown shown only when user has multiple companies\n- Selected company persisted across page interactions\n\nImplementation:\n- Added IDirectorService injection to ManageModel\n- Added SelectedCompanyId, AvailableCompanies, CanSelectCompany properties\n- Updated OnGetAsync to:\n  - Load available companies based on user role\n  - Validate user has access to selected company\n  - Use IgnoreQueryFilters for cross-company queries\n  - Load users and shift types from selected company\n- Updated OnPostAsync to set CompanyId on ShiftAssignment\n- Updated all redirects to preserve selectedCompanyId parameter\n- Added company selection dropdown to UI (auto-submits on change)\n- Added hidden fields to preserve company selection in forms\n\nValidation:\n- Owner: access to all companies\n- Director: only companies they manage\n- Manager: only their own company (no dropdown shown)\n- Prevents privilege escalation by validating company access\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git commit -m \"$(cat <<''EOF''\nFix: Remove company selection from Assignments/Manage page\n\nProblem:\n- Company selection on Assignments page caused unexpected redirect\n- Users could attempt cross-company assignments\n- Company should be determined by shift type, not user selection\n\nSolution:\n- Removed company selection dropdown from Assignments/Manage UI\n- Company now determined from ShiftType.CompanyId\n- Added access validation: Owner/Director/Manager must have permission\n- Added cross-company assignment prevention validation\n- Users filtered to only show those from shift''s company\n- Fixed redirect issue by loading shift type across all companies\n\nImplementation:\n- Removed SelectedCompanyId, AvailableCompanies, CanSelectCompany\n- Load ShiftType with IgnoreQueryFilters to find across companies\n- Validate user has access to shift''s company before showing page\n- In OnPostAsync, validate selected user belongs to shift''s company\n- Filter ActiveUsers and TimeOffRequests by shift''s CompanyId\n- Removed all selectedCompanyId from redirects and forms\n\nValidation:\n- Owner: access to all company shifts\n- Director: only shifts from companies they manage\n- Manager: only shifts from their company\n- Server-side validation blocks cross-company user assignments\n- Clear error messages for unauthorized access and invalid assignments\n\nThis fixes the redirect issue and enforces proper company scoping.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git commit -m \"$(cat <<''EOF''\nAdd company selection to shift creation modal\n\nFeatures:\n- Owners see all companies in shift creation modal\n- Directors see companies they manage (if multiple)\n- Company dropdown shown only when user has access to multiple companies\n- Shift types filtered by selected company\n- Each shift type shows company name when multiple companies present\n\nImplementation:\n- Updated Day.cshtml.cs to:\n  - Inject IDirectorService\n  - Load shift types from all accessible companies using IgnoreQueryFilters\n  - Add company info to ViewData for JavaScript\n  - Include companyId and companyName in shift type data\n- Updated Day.cshtml to pass companies array to JavaScript\n- Updated site.js to:\n  - Add company selector dropdown to shift creation modal\n  - Filter shift types by selected company\n  - Show company name on shift types when applicable\n  - Auto-refresh shift types when company selection changes\n\nUser Experience:\n- Owner: Dropdown shows all companies, can create shifts for any company\n- Director (managing multiple): Dropdown shows managed companies\n- Director (managing one): No dropdown, uses single company\n- Manager/Employee: No dropdown, uses their company\n\nThis allows Owners and Directors to easily select which company\na shift belongs to during creation, eliminating the previous confusion.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git commit:*)",
+      "Bash(git merge:*)"
     ],
+    "deny": [],
+    "ask": [],
     "defaultMode": "acceptEdits"
   }
 }
