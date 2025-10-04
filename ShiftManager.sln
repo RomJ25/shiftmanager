@@ -1,8 +1,10 @@
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShiftManager", "ShiftManager.csproj", "{24E931EF-1D06-9E43-E5FB-AF0E807D4B70}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShiftManager.Tests", "ShiftManager.Tests\ShiftManager.Tests.csproj", "{E52F503E-C671-49CC-98ED-5F8039D750D9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -14,6 +16,10 @@ Global
 		{24E931EF-1D06-9E43-E5FB-AF0E807D4B70}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{24E931EF-1D06-9E43-E5FB-AF0E807D4B70}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{24E931EF-1D06-9E43-E5FB-AF0E807D4B70}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E52F503E-C671-49CC-98ED-5F8039D750D9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E52F503E-C671-49CC-98ED-5F8039D750D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E52F503E-C671-49CC-98ED-5F8039D750D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E52F503E-C671-49CC-98ED-5F8039D750D9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
