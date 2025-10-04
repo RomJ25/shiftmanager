@@ -1,0 +1,39 @@
+@page
+@model ShiftManager.Pages.DiagnosticModel
+@{
+    ViewData["Title"] = "Diagnostic";
+}
+
+<h1>Diagnostic Info</h1>
+
+<h2>Companies</h2>
+<table border="1">
+    <tr><th>Id</th><th>Name</th><th>Slug</th></tr>
+    @foreach (var c in Model.Companies)
+    {
+        <tr><td>@c.Id</td><td>@c.Name</td><td>@c.Slug</td></tr>
+    }
+</table>
+
+<h2>User b@b</h2>
+<p>Email: @Model.UserInfo?.Email</p>
+<p>CompanyId: @Model.UserInfo?.CompanyId</p>
+<p>Role: @Model.UserInfo?.Role</p>
+
+<h2>Shift Instances (Oct 2025)</h2>
+<table border="1">
+    <tr><th>Id</th><th>CompanyId</th><th>WorkDate</th><th>ShiftType</th><th>Staffing</th></tr>
+    @foreach (var si in Model.ShiftInstances)
+    {
+        <tr><td>@si.Id</td><td>@si.CompanyId</td><td>@si.WorkDate</td><td>@si.ShiftKey</td><td>@si.Staffing</td></tr>
+    }
+</table>
+
+<h2>Shift Assignments for b@b</h2>
+<table border="1">
+    <tr><th>Id</th><th>UserId</th><th>CompanyId</th><th>InstanceId</th><th>WorkDate</th></tr>
+    @foreach (var sa in Model.Assignments)
+    {
+        <tr><td>@sa.Id</td><td>@sa.UserId</td><td>@sa.CompanyId</td><td>@sa.InstanceId</td><td>@sa.WorkDate</td></tr>
+    }
+</table>
