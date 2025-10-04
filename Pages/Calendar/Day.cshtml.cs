@@ -131,6 +131,9 @@ public class DayModel : PageModel
             companyName = companyDict.ContainsKey(t.CompanyId) ? companyDict[t.CompanyId] : "Unknown"
         }).ToList();
 
+        // For display on the page, only show shift types from the current company
+        var displayTypes = types.Where(t => t.CompanyId == companyId).ToList();
+
         // Load instances and assignments for the day
         var instances = await _db.ShiftInstances
             .Where(si => si.CompanyId == companyId && si.WorkDate == CurrentDate)
@@ -155,7 +158,7 @@ public class DayModel : PageModel
             .GroupBy(x => x.ShiftInstanceId)
             .ToDictionary(g => g.Key, g => g.Select(x => x.UserName).ToList());
 
-        foreach (var t in types)
+        foreach (var t in displayTypes)
         {
             var inst = instances.FirstOrDefault(i => i.ShiftTypeId == t.Id);
             var assignedCount = inst != null && dictAssigned.ContainsKey(inst.Id) ? dictAssigned[inst.Id] : 0;
@@ -191,23 +194,65 @@ public class DayModel : PageModel
         public int shiftTypeId { get; set; }
         public int delta { get; set; }
         public int concurrency { get; set; }
+        public int? companyId { get; set; }
     }
 
 
     public async Task<IActionResult> OnPostAdjustAsync([FromBody] AdjustPayload payload)
     {
-        _logger.LogInformation("Adjust staffing: date={Date} shiftTypeId={ShiftTypeId} delta={Delta}", payload.date, payload.shiftTypeId, payload.delta);
-        var companyId = _companyContext.GetCompanyIdOrThrow();
+        _logger.LogInformation("Adjust staffing: date={Date} shiftTypeId={ShiftTypeId} delta={Delta} companyId={CompanyId}", payload.date, payload.shiftTypeId, payload.delta, payload.companyId);
+
+        // Get current user for authorization
+        var currentUserId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
+        var currentUser = await _db.Users.FindAsync(currentUserId);
+
+        // Determine and validate companyId
+        int targetCompanyId;
+        if (payload.companyId.HasValue)
+        {
+            targetCompanyId = payload.companyId.Value;
+
+            // Validate user has access to this company
+            bool hasAccess = false;
+            if (currentUser!.Role == Models.Support.UserRole.Owner)
+            {
+                hasAccess = true;
+            }
+            else if (currentUser.Role == Models.Support.UserRole.Director)
+            {
+                hasAccess = await _directorService.IsDirectorOfAsync(targetCompanyId);
+            }
+            else if (currentUser.Role == Models.Support.UserRole.Manager)
+            {
+                hasAccess = currentUser.CompanyId == targetCompanyId;
+            }
+
+            if (!hasAccess)
+            {
+                _logger.LogWarning("User {UserId} attempted to create shift for unauthorized company {CompanyId}", currentUserId, targetCompanyId);
+                return BadRequest(new { message = "You do not have permission to create shifts for this company." });
+            }
+        }
+        else
+        {
+            // Fallback to current user's company (for backward compatibility)
+            targetCompanyId = _companyContext.GetCompanyIdOrThrow();
+        }
+
         var date = DateOnly.Parse(payload.date);
 
-        var inst = await _db.ShiftInstances.FirstOrDefaultAsync(i => i.CompanyId == companyId && i.WorkDate == date && i.ShiftTypeId == payload.shiftTypeId);
+        var inst = await _db.ShiftInstances.IgnoreQueryFilters()
+            .FirstOrDefaultAsync(i => i.CompanyId == targetCompanyId && i.WorkDate == date && i.ShiftTypeId == payload.shiftTypeId);
+
+        bool isNewInstance = inst == null;
+
         if (inst == null)
         {
             if (payload.delta < 0)
                 return BadRequest(new { message = "Cannot go below zero." });
             inst = new ShiftInstance
             {
-                CompanyId = companyId,
+                CompanyId = targetCompanyId,
                 ShiftTypeId = payload.shiftTypeId,
                 WorkDate = date,
                 StaffingRequired = 0,
@@ -216,12 +261,14 @@ public class DayModel : PageModel
             };
             _db.ShiftInstances.Add(inst);
         }
-
-        // concurrency check
-        if (inst.Concurrency != payload.concurrency)
+        else
         {
-            _logger.LogWarning("Concurrency mismatch for ShiftInstanceId={Id}: sent={Sent}, current={Current}", inst.Id, payload.concurrency, inst.Concurrency);
-            return BadRequest(new { message = "Concurrent update detected. Reload the page." });
+            // concurrency check only for existing instances (skip if payload sends 0, meaning "don't care")
+            if (payload.concurrency != 0 && inst.Concurrency != payload.concurrency)
+            {
+                _logger.LogWarning("Concurrency mismatch for ShiftInstanceId={Id}: sent={Sent}, current={Current}", inst.Id, payload.concurrency, inst.Concurrency);
+                return BadRequest(new { message = "Concurrent update detected. Reload the page." });
+            }
         }
 
         int newRequired = inst.StaffingRequired + payload.delta;

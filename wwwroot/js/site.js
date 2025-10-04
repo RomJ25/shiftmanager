@@ -430,11 +430,16 @@ async function createShift() {
     return;
   }
 
+  // Get companyId from selected shift type
+  const selectedTypeId = parseInt(selectedType.dataset.typeId);
+  const shiftType = currentModalData.availableTypes.find(t => t.id === selectedTypeId);
+
   const payload = {
     date: currentModalData.date,
-    shiftTypeId: parseInt(selectedType.dataset.typeId),
+    shiftTypeId: selectedTypeId,
     delta: staffingCount,
-    concurrency: 0
+    concurrency: 0,
+    companyId: shiftType ? shiftType.companyId : null
   };
 
   try {

@@ -160,9 +160,9 @@
                             {
                                 <div class="shift-counter" data-si="@l.InstanceId" data-conc="@l.Concurrency">
                                     <button class="counter-btn large" aria-label="Decrease required staffing"
-                                        onclick="window.adjustStaffing('@Url.Page("Day", "Adjust")', { date: '@Model.CurrentDate.ToString("yyyy-MM-dd")', shiftTypeId:@l.ShiftTypeId, delta:-1, concurrency:@l.Concurrency }, (d)=>{ location.reload(); }, (e)=>alert(e.message))">−</button>
+                                        onclick="window.adjustStaffing('@Url.Page("Day", "Adjust")', { date: '@Model.CurrentDate.ToString("yyyy-MM-dd")', shiftTypeId:@l.ShiftTypeId, delta:-1, concurrency:@l.Concurrency, companyId: (window.shiftTypes.find(t => t.id === @l.ShiftTypeId) || {}).companyId }, (d)=>{ location.reload(); }, (e)=>alert(e.message))">−</button>
                                     <button class="counter-btn large" aria-label="Increase required staffing"
-                                        onclick="window.adjustStaffing('@Url.Page("Day", "Adjust")', { date: '@Model.CurrentDate.ToString("yyyy-MM-dd")', shiftTypeId:@l.ShiftTypeId, delta:1, concurrency:@l.Concurrency }, (d)=>{ location.reload(); }, (e)=>alert(e.message))">+</button>
+                                        onclick="window.adjustStaffing('@Url.Page("Day", "Adjust")', { date: '@Model.CurrentDate.ToString("yyyy-MM-dd")', shiftTypeId:@l.ShiftTypeId, delta:1, concurrency:@l.Concurrency, companyId: (window.shiftTypes.find(t => t.id === @l.ShiftTypeId) || {}).companyId }, (d)=>{ location.reload(); }, (e)=>alert(e.message))">+</button>
                                 </div>
                             }
 
@@ -185,10 +185,8 @@
                         <div class="shift-controls">
                             @if (User.IsInRole("Owner") || User.IsInRole("Manager") || User.IsInRole("Director"))
                             {
-                                <div class="shift-counter" data-si="@l.InstanceId" data-conc="@l.Concurrency">
-                                    <button class="counter-btn large" aria-label="Add required staffing"
-                                        onclick="window.adjustStaffing('@Url.Page("Day", "Adjust")', { date: '@Model.CurrentDate.ToString("yyyy-MM-dd")', shiftTypeId:@l.ShiftTypeId, delta:1, concurrency:@l.Concurrency }, (d)=>{ location.reload(); }, (e)=>alert(e.message))">+ Add Shift</button>
-                                </div>
+                                <button class="counter-btn large" aria-label="Add shift"
+                                    onclick="openShiftModal('@Model.CurrentDate.ToString("yyyy-MM-dd")')">+ Add Shift</button>
                             }
                             else
                             {
