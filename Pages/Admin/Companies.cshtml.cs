@@ -119,7 +119,7 @@ public class CompaniesModel : PageModel
         else
         {
             // Validate that the selected Director exists
-            var directorExists = await _db.Users.AnyAsync(u => u.Id == SelectedDirectorId.Value && u.Role == UserRole.Director);
+            var directorExists = await _db.Users.AnyAsync(u => u.Id == SelectedDirectorId!.Value && u.Role == UserRole.Director);
             if (!directorExists)
             {
                 Error = "Selected Director does not exist or is not a Director.";
@@ -150,10 +150,10 @@ public class CompaniesModel : PageModel
             if (useDirector)
             {
                 // Assign the existing Director to this company
-                var director = await _db.Users.FindAsync(SelectedDirectorId.Value);
+                var director = await _db.Users.FindAsync(SelectedDirectorId!.Value);
                 var directorAssignment = new DirectorCompany
                 {
-                    UserId = SelectedDirectorId.Value,
+                    UserId = SelectedDirectorId!.Value,
                     CompanyId = company.Id,
                     GrantedBy = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "0"),
                     GrantedAt = DateTime.UtcNow

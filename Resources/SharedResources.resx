@@ -422,9 +422,6 @@
   <data name="DeleteUser" xml:space="preserve">
     <value>Delete User</value>
   </data>
-  <data name="SuccessMessage" xml:space="preserve">
-    <value>Success</value>
-  </data>
   <data name="AddShift" xml:space="preserve">
     <value>Add Shift</value>
   </data>
@@ -610,9 +607,6 @@
   <data name="CannotDeleteCompanyWithOwner" xml:space="preserve">
     <value>Cannot delete company: Owner users must be removed or transferred first</value>
   </data>
-  <data name="Edit" xml:space="preserve">
-    <value>Edit</value>
-  </data>
   <data name="Rename" xml:space="preserve">
     <value>Rename</value>
   </data>
@@ -721,9 +715,6 @@
   <data name="ClearFilters" xml:space="preserve">
     <value>Clear Filters</value>
   </data>
-  <data name="Approve" xml:space="preserve">
-    <value>Approve</value>
-  </data>
   <data name="Reject" xml:space="preserve">
     <value>Reject</value>
   </data>
@@ -735,9 +726,6 @@
   </data>
   <data name="ClearUserFilters" xml:space="preserve">
     <value>Clear User Filters</value>
-  </data>
-  <data name="Password" xml:space="preserve">
-    <value>Password</value>
   </data>
   <data name="UserDeletionWarning" xml:space="preserve">
     <value>User Deletion Warning:</value>

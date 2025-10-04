@@ -422,9 +422,6 @@
   <data name="DeleteUser" xml:space="preserve">
     <value>מחיקת משתמש</value>
   </data>
-  <data name="SuccessMessage" xml:space="preserve">
-    <value>הצלחה</value>
-  </data>
   <data name="AddShift" xml:space="preserve">
     <value>הוספת משמרת</value>
   </data>
@@ -610,9 +607,6 @@
   <data name="CannotDeleteCompanyWithOwner" xml:space="preserve">
     <value>לא ניתן למחוק חברה: משתמשי בעלים חייבים להיות מוסרים או מועברים תחילה</value>
   </data>
-  <data name="Edit" xml:space="preserve">
-    <value>ערוך</value>
-  </data>
   <data name="Rename" xml:space="preserve">
     <value>שנה שם</value>
   </data>
@@ -721,9 +715,6 @@
   <data name="ClearFilters" xml:space="preserve">
     <value>נקה מסננים</value>
   </data>
-  <data name="Approve" xml:space="preserve">
-    <value>אשר</value>
-  </data>
   <data name="Reject" xml:space="preserve">
     <value>דחה</value>
   </data>
@@ -735,9 +726,6 @@
   </data>
   <data name="ClearUserFilters" xml:space="preserve">
     <value>נקה מסנני משתמשים</value>
-  </data>
-  <data name="Password" xml:space="preserve">
-    <value>סיסמה</value>
   </data>
   <data name="UserDeletionWarning" xml:space="preserve">
     <value>אזהרת מחיקת משתמש:</value>

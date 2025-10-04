@@ -23,7 +23,7 @@ public class ConfigModel : PageModel
     [BindProperty] public int RestHours { get; set; }
     [BindProperty] public int WeeklyCap { get; set; }
 
-    public async Task OnGetAsync()
+    public void OnGet()
     {
         var companyId = _companyContext.GetCompanyIdOrThrow();
         RestHours = GetInt(companyId, "RestHours", 8);
