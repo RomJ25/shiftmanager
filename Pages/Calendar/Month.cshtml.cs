@@ -69,10 +69,10 @@ public class MonthModel : PageModel
         Previous = (target.AddMonths(-1), target.AddMonths(-1).ToString("MMM yyyy"));
         Next = (target.AddMonths(1), target.AddMonths(1).ToString("MMM yyyy"));
 
-        var companyId = _companyContext.GetCompanyIdOrThrow();
-
         // Load accessible companies and shift types based on role
         var currentUserId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
+        var companyId = _companyContext.GetCompanyIdOrThrow();
+        _logger.LogInformation("Month calendar: User {UserId} loading calendar with CompanyId={CompanyId}", currentUserId, companyId);
         var currentUser = await _db.Users.FindAsync(currentUserId);
 
         List<int> accessibleCompanyIds;
@@ -126,7 +126,7 @@ public class MonthModel : PageModel
             {
                 hasAccess = await _directorService.IsDirectorOfAsync(type.CompanyId);
             }
-            else if (currentUser.Role == Models.Support.UserRole.Manager)
+            else if (currentUser.Role == Models.Support.UserRole.Manager || currentUser.Role == Models.Support.UserRole.Employee)
             {
                 hasAccess = currentUser.CompanyId == type.CompanyId;
             }
@@ -170,9 +170,12 @@ public class MonthModel : PageModel
         var dates = Enumerable.Range(0, 42).Select(i => gridStart.AddDays(i)).ToList();
 
         // Load instances and assignments for the window
+        _logger.LogInformation("Month calendar: Querying ShiftInstances for CompanyId={CompanyId}, dates {Start} to {End}",
+            companyId, dates.First(), dates.Last());
         var instances = await _db.ShiftInstances
             .Where(si => si.CompanyId == companyId && si.WorkDate >= dates.First() && si.WorkDate <= dates.Last())
             .ToListAsync();
+        _logger.LogInformation("Month calendar: Found {Count} shift instances", instances.Count);
 
         var instanceIds = instances.Select(i => i.Id).ToList();
         var assignmentCounts = await _db.ShiftAssignments

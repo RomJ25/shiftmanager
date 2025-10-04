@@ -116,7 +116,7 @@ public class DayModel : PageModel
             {
                 hasAccess = await _directorService.IsDirectorOfAsync(type.CompanyId);
             }
-            else if (currentUser.Role == Models.Support.UserRole.Manager)
+            else if (currentUser.Role == Models.Support.UserRole.Manager || currentUser.Role == Models.Support.UserRole.Employee)
             {
                 hasAccess = currentUser.CompanyId == type.CompanyId;
             }
