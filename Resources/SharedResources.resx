@@ -754,4 +754,208 @@
   <data name="Set" xml:space="preserve">
     <value>Set</value>
   </data>
+
+  <!-- Director Section -->
+  <data name="Director" xml:space="preserve">
+    <value>Director</value>
+  </data>
+  <data name="NotificationHub" xml:space="preserve">
+    <value>Notification Hub</value>
+  </data>
+  <data name="CompanyFilter" xml:space="preserve">
+    <value>Company Filter</value>
+  </data>
+  <data name="ViewAsManager" xml:space="preserve">
+    <value>View as Manager</value>
+  </data>
+
+  <!-- Admin Dropdown Items -->
+  <data name="Directors" xml:space="preserve">
+    <value>Directors</value>
+  </data>
+  <data name="Diagnostic" xml:space="preserve">
+    <value>Diagnostic</value>
+  </data>
+
+  <!-- Diagnostic Page -->
+  <data name="SystemDiagnostics" xml:space="preserve">
+    <value>System Diagnostics</value>
+  </data>
+  <data name="MultiTenantDebugInfo" xml:space="preserve">
+    <value>Multi-Tenant Debug Information</value>
+  </data>
+  <data name="CompaniesInSystem" xml:space="preserve">
+    <value>Companies in System</value>
+  </data>
+  <data name="UserInformation" xml:space="preserve">
+    <value>User Information</value>
+  </data>
+  <data name="CompanyId" xml:space="preserve">
+    <value>Company ID</value>
+  </data>
+  <data name="ShiftInstancesForOctober2025" xml:space="preserve">
+    <value>Shift Instances for October 2025</value>
+  </data>
+  <data name="InstanceId" xml:space="preserve">
+    <value>Instance ID</value>
+  </data>
+  <data name="WorkDate" xml:space="preserve">
+    <value>Work Date</value>
+  </data>
+  <data name="ShiftKey" xml:space="preserve">
+    <value>Shift Key</value>
+  </data>
+  <data name="UserAssignments" xml:space="preserve">
+    <value>User Assignments</value>
+  </data>
+  <data name="AssignmentId" xml:space="preserve">
+    <value>Assignment ID</value>
+  </data>
+  <data name="UserId" xml:space="preserve">
+    <value>User ID</value>
+  </data>
+  <data name="BackToPreviousPage" xml:space="preserve">
+    <value>Back to Previous Page</value>
+  </data>
+  <data name="SelectUserPlaceholder" xml:space="preserve">
+    <value>-- Select a user --</value>
+  </data>
+  <data name="DateRange" xml:space="preserve">
+    <value>Date Range</value>
+  </data>
+  <data name="Apply" xml:space="preserve">
+    <value>Apply</value>
+  </data>
+  <data name="NoUserSelected" xml:space="preserve">
+    <value>No user selected</value>
+  </data>
+  <data name="SelectUserToViewAssignments" xml:space="preserve">
+    <value>Select a user above to view their assignments</value>
+  </data>
+
+  <!-- Director - View As Mode Page -->
+  <data name="ViewAsManagerMode" xml:space="preserve">
+    <value>View as Manager Mode</value>
+  </data>
+  <data name="ViewAsModeDescription" xml:space="preserve">
+    <value>Enter "View as Manager" mode to scope your view to a single company with Manager-level permissions. This is useful for troubleshooting or understanding the Manager experience.</value>
+  </data>
+  <data name="CurrentlyInViewAsManagerMode" xml:space="preserve">
+    <value>⚠️ Currently in View as Manager Mode</value>
+  </data>
+  <data name="YouAreViewingAsManagerOf" xml:space="preserve">
+    <value>You are viewing as Manager of:</value>
+  </data>
+  <data name="ViewScopedToCompany" xml:space="preserve">
+    <value>Your view is scoped to this company only. All other companies are hidden. Your permissions match Manager level for this company.</value>
+  </data>
+  <data name="ExitViewAsManagerMode" xml:space="preserve">
+    <value>Exit View as Manager Mode</value>
+  </data>
+  <data name="SelectCompanyToView" xml:space="preserve">
+    <value>Select Company to View</value>
+  </data>
+  <data name="ChooseCompanyViewAsManager" xml:space="preserve">
+    <value>Choose a company to view as Manager. While in this mode:</value>
+  </data>
+  <data name="OnlyThisCompanyDataVisible" xml:space="preserve">
+    <value>Only this company's data will be visible</value>
+  </data>
+  <data name="PermissionsMatchManagerLevel" xml:space="preserve">
+    <value>Your permissions will match Manager level</value>
+  </data>
+  <data name="SeeWhatManagerSees" xml:space="preserve">
+    <value>You can see exactly what a Manager sees for this company</value>
+  </data>
+  <data name="AllOtherCompaniesHidden" xml:space="preserve">
+    <value>All other companies will be hidden</value>
+  </data>
+  <data name="NotAssignedToAnyCompanies" xml:space="preserve">
+    <value>You are not assigned to any companies yet.</value>
+  </data>
+  <data name="Important" xml:space="preserve">
+    <value>Important:</value>
+  </data>
+  <data name="ViewAsModeInfo" xml:space="preserve">
+    <value>View as Manager mode is for demonstration and troubleshooting purposes. The mode will automatically expire after 8 hours or when you explicitly exit.</value>
+  </data>
+
+  <!-- Director - Company Filter Page -->
+  <data name="CompanyFilterDescription" xml:space="preserve">
+    <value>Select which companies you want to see in calendars, requests, and dashboards. Leave all unchecked to see all assigned companies.</value>
+  </data>
+  <data name="YourAssignedCompanies" xml:space="preserve">
+    <value>Your Assigned Companies</value>
+  </data>
+  <data name="ApplyFilter" xml:space="preserve">
+    <value>Apply Filter</value>
+  </data>
+  <data name="ShowAllCompanies" xml:space="preserve">
+    <value>Show All Companies</value>
+  </data>
+  <data name="CompanyFilterAppliesTo" xml:space="preserve">
+    <value>The company filter applies to:</value>
+  </data>
+  <data name="CalendarViewsOnlySelected" xml:space="preserve">
+    <value>Calendar views (only shows shifts from selected companies)</value>
+  </data>
+  <data name="RequestListsOnlySelected" xml:space="preserve">
+    <value>Request lists (only shows requests from selected companies)</value>
+  </data>
+  <data name="DashboardsAndReports" xml:space="preserve">
+    <value>Dashboards and reports</value>
+  </data>
+  <data name="FilterPersistsInBrowser" xml:space="preserve">
+    <value>This filter is saved in your browser and persists across sessions.</value>
+  </data>
+
+  <!-- Director - Notification Hub Page -->
+  <data name="NotificationHubDescription" xml:space="preserve">
+    <value>Cross-company overview of all notifications and pending requests from your assigned companies.</value>
+  </data>
+  <data name="PendingTimeOffRequests" xml:space="preserve">
+    <value>Pending Time-Off Requests</value>
+  </data>
+  <data name="Company" xml:space="preserve">
+    <value>Company</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>User</value>
+  </data>
+  <data name="Details" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="Requested" xml:space="preserve">
+    <value>Requested</value>
+  </data>
+  <data name="NoPendingTimeOffRequests" xml:space="preserve">
+    <value>No pending time-off requests.</value>
+  </data>
+  <data name="PendingSwapRequests" xml:space="preserve">
+    <value>Pending Swap Requests</value>
+  </data>
+  <data name="NoPendingSwapRequests" xml:space="preserve">
+    <value>No pending swap requests.</value>
+  </data>
+  <data name="RecentNotificationsLast50" xml:space="preserve">
+    <value>Recent Notifications (Last 50)</value>
+  </data>
+  <data name="Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Message" xml:space="preserve">
+    <value>Message</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="Unread" xml:space="preserve">
+    <value>Unread</value>
+  </data>
+  <data name="NoNotificationsYet" xml:space="preserve">
+    <value>No notifications yet.</value>
+  </data>
+  <data name="NotificationHubInfo" xml:space="preserve">
+    <value>This hub aggregates data from all companies you oversee as a Director. Company slugs are shown inline with full names on hover.</value>
+  </data>
 </root>

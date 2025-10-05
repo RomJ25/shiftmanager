@@ -754,4 +754,208 @@
   <data name="Set" xml:space="preserve">
     <value>הגדר</value>
   </data>
+
+  <!-- Director Section -->
+  <data name="Director" xml:space="preserve">
+    <value>מנהל אזורי</value>
+  </data>
+  <data name="NotificationHub" xml:space="preserve">
+    <value>מרכז התראות</value>
+  </data>
+  <data name="CompanyFilter" xml:space="preserve">
+    <value>סינון חברות</value>
+  </data>
+  <data name="ViewAsManager" xml:space="preserve">
+    <value>תצוגה כמנהל</value>
+  </data>
+
+  <!-- Admin Dropdown Items -->
+  <data name="Directors" xml:space="preserve">
+    <value>מנהלים אזוריים</value>
+  </data>
+  <data name="Diagnostic" xml:space="preserve">
+    <value>אבחון</value>
+  </data>
+
+  <!-- Diagnostic Page -->
+  <data name="SystemDiagnostics" xml:space="preserve">
+    <value>אבחון מערכת</value>
+  </data>
+  <data name="MultiTenantDebugInfo" xml:space="preserve">
+    <value>מידע דיבאג רב-דיירים</value>
+  </data>
+  <data name="CompaniesInSystem" xml:space="preserve">
+    <value>חברות במערכת</value>
+  </data>
+  <data name="UserInformation" xml:space="preserve">
+    <value>מידע משתמש</value>
+  </data>
+  <data name="CompanyId" xml:space="preserve">
+    <value>מזהה חברה</value>
+  </data>
+  <data name="ShiftInstancesForOctober2025" xml:space="preserve">
+    <value>משמרות לאוקטובר 2025</value>
+  </data>
+  <data name="InstanceId" xml:space="preserve">
+    <value>מזהה משמרת</value>
+  </data>
+  <data name="WorkDate" xml:space="preserve">
+    <value>תאריך עבודה</value>
+  </data>
+  <data name="ShiftKey" xml:space="preserve">
+    <value>מפתח משמרת</value>
+  </data>
+  <data name="UserAssignments" xml:space="preserve">
+    <value>הקצאות משתמש</value>
+  </data>
+  <data name="AssignmentId" xml:space="preserve">
+    <value>מזהה הקצאה</value>
+  </data>
+  <data name="UserId" xml:space="preserve">
+    <value>מזהה משתמש</value>
+  </data>
+  <data name="BackToPreviousPage" xml:space="preserve">
+    <value>חזרה לעמוד הקודם</value>
+  </data>
+  <data name="SelectUserPlaceholder" xml:space="preserve">
+    <value>-- בחר משתמש --</value>
+  </data>
+  <data name="DateRange" xml:space="preserve">
+    <value>טווח תאריכים</value>
+  </data>
+  <data name="Apply" xml:space="preserve">
+    <value>החל</value>
+  </data>
+  <data name="NoUserSelected" xml:space="preserve">
+    <value>לא נבחר משתמש</value>
+  </data>
+  <data name="SelectUserToViewAssignments" xml:space="preserve">
+    <value>בחר משתמש למעלה כדי לראות את ההקצאות שלו</value>
+  </data>
+
+  <!-- Director - View As Mode Page -->
+  <data name="ViewAsManagerMode" xml:space="preserve">
+    <value>מצב תצוגה כמנהל</value>
+  </data>
+  <data name="ViewAsModeDescription" xml:space="preserve">
+    <value>היכנס ל"מצב תצוגה כמנהל" כדי להגביל את התצוגה שלך לחברה אחת עם הרשאות ברמת מנהל. זה שימושי לפתרון בעיות או הבנת חוויית המנהל.</value>
+  </data>
+  <data name="CurrentlyInViewAsManagerMode" xml:space="preserve">
+    <value>⚠️ כרגע במצב תצוגה כמנהל</value>
+  </data>
+  <data name="YouAreViewingAsManagerOf" xml:space="preserve">
+    <value>אתה צופה כמנהל של:</value>
+  </data>
+  <data name="ViewScopedToCompany" xml:space="preserve">
+    <value>התצוגה שלך מוגבלת לחברה זו בלבד. כל החברות האחרות מוסתרות. ההרשאות שלך תואמות לרמת מנהל עבור חברה זו.</value>
+  </data>
+  <data name="ExitViewAsManagerMode" xml:space="preserve">
+    <value>צא ממצב תצוגה כמנהל</value>
+  </data>
+  <data name="SelectCompanyToView" xml:space="preserve">
+    <value>בחר חברה לצפייה</value>
+  </data>
+  <data name="ChooseCompanyViewAsManager" xml:space="preserve">
+    <value>בחר חברה לצפייה כמנהל. בזמן מצב זה:</value>
+  </data>
+  <data name="OnlyThisCompanyDataVisible" xml:space="preserve">
+    <value>רק הנתונים של חברה זו יהיו גלויים</value>
+  </data>
+  <data name="PermissionsMatchManagerLevel" xml:space="preserve">
+    <value>ההרשאות שלך יתאימו לרמת מנהל</value>
+  </data>
+  <data name="SeeWhatManagerSees" xml:space="preserve">
+    <value>תוכל לראות בדיוק מה שמנהל רואה עבור חברה זו</value>
+  </data>
+  <data name="AllOtherCompaniesHidden" xml:space="preserve">
+    <value>כל החברות האחרות יהיו מוסתרות</value>
+  </data>
+  <data name="NotAssignedToAnyCompanies" xml:space="preserve">
+    <value>עדיין לא הוקצית לאף חברה.</value>
+  </data>
+  <data name="Important" xml:space="preserve">
+    <value>חשוב:</value>
+  </data>
+  <data name="ViewAsModeInfo" xml:space="preserve">
+    <value>מצב תצוגה כמנהל מיועד למטרות הדגמה ופתרון בעיות. המצב יפוג אוטומטית לאחר 8 שעות או כאשר תצא במפורש.</value>
+  </data>
+
+  <!-- Director - Company Filter Page -->
+  <data name="CompanyFilterDescription" xml:space="preserve">
+    <value>בחר אילו חברות אתה רוצה לראות בלוחות שנה, בקשות ולוחות מחוונים. השאר הכל לא מסומן כדי לראות את כל החברות המוקצות.</value>
+  </data>
+  <data name="YourAssignedCompanies" xml:space="preserve">
+    <value>החברות המוקצות שלך</value>
+  </data>
+  <data name="ApplyFilter" xml:space="preserve">
+    <value>החל סינון</value>
+  </data>
+  <data name="ShowAllCompanies" xml:space="preserve">
+    <value>הצג את כל החברות</value>
+  </data>
+  <data name="CompanyFilterAppliesTo" xml:space="preserve">
+    <value>סינון החברות חל על:</value>
+  </data>
+  <data name="CalendarViewsOnlySelected" xml:space="preserve">
+    <value>תצוגות לוח שנה (מציג רק משמרות מהחברות הנבחרות)</value>
+  </data>
+  <data name="RequestListsOnlySelected" xml:space="preserve">
+    <value>רשימות בקשות (מציג רק בקשות מהחברות הנבחרות)</value>
+  </data>
+  <data name="DashboardsAndReports" xml:space="preserve">
+    <value>לוחות מחוונים ודוחות</value>
+  </data>
+  <data name="FilterPersistsInBrowser" xml:space="preserve">
+    <value>הסינון הזה נשמר בדפדפן שלך ונשאר בין הפעלות.</value>
+  </data>
+
+  <!-- Director - Notification Hub Page -->
+  <data name="NotificationHubDescription" xml:space="preserve">
+    <value>סקירה רב-חברתית של כל ההתראות והבקשות הממתינות מהחברות המוקצות שלך.</value>
+  </data>
+  <data name="PendingTimeOffRequests" xml:space="preserve">
+    <value>בקשות חופשה ממתינות</value>
+  </data>
+  <data name="Company" xml:space="preserve">
+    <value>חברה</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>משתמש</value>
+  </data>
+  <data name="Details" xml:space="preserve">
+    <value>פרטים</value>
+  </data>
+  <data name="Requested" xml:space="preserve">
+    <value>התבקש</value>
+  </data>
+  <data name="NoPendingTimeOffRequests" xml:space="preserve">
+    <value>אין בקשות חופשה ממתינות.</value>
+  </data>
+  <data name="PendingSwapRequests" xml:space="preserve">
+    <value>בקשות החלפה ממתינות</value>
+  </data>
+  <data name="NoPendingSwapRequests" xml:space="preserve">
+    <value>אין בקשות החלפה ממתינות.</value>
+  </data>
+  <data name="RecentNotificationsLast50" xml:space="preserve">
+    <value>התראות אחרונות (50 האחרונות)</value>
+  </data>
+  <data name="Type" xml:space="preserve">
+    <value>סוג</value>
+  </data>
+  <data name="Message" xml:space="preserve">
+    <value>הודעה</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>סטטוס</value>
+  </data>
+  <data name="Unread" xml:space="preserve">
+    <value>לא נקרא</value>
+  </data>
+  <data name="NoNotificationsYet" xml:space="preserve">
+    <value>אין התראות עדיין.</value>
+  </data>
+  <data name="NotificationHubInfo" xml:space="preserve">
+    <value>מרכז זה מצרף נתונים מכל החברות שאתה מפקח עליהן כמנהל אזורי. קיצורי חברות מוצגים בשורה עם שמות מלאים בריחוף.</value>
+  </data>
 </root>

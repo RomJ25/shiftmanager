@@ -1,25 +1,28 @@
 @page
+@using Microsoft.Extensions.Localization
+@using ShiftManager.Resources
+@inject IStringLocalizer<SharedResources> Localizer
 @model ShiftManager.Pages.Director.NotificationHubModel
 @{
     Layout = "_Layout";
 }
-<h2>Notification Hub</h2>
+<h2>@Localizer["NotificationHub"]</h2>
 <p style="color: var(--muted); margin-bottom: 2rem;">
-    Cross-company overview of all notifications and pending requests from your assigned companies.
+    @Localizer["NotificationHubDescription"]
 </p>
 
 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
     <div class="card">
-        <h3 style="margin-top:0">Pending Time-Off Requests</h3>
+        <h3 style="margin-top:0">@Localizer["PendingTimeOffRequests"]</h3>
         @if (Model.PendingTimeOffRequests.Any())
         {
             <table>
                 <thead>
                     <tr>
-                        <th>Company</th>
-                        <th>User</th>
-                        <th>Details</th>
-                        <th>Requested</th>
+                        <th>@Localizer["Company"]</th>
+                        <th>@Localizer["User"]</th>
+                        <th>@Localizer["Details"]</th>
+                        <th>@Localizer["Requested"]</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -41,21 +44,21 @@
         }
         else
         {
-            <p style="color: var(--muted); text-align: center; padding: 1rem;">No pending time-off requests.</p>
+            <p style="color: var(--muted); text-align: center; padding: 1rem;">@Localizer["NoPendingTimeOffRequests"]</p>
         }
     </div>
 
     <div class="card">
-        <h3 style="margin-top:0">Pending Swap Requests</h3>
+        <h3 style="margin-top:0">@Localizer["PendingSwapRequests"]</h3>
         @if (Model.PendingSwapRequests.Any())
         {
             <table>
                 <thead>
                     <tr>
-                        <th>Company</th>
-                        <th>User</th>
-                        <th>Details</th>
-                        <th>Requested</th>
+                        <th>@Localizer["Company"]</th>
+                        <th>@Localizer["User"]</th>
+                        <th>@Localizer["Details"]</th>
+                        <th>@Localizer["Requested"]</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -77,23 +80,23 @@
         }
         else
         {
-            <p style="color: var(--muted); text-align: center; padding: 1rem;">No pending swap requests.</p>
+            <p style="color: var(--muted); text-align: center; padding: 1rem;">@Localizer["NoPendingSwapRequests"]</p>
         }
     </div>
 </div>
 
 <div class="card">
-    <h3 style="margin-top:0">Recent Notifications (Last 50)</h3>
+    <h3 style="margin-top:0">@Localizer["RecentNotificationsLast50"]</h3>
     @if (Model.RecentNotifications.Any())
     {
         <table>
             <thead>
                 <tr>
-                    <th>Company</th>
-                    <th>Type</th>
-                    <th>Message</th>
-                    <th>Date</th>
-                    <th>Status</th>
+                    <th>@Localizer["Company"]</th>
+                    <th>@Localizer["Type"]</th>
+                    <th>@Localizer["Message"]</th>
+                    <th>@Localizer["Date"]</th>
+                    <th>@Localizer["Status"]</th>
                 </tr>
             </thead>
             <tbody>
@@ -108,7 +111,7 @@
                         <td>@notification.Type</td>
                         <td>@notification.Message</td>
                         <td>@notification.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
-                        <td>@(notification.IsRead ? "Read" : "Unread")</td>
+                        <td>@(notification.IsRead ? Localizer["Read"] : Localizer["Unread"])</td>
                     </tr>
                 }
             </tbody>
@@ -116,13 +119,12 @@
     }
     else
     {
-        <p style="color: var(--muted); text-align: center; padding: 2rem;">No notifications yet.</p>
+        <p style="color: var(--muted); text-align: center; padding: 2rem;">@Localizer["NoNotificationsYet"]</p>
     }
 </div>
 
 <div style="margin-top: 1rem; padding: 1rem; background: var(--surface); border-left: 4px solid var(--primary); border-radius: 0.5rem;">
     <small style="color: var(--muted);">
-        <strong>Note:</strong> This hub aggregates data from all companies you oversee as a Director.
-        Company slugs are shown inline with full names on hover.
+        <strong>@Localizer["Note"]</strong> @Localizer["NotificationHubInfo"]
     </small>
 </div>

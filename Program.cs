@@ -88,6 +88,10 @@ builder.Services.AddScoped<ITraineeService, TraineeService>();
 builder.Services.AddScoped<ICompanyFilterService, CompanyFilterService>();
 builder.Services.AddScoped<IViewAsModeService, ViewAsModeService>();
 
+// Add health checks for container orchestration
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<AppDbContext>();
+
 var app = builder.Build();
 
 // Ensure DB exists and seed minimal data
@@ -95,6 +99,25 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     await db.Database.MigrateAsync();
+
+    // Get seed passwords from environment (required in production)
+    var seedAdminPassword = app.Configuration["SEED_ADMIN_PASSWORD"] ?? Environment.GetEnvironmentVariable("SEED_ADMIN_PASSWORD");
+    var seedDirectorPassword = app.Configuration["SEED_DIRECTOR_PASSWORD"] ?? Environment.GetEnvironmentVariable("SEED_DIRECTOR_PASSWORD");
+
+    // In production, require explicit seed passwords
+    if (!app.Environment.IsDevelopment())
+    {
+        if (string.IsNullOrEmpty(seedAdminPassword))
+        {
+            throw new InvalidOperationException(
+                "SEED_ADMIN_PASSWORD environment variable must be set in production. " +
+                "Set this via environment variables or app configuration.");
+        }
+    }
+
+    // Use defaults only in development
+    seedAdminPassword ??= "admin123";
+    seedDirectorPassword ??= "director123";
 
     // Seed company
     if (!db.Companies.Any())
@@ -130,7 +153,7 @@ using (var scope = app.Services.CreateScope())
     // Seed owner user
     if (!db.Users.Any())
     {
-        var (hash, salt) = PasswordHasher.CreateHash("admin123");
+        var (hash, salt) = PasswordHasher.CreateHash(seedAdminPassword);
         db.Users.Add(new AppUser
         {
             CompanyId = company.Id,
@@ -175,7 +198,7 @@ using (var scope = app.Services.CreateScope())
         // Create Director user if doesn't exist
         if (!db.Users.Any(u => u.Role == UserRole.Director))
         {
-            var (dirHash, dirSalt) = PasswordHasher.CreateHash("director123");
+            var (dirHash, dirSalt) = PasswordHasher.CreateHash(seedDirectorPassword);
             var director = new AppUser
             {
                 CompanyId = company.Id,
@@ -241,4 +264,5 @@ app.UseMiddleware<CompanyContextMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapRazorPages();
+app.MapHealthChecks("/health");
 app.Run();

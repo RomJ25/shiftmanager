@@ -74,11 +74,11 @@
             @if (isDirector)
             {
                 <div class="dropdown">
-                    <button class="linklike">Director ▾</button>
+                    <button class="linklike">@Localizer["Director"] ▾</button>
                     <div class="menu">
-                        <a href="/Director/NotificationHub">Notification Hub</a>
-                        <a href="/Director/CompanyFilter">Company Filter</a>
-                        <a href="/Director/ViewAsMode">View as Manager</a>
+                        <a href="/Director/NotificationHub">@Localizer["NotificationHub"]</a>
+                        <a href="/Director/CompanyFilter">@Localizer["CompanyFilter"]</a>
+                        <a href="/Director/ViewAsMode">@Localizer["ViewAsManager"]</a>
                     </div>
                 </div>
             }
@@ -87,9 +87,9 @@
                 <div class="menu">
                     @if (User.IsInRole("Owner"))
                     {
-                        <a href="/Admin/Companies">Companies</a>
-                        <a href="/Admin/Directors">Directors</a>
-                        <a href="/Diagnostic">🔧 Diagnostic</a>
+                        <a href="/Admin/Companies">@Localizer["Companies"]</a>
+                        <a href="/Admin/Directors">@Localizer["Directors"]</a>
+                        <a href="/Diagnostic">🔧 @Localizer["Diagnostic"]</a>
                     }
                     <a href="/Admin/Users">@Localizer["Users"]</a>
                     <a href="/Admin/ShiftTypes">@Localizer["ShiftTypes"]</a>

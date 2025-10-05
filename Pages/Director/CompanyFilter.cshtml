@@ -1,12 +1,14 @@
 @page
+@using Microsoft.Extensions.Localization
+@using ShiftManager.Resources
+@inject IStringLocalizer<SharedResources> Localizer
 @model ShiftManager.Pages.Director.CompanyFilterModel
 @{
     Layout = "_Layout";
 }
-<h2>Company Filter</h2>
+<h2>@Localizer["CompanyFilter"]</h2>
 <p style="color: var(--muted); margin-bottom: 2rem;">
-    Select which companies you want to see in calendars, requests, and dashboards.
-    Leave all unchecked to see all assigned companies.
+    @Localizer["CompanyFilterDescription"]
 </p>
 
 @if (TempData["SuccessMessage"] != null)
@@ -17,7 +19,7 @@
 }
 
 <div class="card">
-    <h3 style="margin-top:0">Your Assigned Companies</h3>
+    <h3 style="margin-top:0">@Localizer["YourAssignedCompanies"]</h3>
 
     <form method="post" asp-page-handler="SetFilter">
         @Html.AntiForgeryToken()
@@ -46,20 +48,20 @@
         </div>
 
         <div style="display: flex; gap: 0.5rem;">
-            <button type="submit" class="btn btn-primary">Apply Filter</button>
-            <button type="submit" formaction="?handler=ClearFilter" class="btn btn-ghost">Show All Companies</button>
+            <button type="submit" class="btn btn-primary">@Localizer["ApplyFilter"]</button>
+            <button type="submit" formaction="?handler=ClearFilter" class="btn btn-ghost">@Localizer["ShowAllCompanies"]</button>
         </div>
     </form>
 </div>
 
 <div style="margin-top: 1rem; padding: 1rem; background: var(--surface); border-left: 4px solid var(--primary); border-radius: 0.5rem;">
     <small style="color: var(--muted);">
-        <strong>Note:</strong> The company filter applies to:
+        <strong>@Localizer["Note"]</strong> @Localizer["CompanyFilterAppliesTo"]
         <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">
-            <li>Calendar views (only shows shifts from selected companies)</li>
-            <li>Request lists (only shows requests from selected companies)</li>
-            <li>Dashboards and reports</li>
+            <li>@Localizer["CalendarViewsOnlySelected"]</li>
+            <li>@Localizer["RequestListsOnlySelected"]</li>
+            <li>@Localizer["DashboardsAndReports"]</li>
         </ul>
-        This filter is saved in your browser and persists across sessions.
+        @Localizer["FilterPersistsInBrowser"]
     </small>
 </div>

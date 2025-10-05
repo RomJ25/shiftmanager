@@ -1,12 +1,14 @@
 @page
+@using Microsoft.Extensions.Localization
+@using ShiftManager.Resources
+@inject IStringLocalizer<SharedResources> Localizer
 @model ShiftManager.Pages.Director.ViewAsModeModel
 @{
     Layout = "_Layout";
 }
-<h2>View as Manager Mode</h2>
+<h2>@Localizer["ViewAsManagerMode"]</h2>
 <p style="color: var(--muted); margin-bottom: 2rem;">
-    Enter "View as Manager" mode to scope your view to a single company with Manager-level permissions.
-    This is useful for troubleshooting or understanding the Manager experience.
+    @Localizer["ViewAsModeDescription"]
 </p>
 
 @if (TempData["SuccessMessage"] != null)
@@ -26,30 +28,29 @@
 @if (Model.IsCurrentlyViewing)
 {
     <div class="card" style="border: 2px solid var(--warning); background: var(--surface);">
-        <h3 style="margin-top:0; color: var(--warning);">⚠️ Currently in View as Manager Mode</h3>
-        <p>You are viewing as Manager of: <strong>@Model.CurrentCompanyName</strong></p>
+        <h3 style="margin-top:0; color: var(--warning);">@Localizer["CurrentlyInViewAsManagerMode"]</h3>
+        <p>@Localizer["YouAreViewingAsManagerOf"] <strong>@Model.CurrentCompanyName</strong></p>
         <p style="color: var(--muted); margin-bottom: 1rem;">
-            Your view is scoped to this company only. All other companies are hidden.
-            Your permissions match Manager level for this company.
+            @Localizer["ViewScopedToCompany"]
         </p>
         <form method="post" asp-page-handler="Exit">
             @Html.AntiForgeryToken()
-            <button type="submit" class="btn btn-primary">Exit View as Manager Mode</button>
+            <button type="submit" class="btn btn-primary">@Localizer["ExitViewAsManagerMode"]</button>
         </form>
     </div>
 }
 else
 {
     <div class="card">
-        <h3 style="margin-top:0">Select Company to View</h3>
+        <h3 style="margin-top:0">@Localizer["SelectCompanyToView"]</h3>
         <p style="color: var(--muted); margin-bottom: 1rem;">
-            Choose a company to view as Manager. While in this mode:
+            @Localizer["ChooseCompanyViewAsManager"]
         </p>
         <ul style="color: var(--muted); margin-bottom: 1.5rem;">
-            <li>Only this company's data will be visible</li>
-            <li>Your permissions will match Manager level</li>
-            <li>You can see exactly what a Manager sees for this company</li>
-            <li>All other companies will be hidden</li>
+            <li>@Localizer["OnlyThisCompanyDataVisible"]</li>
+            <li>@Localizer["PermissionsMatchManagerLevel"]</li>
+            <li>@Localizer["SeeWhatManagerSees"]</li>
+            <li>@Localizer["AllOtherCompaniesHidden"]</li>
         </ul>
 
         @if (Model.AssignedCompanies.Any())
@@ -71,7 +72,7 @@ else
                             @Html.AntiForgeryToken()
                             <input type="hidden" name="companyId" value="@company.Id" />
                             <button type="submit" class="btn btn-primary" style="font-size: 0.9rem;">
-                                View as Manager
+                                @Localizer["ViewAsManager"]
                             </button>
                         </form>
                     </div>
@@ -81,7 +82,7 @@ else
         else
         {
             <p style="color: var(--muted); text-align: center; padding: 2rem;">
-                You are not assigned to any companies yet.
+                @Localizer["NotAssignedToAnyCompanies"]
             </p>
         }
     </div>
@@ -89,7 +90,6 @@ else
 
 <div style="margin-top: 1rem; padding: 1rem; background: var(--surface); border-left: 4px solid var(--warning); border-radius: 0.5rem;">
     <small style="color: var(--muted);">
-        <strong>Important:</strong> View as Manager mode is for demonstration and troubleshooting purposes.
-        The mode will automatically expire after 8 hours or when you explicitly exit.
+        <strong>@Localizer["Important"]</strong> @Localizer["ViewAsModeInfo"]
     </small>
 </div>

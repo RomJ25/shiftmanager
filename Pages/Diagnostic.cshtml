@@ -1,39 +1,264 @@
 @page
+@using Microsoft.Extensions.Localization
+@using ShiftManager.Resources
+@inject IStringLocalizer<SharedResources> Localizer
 @model ShiftManager.Pages.DiagnosticModel
 @{
-    ViewData["Title"] = "Diagnostic";
+    ViewData["Title"] = Localizer["SystemDiagnostics"];
 }
 
-<h1>Diagnostic Info</h1>
+<div style="max-width: 1200px; margin: 0 auto;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem;">
+        <h1 style="margin: 0;">🔧 @Localizer["SystemDiagnostics"]</h1>
+        <button onclick="history.back()" class="btn btn-secondary" style="padding: 0.5rem 1rem; background: var(--secondary); color: white; border: none; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
+            <span>←</span>
+            <span>@Localizer["BackToPreviousPage"]</span>
+        </button>
+    </div>
 
-<h2>Companies</h2>
-<table border="1">
-    <tr><th>Id</th><th>Name</th><th>Slug</th></tr>
-    @foreach (var c in Model.Companies)
-    {
-        <tr><td>@c.Id</td><td>@c.Name</td><td>@c.Slug</td></tr>
+    <div style="background: var(--warning); color: #000; padding: 1rem; border-radius: 8px; margin-bottom: 2rem; border-left: 4px solid #d97706;">
+        <strong>⚠️ Admin Only:</strong> @Localizer["MultiTenantDebugInfo"]
+    </div>
+
+    <!-- Filter Section -->
+    <div style="background: var(--card-bg); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        <h2 style="margin-top: 0; color: var(--primary); display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+            <span>🔍</span>
+            <span>@Localizer["Filter"]</span>
+        </h2>
+        <form method="get" style="display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 1rem; align-items: end;">
+            <div>
+                <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-primary);">
+                    @Localizer["SelectUser"]
+                </label>
+                <select name="SelectedUserId" style="width: 100%; padding: 0.5rem; border: 1px solid var(--border); border-radius: 4px; background: var(--input-bg); color: var(--text-primary);">
+                    <option value="">@Localizer["SelectUserPlaceholder"]</option>
+                    @foreach (var user in Model.AllUsers)
+                    {
+                        <option value="@user.Id" selected="@(Model.SelectedUserId == user.Id)">
+                            @user.Email (@user.DisplayName)
+                        </option>
+                    }
+                </select>
+            </div>
+
+            <div>
+                <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-primary);">
+                    @Localizer["StartDate"]
+                </label>
+                <input type="date" name="StartDate" value="@Model.StartDate" style="width: 100%; padding: 0.5rem; border: 1px solid var(--border); border-radius: 4px; background: var(--input-bg); color: var(--text-primary);" />
+            </div>
+
+            <div>
+                <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-primary);">
+                    @Localizer["EndDate"]
+                </label>
+                <input type="date" name="EndDate" value="@Model.EndDate" style="width: 100%; padding: 0.5rem; border: 1px solid var(--border); border-radius: 4px; background: var(--input-bg); color: var(--text-primary);" />
+            </div>
+
+            <div>
+                <button type="submit" style="padding: 0.5rem 1.5rem; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; white-space: nowrap;">
+                    @Localizer["Apply"]
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Companies Section -->
+    <div style="background: var(--card-bg); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        <h2 style="margin-top: 0; color: var(--primary); display: flex; align-items: center; gap: 0.5rem;">
+            <span>🏢</span>
+            <span>@Localizer["CompaniesInSystem"]</span>
+        </h2>
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; border-radius: 4px; overflow: hidden;">
+                <thead style="background: var(--primary); color: white;">
+                    <tr>
+                        <th style="padding: 0.75rem; text-align: left;">ID</th>
+                        <th style="padding: 0.75rem; text-align: left;">@Localizer["Name"]</th>
+                        <th style="padding: 0.75rem; text-align: left;">@Localizer["Slug"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var c in Model.Companies)
+                    {
+                        <tr style="border-bottom: 1px solid var(--border);">
+                            <td style="padding: 0.75rem;">@c.Id</td>
+                            <td style="padding: 0.75rem; font-weight: 600;">@c.Name</td>
+                            <td style="padding: 0.75rem; font-family: monospace; color: var(--secondary);">@c.Slug</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- User Information Section -->
+    <div style="background: var(--card-bg); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        <h2 style="margin-top: 0; color: var(--primary); display: flex; align-items: center; gap: 0.5rem;">
+            <span>👤</span>
+            <span>@Localizer["UserInformation"]</span>
+        </h2>
+        @if (Model.UserInfo != null)
+        {
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                <div>
+                    <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.25rem;">@Localizer["Email"]</div>
+                    <div style="font-weight: 600;">@Model.UserInfo.Email</div>
+                </div>
+                <div>
+                    <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.25rem;">@Localizer["CompanyId"]</div>
+                    <div style="font-weight: 600;">@Model.UserInfo.CompanyId</div>
+                </div>
+                <div>
+                    <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.25rem;">@Localizer["Role"]</div>
+                    <div style="font-weight: 600;">@Model.UserInfo.Role</div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <p style="color: var(--text-secondary); text-align: center; padding: 1rem;">
+                @Localizer["SelectUserToViewAssignments"]
+            </p>
+        }
+    </div>
+
+    <!-- Shift Instances Section -->
+    <div style="background: var(--card-bg); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        <h2 style="margin-top: 0; color: var(--primary); display: flex; align-items: center; gap: 0.5rem;">
+            <span>📅</span>
+            <span>@Localizer["ShiftInstancesForOctober2025"]</span>
+            <span style="font-size: 0.875rem; font-weight: normal; color: var(--text-secondary);">
+                (@Model.ShiftInstances.Count items)
+            </span>
+        </h2>
+        <div style="overflow-x: auto;">
+            @if (Model.ShiftInstances.Any())
+            {
+                <table style="width: 100%; border-collapse: collapse; border-radius: 4px; overflow: hidden;">
+                    <thead style="background: var(--primary); color: white;">
+                        <tr>
+                            <th style="padding: 0.75rem; text-align: left;">@Localizer["InstanceId"]</th>
+                            <th style="padding: 0.75rem; text-align: left;">@Localizer["CompanyId"]</th>
+                            <th style="padding: 0.75rem; text-align: left;">@Localizer["WorkDate"]</th>
+                            <th style="padding: 0.75rem; text-align: left;">@Localizer["ShiftKey"]</th>
+                            <th style="padding: 0.75rem; text-align: left;">@Localizer["Staffing"]</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var si in Model.ShiftInstances)
+                        {
+                            <tr style="border-bottom: 1px solid var(--border);">
+                                <td style="padding: 0.75rem;">@si.Id</td>
+                                <td style="padding: 0.75rem;">@si.CompanyId</td>
+                                <td style="padding: 0.75rem;">@si.WorkDate</td>
+                                <td style="padding: 0.75rem;">
+                                    <span style="font-family: monospace; background: var(--shift-badge-bg); display: inline-block; padding: 0.25rem 0.5rem; border-radius: 4px;">@si.ShiftKey</span>
+                                </td>
+                                <td style="padding: 0.75rem; font-weight: 600;">@si.Staffing</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <p style="color: var(--text-secondary); text-align: center; padding: 1rem;">
+                    No shift instances found for the selected date range.
+                </p>
+            }
+        </div>
+    </div>
+
+    <!-- Assignments Section -->
+    <div style="background: var(--card-bg); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        <h2 style="margin-top: 0; color: var(--primary); display: flex; align-items: center; gap: 0.5rem;">
+            <span>✅</span>
+            <span>@Localizer["UserAssignments"]</span>
+            @if (Model.UserInfo != null)
+            {
+                <span style="font-size: 0.875rem; font-weight: normal; color: var(--text-secondary);">
+                    (@Model.UserInfo.Email - @Model.Assignments.Count)
+                </span>
+            }
+        </h2>
+        <div style="overflow-x: auto;">
+            @if (Model.SelectedUserId.HasValue)
+            {
+                @if (Model.Assignments.Any())
+                {
+                    <table style="width: 100%; border-collapse: collapse; border-radius: 4px; overflow: hidden;">
+                        <thead style="background: var(--primary); color: white;">
+                            <tr>
+                                <th style="padding: 0.75rem; text-align: left;">@Localizer["AssignmentId"]</th>
+                                <th style="padding: 0.75rem; text-align: left;">@Localizer["UserId"]</th>
+                                <th style="padding: 0.75rem; text-align: left;">@Localizer["CompanyId"]</th>
+                                <th style="padding: 0.75rem; text-align: left;">@Localizer["InstanceId"]</th>
+                                <th style="padding: 0.75rem; text-align: left;">@Localizer["WorkDate"]</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var sa in Model.Assignments)
+                            {
+                                <tr style="border-bottom: 1px solid var(--border);">
+                                    <td style="padding: 0.75rem;">@sa.Id</td>
+                                    <td style="padding: 0.75rem;">@sa.UserId</td>
+                                    <td style="padding: 0.75rem;">@sa.CompanyId</td>
+                                    <td style="padding: 0.75rem;">@sa.InstanceId</td>
+                                    <td style="padding: 0.75rem;">@sa.WorkDate</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <p style="color: var(--text-secondary); text-align: center; padding: 1rem;">
+                        No assignments found for this user in the selected date range.
+                    </p>
+                }
+            }
+            else
+            {
+                <p style="color: var(--text-secondary); text-align: center; padding: 1rem;">
+                    @Localizer["SelectUserToViewAssignments"]
+                </p>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .btn-secondary:hover {
+        background: var(--secondary-hover) !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     }
-</table>
 
-<h2>User b@b</h2>
-<p>Email: @Model.UserInfo?.Email</p>
-<p>CompanyId: @Model.UserInfo?.CompanyId</p>
-<p>Role: @Model.UserInfo?.Role</p>
-
-<h2>Shift Instances (Oct 2025)</h2>
-<table border="1">
-    <tr><th>Id</th><th>CompanyId</th><th>WorkDate</th><th>ShiftType</th><th>Staffing</th></tr>
-    @foreach (var si in Model.ShiftInstances)
-    {
-        <tr><td>@si.Id</td><td>@si.CompanyId</td><td>@si.WorkDate</td><td>@si.ShiftKey</td><td>@si.Staffing</td></tr>
+    .btn-secondary:active {
+        transform: translateY(0);
     }
-</table>
 
-<h2>Shift Assignments for b@b</h2>
-<table border="1">
-    <tr><th>Id</th><th>UserId</th><th>CompanyId</th><th>InstanceId</th><th>WorkDate</th></tr>
-    @foreach (var sa in Model.Assignments)
-    {
-        <tr><td>@sa.Id</td><td>@sa.UserId</td><td>@sa.CompanyId</td><td>@sa.InstanceId</td><td>@sa.WorkDate</td></tr>
+    table tbody tr:hover {
+        background: var(--hover-bg);
     }
-</table>
+
+    button[type="submit"]:hover {
+        background: var(--primary-hover) !important;
+        transform: translateY(-1px);
+    }
+
+    button[type="submit"]:active {
+        transform: translateY(0);
+    }
+
+    select, input[type="date"] {
+        cursor: pointer;
+    }
+
+    select:focus, input[type="date"]:focus {
+        outline: 2px solid var(--primary);
+        outline-offset: 2px;
+    }
+</style>
