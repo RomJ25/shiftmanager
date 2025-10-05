@@ -84,6 +84,7 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddScoped<IConflictChecker, ConflictChecker>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IDirectorService, DirectorService>();
+builder.Services.AddScoped<ITraineeService, TraineeService>();
 builder.Services.AddScoped<ICompanyFilterService, CompanyFilterService>();
 builder.Services.AddScoped<IViewAsModeService, ViewAsModeService>();
 

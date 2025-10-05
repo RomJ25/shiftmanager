@@ -58,6 +58,7 @@
                     <option value="1" selected="@(Model.FilterRole == UserRole.Manager)">@Localizer["Manager"]</option>
                     <option value="3" selected="@(Model.FilterRole == UserRole.Director)">@Localizer["Director"]</option>
                     <option value="0" selected="@(Model.FilterRole == UserRole.Owner)">@Localizer["Owner"]</option>
+                    <option value="4" selected="@(Model.FilterRole == UserRole.Trainee)">@Localizer["Trainee"]</option>
                 </select>
             </label>
 
@@ -176,6 +177,7 @@
                     <option value="1" selected="@(Model.UserFilterRole == UserRole.Manager)">@Localizer["Manager"]</option>
                     <option value="3" selected="@(Model.UserFilterRole == UserRole.Director)">@Localizer["Director"]</option>
                     <option value="0" selected="@(Model.UserFilterRole == UserRole.Owner)">@Localizer["Owner"]</option>
+                    <option value="4" selected="@(Model.UserFilterRole == UserRole.Trainee)">@Localizer["Trainee"]</option>
                 </select>
             </label>
 

@@ -1467,7 +1467,8 @@ th { text-align: left; color: var(--text) !important; }
 }
 
 .admin-badge {
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--text);
+  opacity: 0.9;
   font-size: 0.9rem;
 }
 

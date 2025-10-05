@@ -54,7 +54,9 @@ public class MonthModel : PageModel
         public string ShiftName { get; set; } = ""; // Custom shift instance name
         public int Assigned { get; set; }
         public int Required { get; set; }
+        public int TraineeCount { get; set; }
         public List<string> AssignedNames { get; set; } = new();
+        public List<string> TraineeNames { get; set; } = new();
         public List<string> EmptySlots { get; set; } = new();
         public string StartTime { get; set; } = "";
         public string EndTime { get; set; } = "";
@@ -104,7 +106,7 @@ public class MonthModel : PageModel
         }
         else
         {
-            // Manager/Employee: only their company
+            // Manager/Employee/Trainee: only their company
             accessibleCompanyIds = new List<int> { currentUser.CompanyId };
             accessibleCompanies = await _db.Companies
                 .Where(c => c.Id == currentUser.CompanyId)
@@ -126,7 +128,7 @@ public class MonthModel : PageModel
             {
                 hasAccess = await _directorService.IsDirectorOfAsync(type.CompanyId);
             }
-            else if (currentUser.Role == Models.Support.UserRole.Manager || currentUser.Role == Models.Support.UserRole.Employee)
+            else if (currentUser.Role == Models.Support.UserRole.Manager || currentUser.Role == Models.Support.UserRole.Employee || currentUser.Role == Models.Support.UserRole.Trainee)
             {
                 hasAccess = currentUser.CompanyId == type.CompanyId;
             }
@@ -191,10 +193,23 @@ public class MonthModel : PageModel
                                          select new { a.ShiftInstanceId, UserName = u.DisplayName })
                                          .ToListAsync();
 
+        // Fetch trainee assignments with names
+        var traineeAssignments = await (from a in _db.ShiftAssignments
+                                       join t in _db.Users on a.TraineeUserId equals t.Id
+                                       where instanceIds.Contains(a.ShiftInstanceId) && a.TraineeUserId != null
+                                       select new { a.ShiftInstanceId, TraineeName = t.DisplayName })
+                                       .ToListAsync();
+
         var dictAssigned = assignmentCounts.ToDictionary(x => x.ShiftInstanceId, x => x.Count);
         var dictAssignedNames = assignmentsWithNames
             .GroupBy(x => x.ShiftInstanceId)
             .ToDictionary(g => g.Key, g => g.Select(x => x.UserName).ToList());
+        var dictTraineeCount = traineeAssignments
+            .GroupBy(x => x.ShiftInstanceId)
+            .ToDictionary(g => g.Key, g => g.Count());
+        var dictTraineeNames = traineeAssignments
+            .GroupBy(x => x.ShiftInstanceId)
+            .ToDictionary(g => g.Key, g => g.Select(x => x.TraineeName).ToList());
 
         for (int w = 0; w < 6; w++)
         {
@@ -208,7 +223,9 @@ public class MonthModel : PageModel
                     var inst = instances.FirstOrDefault(i => i.WorkDate == date && i.ShiftTypeId == t.Id && i.CompanyId == companyId);
                     var assignedCount = inst != null && dictAssigned.ContainsKey(inst.Id) ? dictAssigned[inst.Id] : 0;
                     var requiredCount = inst?.StaffingRequired ?? 0;
+                    var traineeCount = inst != null && dictTraineeCount.ContainsKey(inst.Id) ? dictTraineeCount[inst.Id] : 0;
                     var assignedNames = inst != null && dictAssignedNames.ContainsKey(inst.Id) ? dictAssignedNames[inst.Id] : new List<string>();
+                    var traineeNames = inst != null && dictTraineeNames.ContainsKey(inst.Id) ? dictTraineeNames[inst.Id] : new List<string>();
                     var emptySlots = Enumerable.Repeat(_localizer["Empty"].Value, Math.Max(0, requiredCount - assignedCount)).ToList();
 
                     vm.Lines.Add(new LineVM
@@ -222,7 +239,9 @@ public class MonthModel : PageModel
                         ShiftName = inst?.Name ?? "",
                         Assigned = assignedCount,
                         Required = requiredCount,
+                        TraineeCount = traineeCount,
                         AssignedNames = assignedNames,
+                        TraineeNames = traineeNames,
                         EmptySlots = emptySlots,
                         StartTime = t.Start.ToString("HH:mm"),
                         EndTime = t.End.ToString("HH:mm")

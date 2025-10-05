@@ -217,6 +217,7 @@ public class DirectorServiceTests : IDisposable
         _service.CanAssignRole(UserRole.Director).Should().BeTrue();
         _service.CanAssignRole(UserRole.Manager).Should().BeTrue();
         _service.CanAssignRole(UserRole.Employee).Should().BeTrue();
+        _service.CanAssignRole(UserRole.Trainee).Should().BeTrue();
     }
 
     [Fact]
@@ -230,6 +231,7 @@ public class DirectorServiceTests : IDisposable
         _service.CanAssignRole(UserRole.Director).Should().BeFalse();
         _service.CanAssignRole(UserRole.Manager).Should().BeFalse();
         _service.CanAssignRole(UserRole.Employee).Should().BeTrue("Manager can assign Employee");
+        _service.CanAssignRole(UserRole.Trainee).Should().BeTrue("Manager can assign Trainee");
     }
 
     [Fact]
@@ -243,6 +245,7 @@ public class DirectorServiceTests : IDisposable
         _service.CanAssignRole(UserRole.Director).Should().BeFalse();
         _service.CanAssignRole(UserRole.Manager).Should().BeFalse();
         _service.CanAssignRole(UserRole.Employee).Should().BeFalse("Employee cannot assign any role");
+        _service.CanAssignRole(UserRole.Trainee).Should().BeFalse("Employee cannot assign Trainee");
     }
 
     [Fact]

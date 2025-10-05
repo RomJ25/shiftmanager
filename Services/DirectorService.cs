@@ -116,18 +116,20 @@ public class DirectorService : IDirectorService
         if (CurrentUser.IsInRole(nameof(UserRole.Owner)))
             return true;
 
-        // Director can assign Employee, Manager, Director (but NOT Owner)
+        // Director can assign Employee, Manager, Director, Trainee (but NOT Owner)
         if (CurrentUser.IsInRole(nameof(UserRole.Director)))
         {
             return targetRole == UserRole.Employee
                 || targetRole == UserRole.Manager
-                || targetRole == UserRole.Director;
+                || targetRole == UserRole.Director
+                || targetRole == UserRole.Trainee;
         }
 
-        // Manager can assign Employee only
+        // Manager can assign Employee and Trainee
         if (CurrentUser.IsInRole(nameof(UserRole.Manager)))
         {
-            return targetRole == UserRole.Employee;
+            return targetRole == UserRole.Employee
+                || targetRole == UserRole.Trainee;
         }
 
         // Employee cannot assign any role

@@ -19,13 +19,15 @@ public class UsersModel : PageModel
     private readonly ILogger<UsersModel> _logger;
     private readonly ICompanyContext _companyContext;
     private readonly IDirectorService _directorService;
+    private readonly ITraineeService _traineeService;
 
-    public UsersModel(AppDbContext db, ILogger<UsersModel> logger, ICompanyContext companyContext, IDirectorService directorService)
+    public UsersModel(AppDbContext db, ILogger<UsersModel> logger, ICompanyContext companyContext, IDirectorService directorService, ITraineeService traineeService)
     {
         _db = db;
         _logger = logger;
         _companyContext = companyContext;
         _directorService = directorService;
+        _traineeService = traineeService;
     }
 
     public record UserVM(int Id, string DisplayName, string Email, string CompanyName, string Role, bool IsActive);
@@ -45,6 +47,7 @@ public class UsersModel : PageModel
             if (_directorService.CanAssignRole(UserRole.Manager)) roles.Add(UserRole.Manager);
             if (_directorService.CanAssignRole(UserRole.Director)) roles.Add(UserRole.Director);
             if (_directorService.CanAssignRole(UserRole.Owner)) roles.Add(UserRole.Owner);
+            if (_directorService.CanAssignRole(UserRole.Trainee)) roles.Add(UserRole.Trainee);
             return roles;
         }
     }
@@ -307,11 +310,61 @@ public class UsersModel : PageModel
         if (u != null)
         {
             var oldRole = u.Role;
+
+            var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+            // If changing from Trainee to another role, validate and cancel shadowing
+            if (oldRole == UserRole.Trainee && targetRole != UserRole.Trainee)
+            {
+                // Check if trainee has active shadowing assignments
+                var today = DateOnly.FromDateTime(DateTime.UtcNow);
+                var activeShadowingCount = await _db.ShiftAssignments
+                    .Include(sa => sa.ShiftInstance)
+                    .Where(sa => sa.TraineeUserId == id && sa.ShiftInstance.WorkDate >= today)
+                    .CountAsync();
+
+                if (activeShadowingCount > 0)
+                {
+                    // Cancel all shadowing assignments
+                    var canceledCount = await _traineeService.CancelAllShadowingAssignmentsAsync(id, "RoleChanged", currentUserId);
+
+                    _logger.LogInformation("Canceled {Count} shadowing assignments for user {UserId} due to role change from {OldRole} to {NewRole}",
+                        canceledCount, id, oldRole, targetRole);
+                }
+            }
+
+            // If changing to Trainee from another role, check if they have active shifts as primary employee
+            if (oldRole != UserRole.Trainee && targetRole == UserRole.Trainee)
+            {
+                var today = DateOnly.FromDateTime(DateTime.UtcNow);
+                var activeShiftsCount = await _db.ShiftAssignments
+                    .Include(sa => sa.ShiftInstance)
+                    .Where(sa => sa.UserId == id && sa.ShiftInstance.WorkDate >= today)
+                    .CountAsync();
+
+                if (activeShiftsCount > 0)
+                {
+                    TempData["ErrorMessage"] = $"Cannot change to Trainee role: user has {activeShiftsCount} active shift(s) as primary employee. Please remove these shifts first.";
+                    return RedirectToPage();
+                }
+
+                // Check if they have trainees shadowing them
+                var traineeShadowingCount = await _db.ShiftAssignments
+                    .Include(sa => sa.ShiftInstance)
+                    .Where(sa => sa.UserId == id && sa.TraineeUserId != null && sa.ShiftInstance.WorkDate >= today)
+                    .CountAsync();
+
+                if (traineeShadowingCount > 0)
+                {
+                    TempData["ErrorMessage"] = $"Cannot change to Trainee role: user has {traineeShadowingCount} shift(s) with trainees shadowing them. Please remove trainees first.";
+                    return RedirectToPage();
+                }
+            }
+
             u.Role = targetRole;
             await _db.SaveChangesAsync();
 
             // Audit logging
-            var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             _db.RoleAssignmentAudits.Add(new RoleAssignmentAudit
             {
                 ChangedBy = currentUserId,

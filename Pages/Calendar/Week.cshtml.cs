@@ -49,6 +49,7 @@ public class WeekModel : PageModel
         public string ShiftName { get; set; } = ""; // Custom shift instance name
         public int Assigned { get; set; }
         public int Required { get; set; }
+        public int TraineeCount { get; set; }
         public List<string> AssignedNames { get; set; } = new();
         public List<string> EmptySlots { get; set; } = new();
         public string StartTime { get; set; } = "";
@@ -104,7 +105,7 @@ public class WeekModel : PageModel
         }
         else
         {
-            // Manager/Employee: only their company
+            // Manager/Employee/Trainee: only their company
             accessibleCompanyIds = new List<int> { currentUser.CompanyId };
             accessibleCompanies = await _db.Companies
                 .Where(c => c.Id == currentUser.CompanyId)
@@ -126,7 +127,7 @@ public class WeekModel : PageModel
             {
                 hasAccess = await _directorService.IsDirectorOfAsync(type.CompanyId);
             }
-            else if (currentUser.Role == Models.Support.UserRole.Manager || currentUser.Role == Models.Support.UserRole.Employee)
+            else if (currentUser.Role == Models.Support.UserRole.Manager || currentUser.Role == Models.Support.UserRole.Employee || currentUser.Role == Models.Support.UserRole.Trainee)
             {
                 hasAccess = currentUser.CompanyId == type.CompanyId;
             }
@@ -185,10 +186,18 @@ public class WeekModel : PageModel
                                          select new { a.ShiftInstanceId, UserName = u.DisplayName })
                                          .ToListAsync();
 
+        // Count trainees per shift instance
+        var traineeCounts = await _db.ShiftAssignments
+            .Where(a => instanceIds.Contains(a.ShiftInstanceId) && a.TraineeUserId != null)
+            .GroupBy(a => a.ShiftInstanceId)
+            .Select(g => new { ShiftInstanceId = g.Key, TraineeCount = g.Count() })
+            .ToListAsync();
+
         var dictAssigned = assignmentCounts.ToDictionary(x => x.ShiftInstanceId, x => x.Count);
         var dictAssignedNames = assignmentsWithNames
             .GroupBy(x => x.ShiftInstanceId)
             .ToDictionary(g => g.Key, g => g.Select(x => x.UserName).ToList());
+        var dictTraineeCount = traineeCounts.ToDictionary(x => x.ShiftInstanceId, x => x.TraineeCount);
 
         foreach (var date in weekDates)
         {
@@ -203,6 +212,7 @@ public class WeekModel : PageModel
                 var inst = instances.FirstOrDefault(i => i.WorkDate == date && i.ShiftTypeId == t.Id && i.CompanyId == companyId);
                 var assignedCount = inst != null && dictAssigned.ContainsKey(inst.Id) ? dictAssigned[inst.Id] : 0;
                 var requiredCount = inst?.StaffingRequired ?? 0;
+                var traineeCount = inst != null && dictTraineeCount.ContainsKey(inst.Id) ? dictTraineeCount[inst.Id] : 0;
                 var assignedNames = inst != null && dictAssignedNames.ContainsKey(inst.Id) ? dictAssignedNames[inst.Id] : new List<string>();
                 var emptySlots = Enumerable.Repeat("Empty", Math.Max(0, requiredCount - assignedCount)).ToList();
 
@@ -217,6 +227,7 @@ public class WeekModel : PageModel
                     ShiftName = inst?.Name ?? "",
                     Assigned = assignedCount,
                     Required = requiredCount,
+                    TraineeCount = traineeCount,
                     AssignedNames = assignedNames,
                     EmptySlots = emptySlots,
                     StartTime = t.Start.ToString("HH:mm"),
