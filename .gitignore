@@ -1,0 +1,116 @@
+# Build results
+bin/
+obj/
+[Bb]uild/
+[Bb]uilds/
+[Bb]inaries/
+
+# Visual Studio files
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Visual Studio Code settings
+.vscode/
+
+# Rider
+.idea/
+
+# Claude Code settings (local config only, shared config is tracked)
+.claude/settings.local.json
+
+# .NET Core
+*.dll
+*.exe
+*.pdb
+*.cache
+*.log
+*.vspscc
+*.vssscc
+*.dbmdl
+*.bak
+*.backup
+*.swp
+*.tmp
+
+# NuGet
+*.nupkg
+*.snupkg
+*.nuspec
+packages/
+*.nuget.props
+*.nuget.targets
+
+# Logs
+*.log
+logs/
+
+# Database
+*.mdf
+*.ldf
+*.ndf
+
+# SQLite database files (development data - DO NOT COMMIT)
+app.db
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# EXCEPTION: seed.db is the clean template database (SHOULD be committed)
+!seed.db
+
+# Environment files
+*.env
+*.local.json
+appsettings.Production.json
+
+# User uploaded files (generated at runtime)
+wwwroot/avatars/
+wwwroot/announcements/
+
+# Hangfire background job storage (if using separate storage)
+hangfire.db
+hangfire.db-*
+
+# Coverage and test results
+TestResults/
+*.coverage
+*.coveragexml
+
+# Temporary development/testing files
+*.development.*
+*.test.*
+nul
+TempScaffold/
+TempModels/
+
+# Testing and reporting files
+TEST_STRATEGY.md
+AUTONOMOUS_TESTING_COMPLETE_REPORT.md
+DEFECT_REPORT.md
+TRAINEE_ROLE_*.md
+HEBREW_LOCALIZATION_REPORT.md
+DIRECTOR_ROLE.md
+check_data.sql
+apply_localization.ps1
+
+# Publish output
+publish/
+out/
+dist/
+
+# Resharper
+_ReSharper*/
+*.DotSettings.user
+
+# Other IDE specific
+*.DotSettings
+*.DotSettings.user
+
+# OS junk
+.DS_Store
+Thumbs.db

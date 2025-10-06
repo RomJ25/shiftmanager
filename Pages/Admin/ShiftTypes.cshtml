@@ -1,0 +1,30 @@
+@page
+@model ShiftManager.Pages.Admin.ShiftTypesModel
+@using Microsoft.Extensions.Localization
+@using ShiftManager.Resources
+@inject IStringLocalizer<SharedResources> Localizer
+@{
+    Layout = "_Layout";
+}
+<h2>@Localizer["ShiftTypes"]</h2>
+<div class="card">
+    <form method="post">
+        <table>
+            <thead><tr><th>@Localizer["Key"]</th><th>@Localizer["Name"]</th><th>@Localizer["Start"]</th><th>@Localizer["End"]</th></tr></thead>
+            <tbody>
+            @for (int i = 0; i < Model.Items.Count; i++)
+            {
+                <tr>
+                    <td>@Model.Items[i].Key</td>
+                    <td>@Localizer[$"ShiftType_{Model.Items[i].Key}"]</td>
+                    <td><input class="input" name="items[@i].Start" type="time" value="@Model.Items[i].Start" /></td>
+                    <td><input class="input" name="items[@i].End" type="time" value="@Model.Items[i].End" /></td>
+                    <input type="hidden" name="items[@i].Id" value="@Model.Items[i].Id" />
+                    <input type="hidden" name="items[@i].Key" value="@Model.Items[i].Key" />
+                </tr>
+            }
+            </tbody>
+        </table>
+        <button class="btn btn-primary" type="submit">@Localizer["Save"]</button>
+    </form>
+</div>

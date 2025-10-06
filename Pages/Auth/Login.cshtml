@@ -1,0 +1,29 @@
+@page
+@model ShiftManager.Pages.Auth.LoginModel
+@using Microsoft.Extensions.Localization
+@using ShiftManager.Resources
+@inject IStringLocalizer<SharedResources> Localizer
+@{
+    Layout = "_Layout";
+}
+<div class="card" style="max-width:420px; margin:auto">
+    <h2>@Localizer["Login"]</h2>
+    @if (!string.IsNullOrEmpty(Model.Error))
+    {
+        <div class="small" style="color:var(--danger)">@Model.Error</div>
+    }
+   <form method="post" asp-page="./Login">
+    @Html.AntiForgeryToken()
+    <div style="display:grid; gap:.75rem; margin-top:.75rem">
+        <label>@Localizer["Email"]<br /><input class="input" asp-for="Email" /></label>
+        <label>@Localizer["Password"]<br /><input class="input" asp-for="Password" type="password" /></label>
+        <button class="btn btn-primary" type="submit">@Localizer["Login"]</button>
+    </div>
+</form>
+
+    <div class="small" style="margin-top:.5rem">Demo: <b>admin@local</b> / <b>admin123</b></div>
+
+    <div class="small" style="margin-top:1rem; text-align:center">
+        Don't have an account? <a href="/Auth/Signup">Request access here</a>
+    </div>
+</div>

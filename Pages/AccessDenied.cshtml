@@ -1,0 +1,39 @@
+@page
+@model ShiftManager.Pages.AccessDeniedModel
+@using Microsoft.Extensions.Localization
+@using ShiftManager.Resources
+@using System.Globalization
+@inject IStringLocalizer<SharedResources> Localizer
+@{
+    Layout = null;
+    var currentCulture = CultureInfo.CurrentUICulture.Name;
+    var isHebrew = currentCulture.StartsWith("he");
+    var direction = isHebrew ? "rtl" : "ltr";
+    var lang = isHebrew ? "he" : "en";
+}
+
+<!DOCTYPE html>
+<html lang="@lang" dir="@direction" data-theme="light" class="@(isHebrew ? "hebrew" : "english")">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Access Denied - Shift Manager</title>
+    <link rel="stylesheet" href="~/css/site.css" />
+    <script>
+        // Automatically redirect with popup after 2 seconds
+        setTimeout(() => {
+            window.location.href = '@Model.ReturnUrl?accessDenied=true';
+        }, 2000);
+    </script>
+</head>
+<body>
+    <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; background: var(--bg);">
+        <div style="text-align: center; padding: 3rem; background: var(--surface); border-radius: 1rem; border: 1px solid var(--border); box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1); max-width: 400px;">
+            <div style="color: var(--danger); font-size: 3rem; margin-bottom: 1rem;">🚫</div>
+            <h2 style="color: var(--text); margin-bottom: 1rem;">@Localizer["AccessDenied"]</h2>
+            <p style="color: var(--muted); margin-bottom: 2rem;">@Localizer["RedirectingBack"]</p>
+            <div class="loading-spinner" style="margin: 0 auto;"></div>
+        </div>
+    </div>
+</body>
+</html>

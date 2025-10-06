@@ -1,0 +1,18 @@
+@page
+@model ShiftManager.Pages.Admin.ConfigModel
+@using Microsoft.Extensions.Localization
+@using ShiftManager.Resources
+@inject IStringLocalizer<SharedResources> Localizer
+@{
+    Layout = "_Layout";
+}
+<h2>@Localizer["Config"]</h2>
+<div class="card" style="max-width:580px">
+    <form method="post">
+        <div style="display:grid; grid-template-columns: 1fr 1fr auto; gap:.5rem; align-items:end">
+            <label>@Localizer["RestHours"]<br /><input class="input" asp-for="RestHours" type="number" min="0" /></label>
+            <label>@Localizer["WeeklyCap"]<br /><input class="input" asp-for="WeeklyCap" type="number" min="0" /></label>
+            <button class="btn btn-primary" type="submit">@Localizer["Save"]</button>
+        </div>
+    </form>
+</div>
