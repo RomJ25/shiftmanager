@@ -1,5 +1,8 @@
 @page
 @model ShiftManager.Pages.Calendar.WeekModel
+@using Microsoft.Extensions.Localization
+@using ShiftManager.Resources
+@inject IStringLocalizer<SharedResources> Localizer
 @{
     Layout = "_Layout";
 }
@@ -19,7 +22,7 @@
             @Model.Next.Label →
         </a>
     </div>
-    @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+    @if (User.IsInRole("Owner") || User.IsInRole("Manager") || User.IsInRole("Director"))
     {
         <div class="calendar-help">
             Click a shift badge to manage assignments.<br>
@@ -59,15 +62,15 @@
                         var badgeClass = l.Assigned >= l.Required ? "ok" : "warn";
                         <div class="shift-line">
                             <div class="assignment-tooltip">
-                                @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+                                @if (User.IsInRole("Owner") || User.IsInRole("Manager") || User.IsInRole("Director"))
                                 {
                                     <a href="/Assignments/Manage?date=@day.Date.ToString("yyyy-MM-dd")&shiftTypeId=@l.ShiftTypeId&returnUrl=@Uri.EscapeDataString("/Calendar/Week?year=" + Model.CurrentWeekStart.Year + "&month=" + Model.CurrentWeekStart.Month + "&day=" + Model.CurrentWeekStart.Day)">
-                                        <span class="shift-badge @l.ShiftTypeKey">@l.ShortName</span>
+                                        <span class="shift-badge @l.ShiftTypeKey">@Localizer[$"ShiftType_{l.ShiftTypeKey.ToUpper()}"].Value.Substring(0, Math.Min(3, Localizer[$"ShiftType_{l.ShiftTypeKey.ToUpper()}"].Value.Length))</span>
                                     </a>
                                 }
                                 else
                                 {
-                                    <span class="shift-badge @l.ShiftTypeKey employee-badge">@l.ShortName</span>
+                                    <span class="shift-badge @l.ShiftTypeKey employee-badge">@Localizer[$"ShiftType_{l.ShiftTypeKey.ToUpper()}"].Value.Substring(0, Math.Min(3, Localizer[$"ShiftType_{l.ShiftTypeKey.ToUpper()}"].Value.Length))</span>
                                 }
                                 <div class="tooltip-content">
                                     <div class="tooltip-header">
@@ -75,11 +78,11 @@
                                             @if (!string.IsNullOrEmpty(l.ShiftName))
                                             {
                                                 @l.ShiftName
-                                                <span class="tooltip-custom-name">(@l.ShiftTypeName)</span>
+                                                <span class="tooltip-custom-name">(@Localizer[$"ShiftType_{l.ShiftTypeKey.ToUpper()}"])</span>
                                             }
                                             else
                                             {
-                                                @l.ShiftTypeName
+                                                @Localizer[$"ShiftType_{l.ShiftTypeKey.ToUpper()}"]
                                             }
                                         </div>
                                         <div class="tooltip-hours">@l.StartTime - @l.EndTime</div>
@@ -110,7 +113,15 @@
                                     </div>
 
                                     <div class="tooltip-stats">
-                                        <span class="tooltip-stat">@l.Assigned/@l.Required staffed</span>
+                                        <span class="tooltip-stat">
+                                            @l.Assigned/@l.Required staffed
+                                            @if (l.TraineeCount > 0)
+                                            {
+                                                <span style="margin-left: 0.5rem; padding: 0.125rem 0.375rem; background-color: var(--info); color: var(--info-text); border-radius: 0.25rem; font-size: 0.75rem;">
+                                                    +@l.TraineeCount 👤
+                                                </span>
+                                            }
+                                        </span>
                                         @if (l.Assigned >= l.Required)
                                         {
                                             <span class="tooltip-status-ok">✓ Fully Staffed</span>
@@ -122,7 +133,7 @@
                                     </div>
                                 </div>
                             </div>
-                            @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+                            @if (User.IsInRole("Owner") || User.IsInRole("Manager") || User.IsInRole("Director"))
                             {
                                 <div class="shift-counter" data-si="@l.InstanceId" data-conc="@l.Concurrency">
                                     <button class="counter-btn" aria-label="Decrease required staffing"
@@ -141,7 +152,7 @@
                         }
                     }
                 }
-                @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+                @if (User.IsInRole("Owner") || User.IsInRole("Manager") || User.IsInRole("Director"))
                 {
                     <button class="add-shift-btn" onclick="openShiftModal('@day.Date.ToString("yyyy-MM-dd")')">
                         <span>+</span>
@@ -155,4 +166,5 @@
 
 <script>
 window.shiftTypes = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewData["ShiftTypes"]));
+window.companies = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewData["Companies"]));
 </script>

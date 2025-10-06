@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using ShiftManager.Data;
 using ShiftManager.Models;
+using ShiftManager.Services;
 
 namespace ShiftManager.Pages.Admin;
 
@@ -11,21 +12,27 @@ namespace ShiftManager.Pages.Admin;
 public class ConfigModel : PageModel
 {
     private readonly AppDbContext _db;
-    public ConfigModel(AppDbContext db) => _db = db;
+    private readonly ICompanyContext _companyContext;
+
+    public ConfigModel(AppDbContext db, ICompanyContext companyContext)
+    {
+        _db = db;
+        _companyContext = companyContext;
+    }
 
     [BindProperty] public int RestHours { get; set; }
     [BindProperty] public int WeeklyCap { get; set; }
 
-    public async Task OnGetAsync()
+    public void OnGet()
     {
-        var companyId = int.Parse(User.FindFirst("CompanyId")!.Value);
+        var companyId = _companyContext.GetCompanyIdOrThrow();
         RestHours = GetInt(companyId, "RestHours", 8);
         WeeklyCap = GetInt(companyId, "WeeklyHoursCap", 40);
     }
 
     public async Task<IActionResult> OnPostAsync()
     {
-        var companyId = int.Parse(User.FindFirst("CompanyId")!.Value);
+        var companyId = _companyContext.GetCompanyIdOrThrow();
         await Set(companyId, "RestHours", RestHours.ToString());
         await Set(companyId, "WeeklyHoursCap", WeeklyCap.ToString());
         return RedirectToPage();

@@ -1,7 +1,7 @@
 @model ShiftManager.ViewComponents.LanguageToggleViewModel
 @using Microsoft.Extensions.Localization
 @using ShiftManager.Resources
-@inject IStringLocalizer<SharedResource> Localizer
+@inject IStringLocalizer<SharedResources> Localizer
 
 <div class="language-toggle">
     <button class="action-btn language-btn" onclick="toggleLanguage('@Model.CurrentLanguage')"

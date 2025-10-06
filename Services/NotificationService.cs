@@ -19,11 +19,13 @@ public class NotificationService : INotificationService
 {
     private readonly AppDbContext _db;
     private readonly ILogger<NotificationService> _logger;
+    private readonly ITenantResolver _tenantResolver;
 
-    public NotificationService(AppDbContext db, ILogger<NotificationService> logger)
+    public NotificationService(AppDbContext db, ILogger<NotificationService> logger, ITenantResolver tenantResolver)
     {
         _db = db;
         _logger = logger;
+        _tenantResolver = tenantResolver;
     }
 
     public async Task CreateNotificationAsync(int userId, NotificationType type, string title, string message, int? relatedEntityId = null, string? relatedEntityType = null)
@@ -32,6 +34,7 @@ public class NotificationService : INotificationService
         {
             var notification = new UserNotification
             {
+                CompanyId = _tenantResolver.GetCurrentTenantId(), // Multitenancy Phase 2
                 UserId = userId,
                 Type = type,
                 Title = title,

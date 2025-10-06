@@ -17,8 +17,20 @@ public class ManageModel : PageModel
     private readonly IConflictChecker _checker;
     private readonly INotificationService _notificationService;
     private readonly ILogger<ManageModel> _logger;
-    public ManageModel(AppDbContext db, IConflictChecker checker, INotificationService notificationService, ILogger<ManageModel> logger)
-    { _db = db; _checker = checker; _notificationService = notificationService; _logger = logger; }
+    private readonly ICompanyContext _companyContext;
+    private readonly IDirectorService _directorService;
+    private readonly ITraineeService _traineeService;
+
+    public ManageModel(AppDbContext db, IConflictChecker checker, INotificationService notificationService, ILogger<ManageModel> logger, ICompanyContext companyContext, IDirectorService directorService, ITraineeService traineeService)
+    {
+        _db = db;
+        _checker = checker;
+        _notificationService = notificationService;
+        _logger = logger;
+        _companyContext = companyContext;
+        _directorService = directorService;
+        _traineeService = traineeService;
+    }
 
 
     [BindProperty(SupportsGet = true)] public DateOnly Date { get; set; }
@@ -27,21 +39,58 @@ public class ManageModel : PageModel
 
     public ShiftType? Type { get; set; }
     public ShiftInstance Instance { get; set; } = default!;
-    public List<(int AssignmentId, string UserLabel)> Assigned { get; set; } = new();
+    public List<(int AssignmentId, string UserLabel, int? TraineeUserId, string? TraineeName)> Assigned { get; set; } = new();
 
     [BindProperty] public int? SelectedUserId { get; set; }
     [BindProperty] public string ShiftName { get; set; } = string.Empty;
     public List<AppUser> ActiveUsers { get; set; } = new();
+    public List<AppUser> Trainees { get; set; } = new();
     public HashSet<int> UsersOnTimeOff { get; set; } = new();
     public string? Error { get; set; }
 
     public async Task<IActionResult> OnGetAsync()
     {
-        var companyId = int.Parse(User.FindFirst("CompanyId")!.Value);
-        Type = await _db.ShiftTypes.FindAsync(ShiftTypeId);
-        if (Type == null) return RedirectToPage("/Calendar/Month");
+        // Load the shift type (across all companies using IgnoreQueryFilters)
+        Type = await _db.ShiftTypes
+            .IgnoreQueryFilters()
+            .FirstOrDefaultAsync(st => st.Id == ShiftTypeId);
 
-        Instance = await _db.ShiftInstances.FirstOrDefaultAsync(i => i.CompanyId == companyId && i.WorkDate == Date && i.ShiftTypeId == ShiftTypeId)
+        if (Type == null)
+        {
+            _logger.LogWarning("ShiftType {ShiftTypeId} not found", ShiftTypeId);
+            return RedirectToPage("/Calendar/Month");
+        }
+
+        // Company is determined by the shift type's CompanyId
+        var companyId = Type.CompanyId;
+
+        // Validate user has access to this company
+        var currentUserId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
+        var currentUser = await _db.Users.FindAsync(currentUserId);
+
+        bool hasAccess = false;
+        if (currentUser!.Role == UserRole.Owner)
+        {
+            hasAccess = true;
+        }
+        else if (currentUser.Role == UserRole.Director)
+        {
+            hasAccess = await _directorService.IsDirectorOfAsync(companyId);
+        }
+        else if (currentUser.Role == UserRole.Manager)
+        {
+            hasAccess = currentUser.CompanyId == companyId;
+        }
+
+        if (!hasAccess)
+        {
+            _logger.LogWarning("User {UserId} attempted to access shift for company {CompanyId} without permission", currentUserId, companyId);
+            return RedirectToPage("/AccessDenied");
+        }
+
+        Instance = await _db.ShiftInstances
+            .IgnoreQueryFilters()
+            .FirstOrDefaultAsync(i => i.CompanyId == companyId && i.WorkDate == Date && i.ShiftTypeId == ShiftTypeId)
             ?? new ShiftInstance { CompanyId = companyId, WorkDate = Date, ShiftTypeId = ShiftTypeId, StaffingRequired = 0 };
 
         if (Instance.Id == 0)
@@ -50,20 +99,47 @@ public class ManageModel : PageModel
             await _db.SaveChangesAsync();
         }
 
-        var assignments = await (from a in _db.ShiftAssignments
-                                 join u in _db.Users on a.UserId equals u.Id
-                                 where a.ShiftInstanceId == Instance.Id
-                                 select new { a.Id, u.DisplayName, u.Email }).ToListAsync();
-        Assigned = assignments.Select(a => (a.Id, $"{a.DisplayName} ({a.Email})")).ToList();
+        var assignments = await _db.ShiftAssignments
+            .IgnoreQueryFilters()
+            .Where(a => a.ShiftInstanceId == Instance.Id)
+            .ToListAsync();
+
+        // Load users and trainees separately to avoid query filter issues
+        var userIds = assignments.Select(a => a.UserId).ToList();
+        var traineeIds = assignments.Where(a => a.TraineeUserId.HasValue).Select(a => a.TraineeUserId!.Value).ToList();
+        var allUserIds = userIds.Concat(traineeIds).Distinct().ToList();
+
+        var users = await _db.Users
+            .IgnoreQueryFilters()
+            .Where(u => allUserIds.Contains(u.Id))
+            .ToDictionaryAsync(u => u.Id);
+
+        Assigned = assignments.Select(a => (
+            a.Id,
+            $"{users[a.UserId].DisplayName} ({users[a.UserId].Email})",
+            a.TraineeUserId,
+            a.TraineeUserId.HasValue && users.ContainsKey(a.TraineeUserId.Value)
+                ? users[a.TraineeUserId.Value].DisplayName
+                : null
+        )).ToList();
 
         // Load current shift name for display
         ShiftName = Instance.Name ?? string.Empty;
 
-        ActiveUsers = await _db.Users.Where(u => u.IsActive && u.CompanyId == companyId).OrderBy(u => u.DisplayName).ToListAsync();
+        // Only show users from the shift's company (exclude trainees from regular user list)
+        ActiveUsers = await _db.Users
+            .Where(u => u.IsActive && u.CompanyId == companyId && u.Role != UserRole.Trainee)
+            .OrderBy(u => u.DisplayName)
+            .ToListAsync();
 
-        // Check which users have approved time off on this date
+        // Load trainees for this company
+        Trainees = await _traineeService.GetCompanyTraineesAsync(companyId);
+
+        // Check which users have approved time off on this date (from same company)
         UsersOnTimeOff = (await _db.TimeOffRequests
-            .Where(r => r.Status == RequestStatus.Approved &&
+            .IgnoreQueryFilters()
+            .Where(r => r.CompanyId == companyId &&
+                       r.Status == RequestStatus.Approved &&
                        r.StartDate <= Date &&
                        r.EndDate >= Date)
             .Select(r => r.UserId)
@@ -80,7 +156,25 @@ public class ManageModel : PageModel
 
         if (SelectedUserId is null) { Error = "Select a user."; return Page(); }
 
-        int assigned = await _db.ShiftAssignments.CountAsync(a => a.ShiftInstanceId == Instance.Id);
+        // Validate user belongs to the shift's company
+        var selectedUser = await _db.Users.FindAsync(SelectedUserId.Value);
+        if (selectedUser == null)
+        {
+            Error = "Selected user not found.";
+            return Page();
+        }
+
+        if (selectedUser.CompanyId != Instance.CompanyId)
+        {
+            _logger.LogWarning("Attempted cross-company assignment: User {UserId} (Company {UserCompanyId}) to Shift (Company {ShiftCompanyId})",
+                SelectedUserId.Value, selectedUser.CompanyId, Instance.CompanyId);
+            Error = "Cannot assign user from a different company to this shift.";
+            return Page();
+        }
+
+        int assigned = await _db.ShiftAssignments
+            .IgnoreQueryFilters()
+            .CountAsync(a => a.ShiftInstanceId == Instance.Id);
         if (assigned >= Instance.StaffingRequired)
         {
             Error = "Cannot over-assign. Increase required first.";
@@ -96,7 +190,12 @@ public class ManageModel : PageModel
             return Page();
         }
 
-        _db.ShiftAssignments.Add(new ShiftAssignment { ShiftInstanceId = Instance.Id, UserId = SelectedUserId.Value });
+        _db.ShiftAssignments.Add(new ShiftAssignment
+        {
+            ShiftInstanceId = Instance.Id,
+            UserId = SelectedUserId.Value,
+            CompanyId = Instance.CompanyId
+        });
 
         // Set shift name if provided and this is the first assignment
         // Also check for pending shift name from localStorage (from modal creation)
@@ -153,5 +252,41 @@ public class ManageModel : PageModel
         }
 
         return !string.IsNullOrEmpty(ReturnUrl) ? Redirect(ReturnUrl) : RedirectToPage(new { date = Date, shiftTypeId = ShiftTypeId });
+    }
+
+    public async Task<IActionResult> OnPostAssignTraineeAsync(int assignmentId, int traineeUserId)
+    {
+        var currentUserId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
+
+        var success = await _traineeService.AssignTraineeToShiftAsync(assignmentId, traineeUserId, currentUserId);
+
+        if (!success)
+        {
+            TempData["ErrorMessage"] = "Failed to assign trainee. Please check validation rules.";
+        }
+        else
+        {
+            TempData["SuccessMessage"] = "Trainee assigned successfully.";
+        }
+
+        return RedirectToPage(new { date = Date, shiftTypeId = ShiftTypeId, returnUrl = ReturnUrl });
+    }
+
+    public async Task<IActionResult> OnPostRemoveTraineeAsync(int assignmentId)
+    {
+        var currentUserId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
+
+        var success = await _traineeService.RemoveTraineeFromShiftAsync(assignmentId, "Manual", currentUserId);
+
+        if (!success)
+        {
+            TempData["ErrorMessage"] = "Failed to remove trainee.";
+        }
+        else
+        {
+            TempData["SuccessMessage"] = "Trainee removed successfully.";
+        }
+
+        return RedirectToPage(new { date = Date, shiftTypeId = ShiftTypeId, returnUrl = ReturnUrl });
     }
 }

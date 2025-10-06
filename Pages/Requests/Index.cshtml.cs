@@ -16,9 +16,10 @@ public class IndexModel : PageModel
     private readonly AppDbContext _db;
     private readonly IConflictChecker _checker;
     private readonly INotificationService _notificationService;
+    private readonly ITraineeService _traineeService;
     private readonly ILogger<IndexModel> _logger;
-    public IndexModel(AppDbContext db, IConflictChecker checker, INotificationService notificationService, ILogger<IndexModel> logger)
-    { _db = db; _checker = checker; _notificationService = notificationService; _logger = logger; }
+    public IndexModel(AppDbContext db, IConflictChecker checker, INotificationService notificationService, ITraineeService traineeService, ILogger<IndexModel> logger)
+    { _db = db; _checker = checker; _notificationService = notificationService; _traineeService = traineeService; _logger = logger; }
 
     public record TimeOffVM(int Id, string UserName, DateOnly StartDate, DateOnly EndDate, string? Reason);
     public List<TimeOffVM> TimeOff { get; set; } = new();
@@ -86,6 +87,15 @@ public class IndexModel : PageModel
         if (assignments.Any())
         {
             _db.ShiftAssignments.RemoveRange(assignments);
+        }
+
+        // Cancel trainee shadowing assignments if user is a trainee
+        var user = await _db.Users.FindAsync(r.UserId);
+        if (user != null && user.Role == UserRole.Trainee)
+        {
+            var startDate = r.StartDate.ToDateTime(TimeOnly.MinValue);
+            var endDate = r.EndDate.ToDateTime(TimeOnly.MaxValue);
+            await _traineeService.CancelShadowingForTimeOffAsync(r.UserId, startDate, endDate);
         }
 
         await _db.SaveChangesAsync();

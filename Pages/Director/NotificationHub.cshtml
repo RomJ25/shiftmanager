@@ -1,0 +1,130 @@
+@page
+@using Microsoft.Extensions.Localization
+@using ShiftManager.Resources
+@inject IStringLocalizer<SharedResources> Localizer
+@model ShiftManager.Pages.Director.NotificationHubModel
+@{
+    Layout = "_Layout";
+}
+<h2>@Localizer["NotificationHub"]</h2>
+<p style="color: var(--muted); margin-bottom: 2rem;">
+    @Localizer["NotificationHubDescription"]
+</p>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
+    <div class="card">
+        <h3 style="margin-top:0">@Localizer["PendingTimeOffRequests"]</h3>
+        @if (Model.PendingTimeOffRequests.Any())
+        {
+            <table>
+                <thead>
+                    <tr>
+                        <th>@Localizer["Company"]</th>
+                        <th>@Localizer["User"]</th>
+                        <th>@Localizer["Details"]</th>
+                        <th>@Localizer["Requested"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var request in Model.PendingTimeOffRequests)
+                    {
+                        <tr>
+                            <td>
+                                <span title="@request.CompanyName">
+                                    <code>@request.CompanySlug</code>
+                                </span>
+                            </td>
+                            <td>@request.UserName</td>
+                            <td>@request.Details</td>
+                            <td>@request.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <p style="color: var(--muted); text-align: center; padding: 1rem;">@Localizer["NoPendingTimeOffRequests"]</p>
+        }
+    </div>
+
+    <div class="card">
+        <h3 style="margin-top:0">@Localizer["PendingSwapRequests"]</h3>
+        @if (Model.PendingSwapRequests.Any())
+        {
+            <table>
+                <thead>
+                    <tr>
+                        <th>@Localizer["Company"]</th>
+                        <th>@Localizer["User"]</th>
+                        <th>@Localizer["Details"]</th>
+                        <th>@Localizer["Requested"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var request in Model.PendingSwapRequests)
+                    {
+                        <tr>
+                            <td>
+                                <span title="@request.CompanyName">
+                                    <code>@request.CompanySlug</code>
+                                </span>
+                            </td>
+                            <td>@request.UserName</td>
+                            <td>@request.Details</td>
+                            <td>@request.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <p style="color: var(--muted); text-align: center; padding: 1rem;">@Localizer["NoPendingSwapRequests"]</p>
+        }
+    </div>
+</div>
+
+<div class="card">
+    <h3 style="margin-top:0">@Localizer["RecentNotificationsLast50"]</h3>
+    @if (Model.RecentNotifications.Any())
+    {
+        <table>
+            <thead>
+                <tr>
+                    <th>@Localizer["Company"]</th>
+                    <th>@Localizer["Type"]</th>
+                    <th>@Localizer["Message"]</th>
+                    <th>@Localizer["Date"]</th>
+                    <th>@Localizer["Status"]</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var notification in Model.RecentNotifications)
+                {
+                    <tr style="@(notification.IsRead ? "opacity: 0.6;" : "font-weight: 600;")">
+                        <td>
+                            <span title="@notification.CompanyName">
+                                <code>@notification.CompanySlug</code>
+                            </span>
+                        </td>
+                        <td>@notification.Type</td>
+                        <td>@notification.Message</td>
+                        <td>@notification.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                        <td>@(notification.IsRead ? Localizer["Read"] : Localizer["Unread"])</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p style="color: var(--muted); text-align: center; padding: 2rem;">@Localizer["NoNotificationsYet"]</p>
+    }
+</div>
+
+<div style="margin-top: 1rem; padding: 1rem; background: var(--surface); border-left: 4px solid var(--primary); border-radius: 0.5rem;">
+    <small style="color: var(--muted);">
+        <strong>@Localizer["Note"]</strong> @Localizer["NotificationHubInfo"]
+    </small>
+</div>

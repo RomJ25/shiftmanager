@@ -1,21 +1,16 @@
 {
   "permissions": {
     "allow": [
-      "Bash(dotnet run:*)",
+      "Bash(git log:*)",
+      "Bash(dotnet ef migrations add:*)",
       "Bash(dotnet build)",
-      "Bash(tasklist:*)",
       "Bash(taskkill:*)",
-      "Bash(dotnet ef:*)",
-      "Bash(dotnet add package:*)",
-      "Bash(sqlite3:*)",
-      "Bash(dotnet tool install:*)",
-      "Bash(findstr:*)",
-      "Read(//c/Users/katzi/Pictures/Screenshots/**)",
-      "Bash(powershell Stop-Process:*)",
-      "Bash(dir:*)",
-      "Bash(del app.db)",
-      "Bash(del TestsHebrewLocalizationTests.cs)"
+      "Bash(dotnet ef database update:*)",
+      "Bash(dotnet test:*)",
+      "Bash(git add:*)"
     ],
+    "deny": [],
+    "ask": [],
     "defaultMode": "acceptEdits"
   }
 }

@@ -13,7 +13,7 @@ public class IndexModel : PageModel
     private readonly AppDbContext _db;
     public IndexModel(AppDbContext db) => _db = db;
 
-    public record UpcomingVM(DateOnly Date, string ShiftName, double Hours, bool IsTimeOff = false);
+    public record UpcomingVM(DateOnly Date, string ShiftName, double Hours, bool IsTimeOff = false, bool IsShadowing = false, string? ShadowingEmployee = null, string? TraineeName = null);
     public List<UpcomingVM> Upcoming { get; set; } = new();
 
     public double Next4WeeksHours { get; set; }
@@ -22,18 +22,55 @@ public class IndexModel : PageModel
     public async Task OnGetAsync()
     {
         int userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
-        var upcoming = await (from a in _db.ShiftAssignments
+        var currentUser = await _db.Users.FindAsync(userId);
+
+        var upcomingShifts = new List<UpcomingVM>();
+
+        // Load regular shifts where user is the primary employee
+        var regularShifts = await (from a in _db.ShiftAssignments
                               join si in _db.ShiftInstances on a.ShiftInstanceId equals si.Id
                               join st in _db.ShiftTypes on si.ShiftTypeId equals st.Id
+                              join t in _db.Users on a.TraineeUserId equals t.Id into traineeJoin
+                              from trainee in traineeJoin.DefaultIfEmpty()
                               where a.UserId == userId && si.WorkDate >= DateOnly.FromDateTime(DateTime.Today)
-                              orderby si.WorkDate
-                              select new { si.WorkDate, st.Key, st.Start, st.End }).ToListAsync();
+                              select new {
+                                  a.TraineeUserId,
+                                  TraineeName = trainee != null ? trainee.DisplayName : null,
+                                  si.WorkDate,
+                                  st.Key,
+                                  st.Start,
+                                  st.End
+                              }).ToListAsync();
 
-        var upcomingShifts = upcoming.Select(u =>
+        upcomingShifts.AddRange(regularShifts.Select(u =>
         {
             var hours = TimeHelpers.Hours(new ShiftManager.Models.ShiftType { Start = u.Start, End = u.End });
-            return new UpcomingVM(u.WorkDate, u.Key, hours);
-        }).ToList();
+            return new UpcomingVM(u.WorkDate, u.Key, hours, false, false, null, u.TraineeName);
+        }));
+
+        // If user is a trainee, also load shifts they are shadowing
+        if (currentUser?.Role == UserRole.Trainee)
+        {
+            var shadowingShifts = await (from a in _db.ShiftAssignments
+                                  join si in _db.ShiftInstances on a.ShiftInstanceId equals si.Id
+                                  join st in _db.ShiftTypes on si.ShiftTypeId equals st.Id
+                                  join u in _db.Users on a.UserId equals u.Id
+                                  where a.TraineeUserId == userId && si.WorkDate >= DateOnly.FromDateTime(DateTime.Today)
+                                  orderby si.WorkDate
+                                  select new {
+                                      si.WorkDate,
+                                      st.Key,
+                                      st.Start,
+                                      st.End,
+                                      EmployeeName = u.DisplayName
+                                  }).ToListAsync();
+
+            upcomingShifts.AddRange(shadowingShifts.Select(u =>
+            {
+                var hours = TimeHelpers.Hours(new ShiftManager.Models.ShiftType { Start = u.Start, End = u.End });
+                return new UpcomingVM(u.WorkDate, u.Key, hours, false, true, u.EmployeeName, null);
+            }));
+        }
 
         // Get approved time off periods
         var approvedTimeOff = await _db.TimeOffRequests

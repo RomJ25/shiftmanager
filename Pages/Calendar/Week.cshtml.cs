@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using ShiftManager.Data;
 using ShiftManager.Models;
+using ShiftManager.Services;
 using Microsoft.Extensions.Logging;
 
 namespace ShiftManager.Pages.Calendar;
@@ -13,8 +14,17 @@ namespace ShiftManager.Pages.Calendar;
 public class WeekModel : PageModel
 {
     private readonly AppDbContext _db;
+    private readonly ICompanyContext _companyContext;
     private readonly ILogger<WeekModel> _logger;
-    public WeekModel(AppDbContext db, ILogger<WeekModel> logger) { _db = db; _logger = logger; }
+    private readonly IDirectorService _directorService;
+
+    public WeekModel(AppDbContext db, ICompanyContext companyContext, ILogger<WeekModel> logger, IDirectorService directorService)
+    {
+        _db = db;
+        _companyContext = companyContext;
+        _logger = logger;
+        _directorService = directorService;
+    }
 
     public DateOnly CurrentWeekStart { get; set; }
     public (DateOnly WeekStart, string Label) Previous { get; set; }
@@ -39,6 +49,7 @@ public class WeekModel : PageModel
         public string ShiftName { get; set; } = ""; // Custom shift instance name
         public int Assigned { get; set; }
         public int Required { get; set; }
+        public int TraineeCount { get; set; }
         public List<string> AssignedNames { get; set; } = new();
         public List<string> EmptySlots { get; set; } = new();
         public string StartTime { get; set; } = "";
@@ -59,19 +70,98 @@ public class WeekModel : PageModel
         Previous = (CurrentWeekStart.AddDays(-7), CurrentWeekStart.AddDays(-7).ToString("MMM dd"));
         Next = (CurrentWeekStart.AddDays(7), CurrentWeekStart.AddDays(7).ToString("MMM dd"));
 
-        var companyId = int.Parse(User.FindFirst("CompanyId")!.Value);
+        var companyId = _companyContext.GetCompanyIdOrThrow();
 
-        // Load shift types
-        var types = await _db.ShiftTypes.OrderBy(s => s.Key).ToListAsync();
+        // Load accessible companies and shift types based on role
+        var currentUserId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
+        var currentUser = await _db.Users.FindAsync(currentUserId);
 
-        // Prepare shift types for JavaScript
+        List<int> accessibleCompanyIds;
+        List<Company> accessibleCompanies;
+        List<ShiftType> types;
+
+        if (currentUser!.Role == Models.Support.UserRole.Owner)
+        {
+            // Owner: all companies
+            accessibleCompanies = await _db.Companies.OrderBy(c => c.Name).ToListAsync();
+            accessibleCompanyIds = accessibleCompanies.Select(c => c.Id).ToList();
+            types = await _db.ShiftTypes.IgnoreQueryFilters()
+                .Where(st => accessibleCompanyIds.Contains(st.CompanyId))
+                .OrderBy(s => s.Key)
+                .ToListAsync();
+        }
+        else if (currentUser.Role == Models.Support.UserRole.Director)
+        {
+            // Director: companies they manage
+            accessibleCompanyIds = await _directorService.GetDirectorCompanyIdsAsync(currentUserId);
+            accessibleCompanies = await _db.Companies
+                .Where(c => accessibleCompanyIds.Contains(c.Id))
+                .OrderBy(c => c.Name)
+                .ToListAsync();
+            types = await _db.ShiftTypes.IgnoreQueryFilters()
+                .Where(st => accessibleCompanyIds.Contains(st.CompanyId))
+                .OrderBy(s => s.Key)
+                .ToListAsync();
+        }
+        else
+        {
+            // Manager/Employee/Trainee: only their company
+            accessibleCompanyIds = new List<int> { currentUser.CompanyId };
+            accessibleCompanies = await _db.Companies
+                .Where(c => c.Id == currentUser.CompanyId)
+                .ToListAsync();
+            types = await _db.ShiftTypes.OrderBy(s => s.Key).ToListAsync();
+        }
+
+        // ✅ SECURITY FIX (DEFECT-002): Post-query validation for defense-in-depth
+        // Validate every shift type after IgnoreQueryFilters to prevent data leaks
+        var validatedTypes = new List<ShiftType>();
+        foreach (var type in types)
+        {
+            bool hasAccess = false;
+            if (currentUser.Role == Models.Support.UserRole.Owner)
+            {
+                hasAccess = true;
+            }
+            else if (currentUser.Role == Models.Support.UserRole.Director)
+            {
+                hasAccess = await _directorService.IsDirectorOfAsync(type.CompanyId);
+            }
+            else if (currentUser.Role == Models.Support.UserRole.Manager || currentUser.Role == Models.Support.UserRole.Employee || currentUser.Role == Models.Support.UserRole.Trainee)
+            {
+                hasAccess = currentUser.CompanyId == type.CompanyId;
+            }
+
+            if (hasAccess)
+            {
+                validatedTypes.Add(type);
+            }
+            else
+            {
+                _logger.LogWarning("SECURITY: Filtered unauthorized shift type {ShiftTypeId} from company {CompanyId} for user {UserId}",
+                    type.Id, type.CompanyId, currentUserId);
+            }
+        }
+        types = validatedTypes;
+
+        // Prepare companies for JavaScript
+        ViewData["Companies"] = accessibleCompanies.Select(c => new
+        {
+            id = c.Id,
+            name = c.Name
+        }).ToList();
+
+        // Prepare shift types with company info for JavaScript
+        var companyDict = accessibleCompanies.ToDictionary(c => c.Id, c => c.Name);
         ViewData["ShiftTypes"] = types.Select(t => new
         {
             id = t.Id,
             key = t.Key,
             name = t.Name,
             start = t.Start.ToString("HH:mm"),
-            end = t.End.ToString("HH:mm")
+            end = t.End.ToString("HH:mm"),
+            companyId = t.CompanyId,
+            companyName = companyDict.ContainsKey(t.CompanyId) ? companyDict[t.CompanyId] : "Unknown"
         }).ToList();
 
         // Generate 7 days for the week
@@ -96,10 +186,18 @@ public class WeekModel : PageModel
                                          select new { a.ShiftInstanceId, UserName = u.DisplayName })
                                          .ToListAsync();
 
+        // Count trainees per shift instance
+        var traineeCounts = await _db.ShiftAssignments
+            .Where(a => instanceIds.Contains(a.ShiftInstanceId) && a.TraineeUserId != null)
+            .GroupBy(a => a.ShiftInstanceId)
+            .Select(g => new { ShiftInstanceId = g.Key, TraineeCount = g.Count() })
+            .ToListAsync();
+
         var dictAssigned = assignmentCounts.ToDictionary(x => x.ShiftInstanceId, x => x.Count);
         var dictAssignedNames = assignmentsWithNames
             .GroupBy(x => x.ShiftInstanceId)
             .ToDictionary(g => g.Key, g => g.Select(x => x.UserName).ToList());
+        var dictTraineeCount = traineeCounts.ToDictionary(x => x.ShiftInstanceId, x => x.TraineeCount);
 
         foreach (var date in weekDates)
         {
@@ -114,6 +212,7 @@ public class WeekModel : PageModel
                 var inst = instances.FirstOrDefault(i => i.WorkDate == date && i.ShiftTypeId == t.Id && i.CompanyId == companyId);
                 var assignedCount = inst != null && dictAssigned.ContainsKey(inst.Id) ? dictAssigned[inst.Id] : 0;
                 var requiredCount = inst?.StaffingRequired ?? 0;
+                var traineeCount = inst != null && dictTraineeCount.ContainsKey(inst.Id) ? dictTraineeCount[inst.Id] : 0;
                 var assignedNames = inst != null && dictAssignedNames.ContainsKey(inst.Id) ? dictAssignedNames[inst.Id] : new List<string>();
                 var emptySlots = Enumerable.Repeat("Empty", Math.Max(0, requiredCount - assignedCount)).ToList();
 
@@ -128,6 +227,7 @@ public class WeekModel : PageModel
                     ShiftName = inst?.Name ?? "",
                     Assigned = assignedCount,
                     Required = requiredCount,
+                    TraineeCount = traineeCount,
                     AssignedNames = assignedNames,
                     EmptySlots = emptySlots,
                     StartTime = t.Start.ToString("HH:mm"),
@@ -144,23 +244,75 @@ public class WeekModel : PageModel
         public int shiftTypeId { get; set; }
         public int delta { get; set; }
         public int concurrency { get; set; }
+        public int? companyId { get; set; }
     }
 
 
     public async Task<IActionResult> OnPostAdjustAsync([FromBody] AdjustPayload payload)
     {
-        _logger.LogInformation("Adjust staffing: date={Date} shiftTypeId={ShiftTypeId} delta={Delta}", payload.date, payload.shiftTypeId, payload.delta);
-        var companyId = int.Parse(User.FindFirst("CompanyId")!.Value);
+        _logger.LogInformation("Adjust staffing: date={Date} shiftTypeId={ShiftTypeId} delta={Delta} companyId={CompanyId}", payload.date, payload.shiftTypeId, payload.delta, payload.companyId);
+
+        // Get current user for authorization
+        var currentUserId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
+        var currentUser = await _db.Users.FindAsync(currentUserId);
+
+        // ✅ SECURITY FIX (DEFECT-003): Always validate company access
+        // Determine target company ID
+        int targetCompanyId = payload.companyId ?? _companyContext.GetCompanyIdOrThrow();
+
+        // ALWAYS validate user has access to target company (even for fallback case)
+        bool hasAccess = false;
+        if (currentUser!.Role == Models.Support.UserRole.Owner)
+        {
+            hasAccess = true;
+        }
+        else if (currentUser.Role == Models.Support.UserRole.Director)
+        {
+            hasAccess = await _directorService.IsDirectorOfAsync(targetCompanyId);
+        }
+        else if (currentUser.Role == Models.Support.UserRole.Manager)
+        {
+            hasAccess = currentUser.CompanyId == targetCompanyId;
+        }
+
+        if (!hasAccess)
+        {
+            _logger.LogWarning("SECURITY: User {UserId} ({Role}) attempted unauthorized access to company {CompanyId}",
+                currentUserId, currentUser.Role, targetCompanyId);
+            return StatusCode(403, new { message = $"Access denied to company {targetCompanyId}" });
+        }
+
+        // Additional validation: Verify shift type belongs to target company
+        var shiftType = await _db.ShiftTypes
+            .IgnoreQueryFilters()
+            .FirstOrDefaultAsync(st => st.Id == payload.shiftTypeId);
+
+        if (shiftType == null)
+        {
+            return NotFound(new { message = "Shift type not found" });
+        }
+
+        if (shiftType.CompanyId != targetCompanyId)
+        {
+            _logger.LogWarning("SECURITY: User {UserId} attempted to use shift type {ShiftTypeId} from company {ShiftTypeCompanyId} in company {TargetCompanyId}",
+                currentUserId, payload.shiftTypeId, shiftType.CompanyId, targetCompanyId);
+            return BadRequest(new { message = "Shift type does not belong to the target company" });
+        }
+
         var date = DateOnly.Parse(payload.date);
 
-        var inst = await _db.ShiftInstances.FirstOrDefaultAsync(i => i.CompanyId == companyId && i.WorkDate == date && i.ShiftTypeId == payload.shiftTypeId);
+        var inst = await _db.ShiftInstances.IgnoreQueryFilters()
+            .FirstOrDefaultAsync(i => i.CompanyId == targetCompanyId && i.WorkDate == date && i.ShiftTypeId == payload.shiftTypeId);
+
+        bool isNewInstance = inst == null;
+
         if (inst == null)
         {
             if (payload.delta < 0)
                 return BadRequest(new { message = "Cannot go below zero." });
             inst = new ShiftInstance
             {
-                CompanyId = companyId,
+                CompanyId = targetCompanyId,
                 ShiftTypeId = payload.shiftTypeId,
                 WorkDate = date,
                 StaffingRequired = 0,
@@ -169,12 +321,15 @@ public class WeekModel : PageModel
             };
             _db.ShiftInstances.Add(inst);
         }
-
-        // concurrency check
-        if (inst.Concurrency != payload.concurrency)
+        else
         {
-            _logger.LogWarning("Concurrency mismatch for ShiftInstanceId={Id}: sent={Sent}, current={Current}", inst.Id, payload.concurrency, inst.Concurrency);
-            return BadRequest(new { message = "Concurrent update detected. Reload the page." });
+            // ✅ SECURITY FIX (DEFECT-001): Always validate concurrency for existing instances
+            // Removed "payload.concurrency != 0 &&" to prevent bypass attacks
+            if (inst.Concurrency != payload.concurrency)
+            {
+                _logger.LogWarning("Concurrency mismatch for ShiftInstanceId={Id}: sent={Sent}, current={Current}", inst.Id, payload.concurrency, inst.Concurrency);
+                return BadRequest(new { message = "Concurrent update detected. Reload the page." });
+            }
         }
 
         int newRequired = inst.StaffingRequired + payload.delta;

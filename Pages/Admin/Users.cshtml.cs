@@ -6,7 +6,9 @@ using Microsoft.Extensions.Logging;
 using ShiftManager.Data;
 using ShiftManager.Models;
 using ShiftManager.Models.Support;
+using ShiftManager.Services;
 using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
 
 namespace ShiftManager.Pages.Admin;
 
@@ -15,14 +17,57 @@ public class UsersModel : PageModel
 {
     private readonly AppDbContext _db;
     private readonly ILogger<UsersModel> _logger;
-    public UsersModel(AppDbContext db, ILogger<UsersModel> logger)
+    private readonly ICompanyContext _companyContext;
+    private readonly IDirectorService _directorService;
+    private readonly ITraineeService _traineeService;
+
+    public UsersModel(AppDbContext db, ILogger<UsersModel> logger, ICompanyContext companyContext, IDirectorService directorService, ITraineeService traineeService)
     {
         _db = db;
         _logger = logger;
+        _companyContext = companyContext;
+        _directorService = directorService;
+        _traineeService = traineeService;
     }
 
-    public record UserVM(int Id, string DisplayName, string Email, string Role, bool IsActive);
+    public record UserVM(int Id, string DisplayName, string Email, string CompanyName, string Role, bool IsActive);
+    public record JoinRequestVM(int Id, string Email, string DisplayName, string CompanyName, string RequestedRole, DateTime CreatedAt, JoinRequestStatus Status);
+
     public List<UserVM> Users { get; set; } = new();
+    public List<JoinRequestVM> JoinRequests { get; set; } = new();
+    public List<Company> AvailableCompanies { get; set; } = new();
+
+    // Expose assignable roles for UI filtering
+    public List<UserRole> AssignableRoles
+    {
+        get
+        {
+            var roles = new List<UserRole>();
+            if (_directorService.CanAssignRole(UserRole.Employee)) roles.Add(UserRole.Employee);
+            if (_directorService.CanAssignRole(UserRole.Manager)) roles.Add(UserRole.Manager);
+            if (_directorService.CanAssignRole(UserRole.Director)) roles.Add(UserRole.Director);
+            if (_directorService.CanAssignRole(UserRole.Owner)) roles.Add(UserRole.Owner);
+            if (_directorService.CanAssignRole(UserRole.Trainee)) roles.Add(UserRole.Trainee);
+            return roles;
+        }
+    }
+
+    // Filter parameters for join requests
+    [BindProperty(SupportsGet = true)]
+    public JoinRequestStatus FilterStatus { get; set; } = JoinRequestStatus.Pending;
+
+    [BindProperty(SupportsGet = true)]
+    public int? FilterCompanyId { get; set; }
+
+    [BindProperty(SupportsGet = true)]
+    public UserRole? FilterRole { get; set; }
+
+    // Filter parameters for existing users
+    [BindProperty(SupportsGet = true)]
+    public int? UserFilterCompanyId { get; set; }
+
+    [BindProperty(SupportsGet = true)]
+    public UserRole? UserFilterRole { get; set; }
 
     [BindProperty, EmailAddress] public string NewEmail { get; set; } = string.Empty;
     [BindProperty] public string NewDisplayName { get; set; } = string.Empty;
@@ -32,10 +77,158 @@ public class UsersModel : PageModel
 
     public async Task OnGetAsync()
     {
-        var companyId = int.Parse(User.FindFirst("CompanyId")!.Value);
-        Users = await _db.Users.Where(u => u.CompanyId == companyId)
-            .OrderBy(u => u.DisplayName)
-            .Select(u => new UserVM(u.Id, u.DisplayName, u.Email, u.Role.ToString(), u.IsActive)).ToListAsync();
+        var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var currentUser = await _db.Users.FindAsync(currentUserId);
+        var role = currentUser!.Role;
+
+        // Determine accessible company IDs based on role
+        List<int> accessibleCompanyIds;
+
+        if (role == UserRole.Owner)
+        {
+            // Owner: all companies
+            accessibleCompanyIds = await _db.Companies.Select(c => c.Id).ToListAsync();
+        }
+        else if (role == UserRole.Director)
+        {
+            // Director: companies they direct
+            accessibleCompanyIds = await _directorService.GetDirectorCompanyIdsAsync(currentUserId);
+        }
+        else if (role == UserRole.Manager)
+        {
+            // Manager: their company only
+            accessibleCompanyIds = new List<int> { currentUser.CompanyId };
+        }
+        else
+        {
+            // Employee: no access (shouldn't reach here due to authorization, but just in case)
+            accessibleCompanyIds = new List<int>();
+        }
+
+        // Load join requests with filters and scoping
+        var joinRequestsQuery = _db.UserJoinRequests
+            .AsNoTracking()
+            .Where(jr => accessibleCompanyIds.Contains(jr.CompanyId))
+            .Where(jr => jr.Status == FilterStatus);
+
+        if (FilterCompanyId.HasValue)
+        {
+            joinRequestsQuery = joinRequestsQuery.Where(jr => jr.CompanyId == FilterCompanyId.Value);
+        }
+
+        if (FilterRole.HasValue)
+        {
+            joinRequestsQuery = joinRequestsQuery.Where(jr => jr.RequestedRole == FilterRole.Value);
+        }
+
+        var joinRequestData = await joinRequestsQuery.ToListAsync();
+
+        // Load companies for join requests
+        var companyIds = joinRequestData.Select(jr => jr.CompanyId).Distinct().ToList();
+        var companies = await _db.Companies
+            .AsNoTracking()
+            .Where(c => companyIds.Contains(c.Id))
+            .ToDictionaryAsync(c => c.Id);
+
+        JoinRequests = joinRequestData
+            .Select(jr => new JoinRequestVM(
+                jr.Id,
+                jr.Email,
+                jr.DisplayName,
+                companies[jr.CompanyId].Name,
+                jr.RequestedRole.ToString(),
+                jr.CreatedAt,
+                jr.Status
+            ))
+            .OrderBy(jr => jr.CreatedAt)
+            .ToList();
+
+        // Load available companies for filter dropdown
+        AvailableCompanies = await _db.Companies
+            .Where(c => accessibleCompanyIds.Contains(c.Id))
+            .OrderBy(c => c.Name)
+            .ToListAsync();
+
+        // Load existing users with filters
+        var usersQuery = _db.Users
+            .AsNoTracking()
+            .Where(u => accessibleCompanyIds.Contains(u.CompanyId));
+
+        // Apply role filter first (before handling Directors specially)
+        if (UserFilterRole.HasValue)
+        {
+            usersQuery = usersQuery.Where(u => u.Role == UserFilterRole.Value);
+        }
+
+        var userData = await usersQuery.ToListAsync();
+
+        // Load companies for users
+        var userCompanyIds = userData.Select(u => u.CompanyId).Distinct().ToList();
+        var userCompanies = await _db.Companies
+            .AsNoTracking()
+            .Where(c => userCompanyIds.Contains(c.Id))
+            .ToDictionaryAsync(c => c.Id);
+
+        // Build user list, handling Directors specially
+        var userList = new List<UserVM>();
+
+        foreach (var u in userData)
+        {
+            if (u.Role == UserRole.Director)
+            {
+                // For Directors, get all companies they manage
+                var directorCompanyIds = await _directorService.GetDirectorCompanyIdsAsync(u.Id);
+
+                // Filter by accessible companies
+                var managedCompanyIds = directorCompanyIds.Where(id => accessibleCompanyIds.Contains(id)).ToList();
+
+                // Apply company filter if specified
+                if (UserFilterCompanyId.HasValue)
+                {
+                    managedCompanyIds = managedCompanyIds.Where(id => id == UserFilterCompanyId.Value).ToList();
+                }
+
+                // Load company names for managed companies
+                var managedCompanies = await _db.Companies
+                    .AsNoTracking()
+                    .Where(c => managedCompanyIds.Contains(c.Id))
+                    .ToDictionaryAsync(c => c.Id);
+
+                // Create one entry per managed company
+                foreach (var companyId in managedCompanyIds)
+                {
+                    userList.Add(new UserVM(
+                        u.Id,
+                        u.DisplayName,
+                        u.Email,
+                        managedCompanies[companyId].Name,
+                        u.Role.ToString(),
+                        u.IsActive
+                    ));
+                }
+            }
+            else
+            {
+                // For non-Directors, use their primary company
+                // Apply company filter if specified
+                if (!UserFilterCompanyId.HasValue || u.CompanyId == UserFilterCompanyId.Value)
+                {
+                    userList.Add(new UserVM(
+                        u.Id,
+                        u.DisplayName,
+                        u.Email,
+                        userCompanies[u.CompanyId].Name,
+                        u.Role.ToString(),
+                        u.IsActive
+                    ));
+                }
+            }
+        }
+
+        Users = userList
+            .OrderBy(u => u.CompanyName)
+            .ThenBy(u => u.DisplayName)
+            .ToList();
     }
 
     public async Task<IActionResult> OnPostAddAsync()
@@ -46,19 +239,48 @@ public class UsersModel : PageModel
 
         if (await _db.Users.AnyAsync(u => u.Email == NewEmail)) { Error = "Email already exists."; return Page(); }
 
-        var companyId = int.Parse(User.FindFirst("CompanyId")!.Value);
+        // Validate role string and permission to assign
+        if (!Enum.TryParse<UserRole>(NewRole, ignoreCase: true, out var targetRole))
+        {
+            TempData["ErrorMessage"] = "Invalid role specified.";
+            return RedirectToPage();
+        }
+
+        if (!_directorService.CanAssignRole(targetRole))
+        {
+            TempData["ErrorMessage"] = $"You do not have permission to assign the {targetRole} role.";
+            return RedirectToPage();
+        }
+
+        var companyId = _companyContext.GetCompanyIdOrThrow();
         var (h, s) = PasswordHasher.CreateHash(NewPassword);
-        _db.Users.Add(new AppUser
+        var newUser = new AppUser
         {
             CompanyId = companyId,
             Email = NewEmail,
             DisplayName = NewDisplayName,
-            Role = Enum.Parse<UserRole>(NewRole),
+            Role = targetRole,
             IsActive = true,
             PasswordHash = h,
             PasswordSalt = s
+        };
+        _db.Users.Add(newUser);
+        await _db.SaveChangesAsync();
+
+        // Audit logging
+        var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        _db.RoleAssignmentAudits.Add(new RoleAssignmentAudit
+        {
+            ChangedBy = currentUserId,
+            TargetUserId = newUser.Id,
+            FromRole = null,
+            ToRole = targetRole,
+            CompanyId = companyId,
+            Timestamp = DateTime.UtcNow
         });
         await _db.SaveChangesAsync();
+
+        TempData["SuccessMessage"] = $"User {NewDisplayName} created successfully as {targetRole}.";
         return RedirectToPage();
     }
 
@@ -71,8 +293,91 @@ public class UsersModel : PageModel
 
     public async Task<IActionResult> OnPostRoleAsync(int id, string role)
     {
+        // Validate role string and permission to assign
+        if (!Enum.TryParse<UserRole>(role, ignoreCase: true, out var targetRole))
+        {
+            TempData["ErrorMessage"] = "Invalid role specified.";
+            return RedirectToPage();
+        }
+
+        if (!_directorService.CanAssignRole(targetRole))
+        {
+            TempData["ErrorMessage"] = $"You do not have permission to assign the {targetRole} role.";
+            return RedirectToPage();
+        }
+
         var u = await _db.Users.FindAsync(id);
-        if (u != null) { u.Role = Enum.Parse<UserRole>(role); await _db.SaveChangesAsync(); }
+        if (u != null)
+        {
+            var oldRole = u.Role;
+
+            var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+            // If changing from Trainee to another role, validate and cancel shadowing
+            if (oldRole == UserRole.Trainee && targetRole != UserRole.Trainee)
+            {
+                // Check if trainee has active shadowing assignments
+                var today = DateOnly.FromDateTime(DateTime.UtcNow);
+                var activeShadowingCount = await _db.ShiftAssignments
+                    .Include(sa => sa.ShiftInstance)
+                    .Where(sa => sa.TraineeUserId == id && sa.ShiftInstance.WorkDate >= today)
+                    .CountAsync();
+
+                if (activeShadowingCount > 0)
+                {
+                    // Cancel all shadowing assignments
+                    var canceledCount = await _traineeService.CancelAllShadowingAssignmentsAsync(id, "RoleChanged", currentUserId);
+
+                    _logger.LogInformation("Canceled {Count} shadowing assignments for user {UserId} due to role change from {OldRole} to {NewRole}",
+                        canceledCount, id, oldRole, targetRole);
+                }
+            }
+
+            // If changing to Trainee from another role, check if they have active shifts as primary employee
+            if (oldRole != UserRole.Trainee && targetRole == UserRole.Trainee)
+            {
+                var today = DateOnly.FromDateTime(DateTime.UtcNow);
+                var activeShiftsCount = await _db.ShiftAssignments
+                    .Include(sa => sa.ShiftInstance)
+                    .Where(sa => sa.UserId == id && sa.ShiftInstance.WorkDate >= today)
+                    .CountAsync();
+
+                if (activeShiftsCount > 0)
+                {
+                    TempData["ErrorMessage"] = $"Cannot change to Trainee role: user has {activeShiftsCount} active shift(s) as primary employee. Please remove these shifts first.";
+                    return RedirectToPage();
+                }
+
+                // Check if they have trainees shadowing them
+                var traineeShadowingCount = await _db.ShiftAssignments
+                    .Include(sa => sa.ShiftInstance)
+                    .Where(sa => sa.UserId == id && sa.TraineeUserId != null && sa.ShiftInstance.WorkDate >= today)
+                    .CountAsync();
+
+                if (traineeShadowingCount > 0)
+                {
+                    TempData["ErrorMessage"] = $"Cannot change to Trainee role: user has {traineeShadowingCount} shift(s) with trainees shadowing them. Please remove trainees first.";
+                    return RedirectToPage();
+                }
+            }
+
+            u.Role = targetRole;
+            await _db.SaveChangesAsync();
+
+            // Audit logging
+            _db.RoleAssignmentAudits.Add(new RoleAssignmentAudit
+            {
+                ChangedBy = currentUserId,
+                TargetUserId = u.Id,
+                FromRole = oldRole,
+                ToRole = targetRole,
+                CompanyId = u.CompanyId,
+                Timestamp = DateTime.UtcNow
+            });
+            await _db.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = $"Role updated to {targetRole} for user {u.DisplayName}.";
+        }
         return RedirectToPage();
     }
 
@@ -114,7 +419,7 @@ public class UsersModel : PageModel
                 return Page();
             }
 
-            var companyId = int.Parse(User.FindFirst("CompanyId")!.Value);
+            var companyId = _companyContext.GetCompanyIdOrThrow();
             if (user.CompanyId != companyId)
             {
                 _logger.LogWarning("User {CurrentUserId} attempted to delete user {TargetUserId} from different company", currentUserId, id);
@@ -175,5 +480,152 @@ public class UsersModel : PageModel
             await OnGetAsync();
             return Page();
         }
+    }
+
+    public async Task<IActionResult> OnPostApproveJoinRequestAsync(int id)
+    {
+        var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var currentUser = await _db.Users.FindAsync(currentUserId);
+
+        var joinRequest = await _db.UserJoinRequests
+            .Include(jr => jr.Company)
+            .FirstOrDefaultAsync(jr => jr.Id == id);
+
+        if (joinRequest == null)
+        {
+            TempData["ErrorMessage"] = "Join request not found.";
+            return RedirectToPage();
+        }
+
+        // Verify user has permission to approve this request
+        var hasPermission = false;
+        if (currentUser!.Role == UserRole.Owner)
+        {
+            hasPermission = true;
+        }
+        else if (currentUser.Role == UserRole.Director)
+        {
+            var directorCompanyIds = await _directorService.GetDirectorCompanyIdsAsync(currentUserId);
+            hasPermission = directorCompanyIds.Contains(joinRequest.CompanyId);
+        }
+        else if (currentUser.Role == UserRole.Manager)
+        {
+            hasPermission = currentUser.CompanyId == joinRequest.CompanyId;
+        }
+
+        if (!hasPermission)
+        {
+            TempData["ErrorMessage"] = "You don't have permission to approve this request.";
+            return RedirectToPage();
+        }
+
+        if (joinRequest.Status != JoinRequestStatus.Pending)
+        {
+            TempData["ErrorMessage"] = "This request has already been reviewed.";
+            return RedirectToPage();
+        }
+
+        // Check if user with this email already exists
+        if (await _db.Users.AnyAsync(u => u.Email == joinRequest.Email))
+        {
+            TempData["ErrorMessage"] = "A user with this email already exists.";
+            return RedirectToPage();
+        }
+
+        // Validate permission to assign the requested role
+        if (!_directorService.CanAssignRole(joinRequest.RequestedRole))
+        {
+            TempData["ErrorMessage"] = $"You do not have permission to assign the {joinRequest.RequestedRole} role.";
+            return RedirectToPage();
+        }
+
+        // Create the user account
+        var newUser = new AppUser
+        {
+            Email = joinRequest.Email,
+            DisplayName = joinRequest.DisplayName,
+            PasswordHash = joinRequest.PasswordHash,
+            PasswordSalt = joinRequest.PasswordSalt,
+            CompanyId = joinRequest.CompanyId,
+            Role = joinRequest.RequestedRole,
+            IsActive = true
+        };
+
+        _db.Users.Add(newUser);
+
+        // Update join request status
+        joinRequest.Status = JoinRequestStatus.Approved;
+        joinRequest.ReviewedBy = currentUserId;
+        joinRequest.ReviewedAt = DateTime.UtcNow;
+
+        await _db.SaveChangesAsync();
+
+        // Link the created user to the join request
+        joinRequest.CreatedUserId = newUser.Id;
+        await _db.SaveChangesAsync();
+
+        _logger.LogInformation("Join request {RequestId} approved by {ApproverId}. Created user {UserId} ({Email}) for company {CompanyId}",
+            id, currentUserId, newUser.Id, newUser.Email, joinRequest.CompanyId);
+
+        TempData["SuccessMessage"] = $"Approved {joinRequest.DisplayName} ({joinRequest.Email}) as {joinRequest.RequestedRole} for {joinRequest.Company?.Name}.";
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostRejectJoinRequestAsync(int id, string? reason)
+    {
+        var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var currentUser = await _db.Users.FindAsync(currentUserId);
+
+        var joinRequest = await _db.UserJoinRequests
+            .Include(jr => jr.Company)
+            .FirstOrDefaultAsync(jr => jr.Id == id);
+
+        if (joinRequest == null)
+        {
+            TempData["ErrorMessage"] = "Join request not found.";
+            return RedirectToPage();
+        }
+
+        // Verify user has permission to reject this request
+        var hasPermission = false;
+        if (currentUser!.Role == UserRole.Owner)
+        {
+            hasPermission = true;
+        }
+        else if (currentUser.Role == UserRole.Director)
+        {
+            var directorCompanyIds = await _directorService.GetDirectorCompanyIdsAsync(currentUserId);
+            hasPermission = directorCompanyIds.Contains(joinRequest.CompanyId);
+        }
+        else if (currentUser.Role == UserRole.Manager)
+        {
+            hasPermission = currentUser.CompanyId == joinRequest.CompanyId;
+        }
+
+        if (!hasPermission)
+        {
+            TempData["ErrorMessage"] = "You don't have permission to reject this request.";
+            return RedirectToPage();
+        }
+
+        if (joinRequest.Status != JoinRequestStatus.Pending)
+        {
+            TempData["ErrorMessage"] = "This request has already been reviewed.";
+            return RedirectToPage();
+        }
+
+        // Update join request status
+        joinRequest.Status = JoinRequestStatus.Rejected;
+        joinRequest.ReviewedBy = currentUserId;
+        joinRequest.ReviewedAt = DateTime.UtcNow;
+        joinRequest.RejectionReason = reason;
+
+        await _db.SaveChangesAsync();
+
+        _logger.LogInformation("Join request {RequestId} rejected by {ReviewerId}. Email: {Email}, Company: {CompanyId}",
+            id, currentUserId, joinRequest.Email, joinRequest.CompanyId);
+
+        TempData["SuccessMessage"] = $"Rejected join request from {joinRequest.DisplayName} ({joinRequest.Email}).";
+        return RedirectToPage();
     }
 }

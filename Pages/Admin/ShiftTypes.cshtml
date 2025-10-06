@@ -2,7 +2,7 @@
 @model ShiftManager.Pages.Admin.ShiftTypesModel
 @using Microsoft.Extensions.Localization
 @using ShiftManager.Resources
-@inject IStringLocalizer<SharedResource> Localizer
+@inject IStringLocalizer<SharedResources> Localizer
 @{
     Layout = "_Layout";
 }
@@ -16,7 +16,7 @@
             {
                 <tr>
                     <td>@Model.Items[i].Key</td>
-                    <td><input class="input" name="items[@i].Name" value="@Model.Items[i].Name" /></td>
+                    <td>@Localizer[$"ShiftType_{Model.Items[i].Key}"]</td>
                     <td><input class="input" name="items[@i].Start" type="time" value="@Model.Items[i].Start" /></td>
                     <td><input class="input" name="items[@i].End" type="time" value="@Model.Items[i].End" /></td>
                     <input type="hidden" name="items[@i].Id" value="@Model.Items[i].Id" />

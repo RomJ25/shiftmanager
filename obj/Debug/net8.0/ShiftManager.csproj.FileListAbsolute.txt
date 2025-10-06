@@ -14,7 +14,6 @@ C:\Users\katzi\Downloads\ShiftManager\bin\Debug\net8.0\ShiftManager.deps.json
 C:\Users\katzi\Downloads\ShiftManager\bin\Debug\net8.0\ShiftManager.runtimeconfig.json
 C:\Users\katzi\Downloads\ShiftManager\bin\Debug\net8.0\ShiftManager.dll
 C:\Users\katzi\Downloads\ShiftManager\bin\Debug\net8.0\ShiftManager.pdb
-C:\Users\katzi\Downloads\ShiftManager\bin\Debug\net8.0\en-US\ShiftManager.resources.dll
 C:\Users\katzi\Downloads\ShiftManager\bin\Debug\net8.0\he-IL\ShiftManager.resources.dll
 C:\Users\katzi\Downloads\ShiftManager\bin\Debug\net8.0\Humanizer.dll
 C:\Users\katzi\Downloads\ShiftManager\bin\Debug\net8.0\Microsoft.Bcl.AsyncInterfaces.dll
@@ -37,8 +36,6 @@ C:\Users\katzi\Downloads\ShiftManager\bin\Debug\net8.0\Microsoft.Extensions.Conf
 C:\Users\katzi\Downloads\ShiftManager\bin\Debug\net8.0\Microsoft.Extensions.DependencyInjection.dll
 C:\Users\katzi\Downloads\ShiftManager\bin\Debug\net8.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll
 C:\Users\katzi\Downloads\ShiftManager\bin\Debug\net8.0\Microsoft.Extensions.DependencyModel.dll
-C:\Users\katzi\Downloads\ShiftManager\bin\Debug\net8.0\Microsoft.Extensions.Localization.dll
-C:\Users\katzi\Downloads\ShiftManager\bin\Debug\net8.0\Microsoft.Extensions.Localization.Abstractions.dll
 C:\Users\katzi\Downloads\ShiftManager\bin\Debug\net8.0\Microsoft.Extensions.Logging.dll
 C:\Users\katzi\Downloads\ShiftManager\bin\Debug\net8.0\Microsoft.Extensions.Logging.Abstractions.dll
 C:\Users\katzi\Downloads\ShiftManager\bin\Debug\net8.0\Microsoft.Extensions.Options.dll
@@ -146,7 +143,6 @@ C:\Users\katzi\Downloads\ShiftManager\bin\Debug\net8.0\runtimes\win-x86\native\e
 C:\Users\katzi\Downloads\ShiftManager\bin\Debug\net8.0\runtimes\browser\lib\net8.0\System.Text.Encodings.Web.dll
 C:\Users\katzi\Downloads\ShiftManager\obj\Debug\net8.0\ShiftManager.csproj.AssemblyReference.cache
 C:\Users\katzi\Downloads\ShiftManager\obj\Debug\net8.0\ShiftManager.Resources.SharedResources.resources
-C:\Users\katzi\Downloads\ShiftManager\obj\Debug\net8.0\ShiftManager.Resources.SharedResources.en-US.resources
 C:\Users\katzi\Downloads\ShiftManager\obj\Debug\net8.0\ShiftManager.Resources.SharedResources.he-IL.resources
 C:\Users\katzi\Downloads\ShiftManager\obj\Debug\net8.0\ShiftManager.csproj.GenerateResource.cache
 C:\Users\katzi\Downloads\ShiftManager\obj\Debug\net8.0\ShiftManager.GeneratedMSBuildEditorConfig.editorconfig
@@ -157,8 +153,6 @@ C:\Users\katzi\Downloads\ShiftManager\obj\Debug\net8.0\ShiftManager.MvcApplicati
 C:\Users\katzi\Downloads\ShiftManager\obj\Debug\net8.0\ShiftManager.RazorAssemblyInfo.cache
 C:\Users\katzi\Downloads\ShiftManager\obj\Debug\net8.0\ShiftManager.RazorAssemblyInfo.cs
 C:\Users\katzi\Downloads\ShiftManager\obj\Debug\net8.0\ShiftManager.sourcelink.json
-C:\Users\katzi\Downloads\ShiftManager\obj\Debug\net8.0\en-US\ShiftManager.resources.cs
-C:\Users\katzi\Downloads\ShiftManager\obj\Debug\net8.0\en-US\ShiftManager.resources.dll
 C:\Users\katzi\Downloads\ShiftManager\obj\Debug\net8.0\he-IL\ShiftManager.resources.cs
 C:\Users\katzi\Downloads\ShiftManager\obj\Debug\net8.0\he-IL\ShiftManager.resources.dll
 C:\Users\katzi\Downloads\ShiftManager\obj\Debug\net8.0\staticwebassets.build.json
