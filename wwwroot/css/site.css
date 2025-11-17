@@ -114,6 +114,7 @@
 
   /* === Borders & Highlights === */
   --border: #d3d7dd; --border: oklch(0.86 0.016 256);
+  --border-rgb: 211, 215, 221;
   --border-strong: #b0b6c0; --border-strong: oklch(0.76 0.024 258);
   --highlight: #f9fafb; --highlight: oklch(0.98 0.008 260);
   --divider: #dce0e5; --divider: oklch(0.88 0.012 256);
@@ -302,6 +303,7 @@
     --text-subtle: oklch(0.50 0.024 254);
 
     --border: oklch(0.26 0.020 256);
+    --border-rgb: 50, 54, 62;
     --border-strong: oklch(0.36 0.024 258);
     --highlight: oklch(0.44 0.018 260);
     --divider: oklch(0.28 0.020 256);
@@ -1593,7 +1595,7 @@ th { text-align: left; color: var(--text) !important; }
   padding: 1rem !important;
   border-radius: var(--radius-lg);
   font-size: var(--text-sm) !important;
-  z-index: calc(var(--z-dropdown) - 1)999999 !important;
+  z-index: calc(var(--z-dropdown) - 1) !important;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
   transition: opacity var(--duration-slow) var(--ease-out), visibility var(--duration-slow) var(--ease-out), transform var(--duration-slow) var(--ease-out) !important;
   min-width: 250px !important;
@@ -1622,7 +1624,7 @@ th { text-align: left; color: var(--text) !important; }
 /* Ultimate tooltip override */
 .assignment-tooltip .tooltip-content {
   position: fixed !important;
-  z-index: calc(var(--z-dropdown) - 1)999999 !important;
+  z-index: calc(var(--z-dropdown) - 1) !important;
   background: rgba(0, 0, 0, 0.9) !important;
   color: white !important;
   border: 2px solid white !important;
