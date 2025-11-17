@@ -1,0 +1,79 @@
+@page
+@model ShiftManager.Pages.Requests.IndexModel
+@using Microsoft.Extensions.Localization
+@using ShiftManager.Resources
+@using ShiftManager.ViewComponents
+@inject IStringLocalizer<SharedResources> Localizer
+@{
+    Layout = "_Layout";
+}
+
+@await Component.InvokeAsync("Breadcrumb", new List<BreadcrumbItem>
+{
+    new BreadcrumbItem { Label = Localizer["Requests"], IsActive = true }
+})
+
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+    <h2 style="margin: 0;">@Localizer["PendingRequests"]</h2>
+    <a href="/Admin/TimeOff" class="btn btn-ghost" style="font-size: 0.9rem;">
+        📋 @Localizer["ManageApprovedTimeOff"]
+    </a>
+</div>
+<div class="card">
+    <h3 style="margin-top:0">@Localizer["PendingTimeOff"]</h3>
+    <table>
+        <thead><tr><th>@Localizer["User"]</th><th>@Localizer["Dates"]</th><th>@Localizer["Reason"]</th><th></th></tr></thead>
+        <tbody>
+        @foreach (var r in Model.TimeOff)
+        {
+            <tr>
+                <td>@r.UserName</td>
+                <td>@r.StartDate.ToString("yyyy-MM-dd") → @r.EndDate.ToString("yyyy-MM-dd")</td>
+                <td>@r.Reason</td>
+                <td style="white-space:nowrap">
+                    <form method="post" asp-page-handler="ApproveTimeOff" style="display:inline">
+                        <input type="hidden" name="id" value="@r.Id" />
+                        <button class="btn btn-primary">@Localizer["Approve"]</button>
+                    </form>
+                    <form method="post" asp-page-handler="DeclineTimeOff" style="display:inline">
+                        <input type="hidden" name="id" value="@r.Id" />
+                        <button class="btn btn-ghost">@Localizer["Decline"]</button>
+                    </form>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
+
+<div class="card">
+    <h3 style="margin-top:0">@Localizer["PendingSwaps"]</h3>
+    <table>
+        <thead><tr><th>@Localizer["From"]</th><th>@Localizer["Shift"]</th><th>@Localizer["ProposedTo"]</th><th></th></tr></thead>
+        <tbody>
+        @foreach (var s in Model.Swaps)
+        {
+            <tr>
+                <td>@s.FromUser</td>
+                <td>@s.When</td>
+                <td>@s.ToUser</td>
+                <td style="white-space:nowrap">
+                    <form method="post" asp-page-handler="ApproveSwap" style="display:inline">
+                        <input type="hidden" name="id" value="@s.Id" />
+                        <button class="btn btn-primary">@Localizer["Approve"]</button>
+                    </form>
+                    <form method="post" asp-page-handler="DeclineSwap" style="display:inline">
+                        <input type="hidden" name="id" value="@s.Id" />
+                        <button class="btn btn-ghost">@Localizer["Decline"]</button>
+                    </form>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.Error))
+{
+    <div class="card" style="color:var(--danger)">@Model.Error</div>
+}

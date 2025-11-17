@@ -1,0 +1,25 @@
+@model ShiftManager.ViewComponents.LanguageToggleViewModel
+@using Microsoft.Extensions.Localization
+@using ShiftManager.Resources
+@inject IStringLocalizer<SharedResources> Localizer
+
+<div class="language-toggle">
+    <button class="action-btn language-btn" onclick="toggleLanguage('@Model.CurrentLanguage')"
+            aria-label="@Localizer["Language"]" title="@Localizer["Language"]">
+        <span class="language-icon">🌐</span>
+        <span class="language-text">@(Model.IsHebrew ? "עב" : "En")</span>
+    </button>
+</div>
+
+<script>
+function toggleLanguage(currentLang) {
+    const newLang = currentLang === 'he-IL' ? 'en-US' : 'he-IL';
+    const expires = new Date();
+    expires.setFullYear(expires.getFullYear() + 1);
+
+    document.cookie = `.AspNetCore.Culture=c=${newLang}|uic=${newLang}; expires=${expires.toUTCString()}; path=/`;
+
+    // Reload the page to apply the new language
+    window.location.reload();
+}
+</script>

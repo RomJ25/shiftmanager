@@ -1,0 +1,2507 @@
+<?xml version='1.0' encoding='utf-8'?>
+<root xmlns:ns1="urn:schemas-microsoft-com:xml-msdata" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:schema id="root">
+    <xs:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xs:element name="root" ns1:IsDataSet="true">
+      <xs:complexType>
+        <xs:choice maxOccurs="unbounded">
+          <xs:element name="metadata">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" />
+              </xs:sequence>
+              <xs:attribute name="name" use="required" type="xsd:string" />
+              <xs:attribute name="type" type="xsd:string" />
+              <xs:attribute name="mimetype" type="xsd:string" />
+              <xs:attribute ref="xml:space" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="assembly">
+            <xs:complexType>
+              <xs:attribute name="alias" type="xsd:string" />
+              <xs:attribute name="name" type="xsd:string" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="data">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" ns1:Ordinal="1" />
+                <xs:element name="comment" type="xsd:string" minOccurs="0" ns1:Ordinal="2" />
+              </xs:sequence>
+              <xs:attribute name="name" type="xsd:string" use="required" ns1:Ordinal="1" />
+              <xs:attribute name="type" type="xsd:string" ns1:Ordinal="3" />
+              <xs:attribute name="mimetype" type="xsd:string" ns1:Ordinal="4" />
+              <xs:attribute ref="xml:space" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="resheader">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" ns1:Ordinal="1" />
+              </xs:sequence>
+              <xs:attribute name="name" type="xsd:string" use="required" />
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  
+  <data name="ShiftManager" xml:space="preserve">
+    <value>Shift Manager</value>
+  </data>
+  <data name="MySchedule" xml:space="preserve">
+    <value>My Schedule</value>
+  </data>
+  <data name="WelcomeBack" xml:space="preserve">
+    <value>Welcome back, {0}!</value>
+  </data>
+  <data name="Calendar" xml:space="preserve">
+    <value>Calendar</value>
+  </data>
+  <data name="MonthView" xml:space="preserve">
+    <value>Month View</value>
+  </data>
+  <data name="WeekView" xml:space="preserve">
+    <value>Week View</value>
+  </data>
+  <data name="DayView" xml:space="preserve">
+    <value>Day View</value>
+  </data>
+  <data name="TableView" xml:space="preserve">
+    <value>Table View</value>
+  </data>
+  <data name="Requests" xml:space="preserve">
+    <value>Requests</value>
+  </data>
+  <data name="MyShifts" xml:space="preserve">
+    <value>My Shifts</value>
+  </data>
+  <data name="Admin" xml:space="preserve">
+    <value>Admin</value>
+  </data>
+  <data name="Users" xml:space="preserve">
+    <value>Users</value>
+  </data>
+  <data name="ShiftTypes" xml:space="preserve">
+    <value>Shift Types</value>
+  </data>
+  <data name="TimeOffManagement" xml:space="preserve">
+    <value>Time-Off Management</value>
+  </data>
+  <data name="Config" xml:space="preserve">
+    <value>Config</value>
+  </data>
+  <data name="AuditLog" xml:space="preserve">
+    <value>Audit Log</value>
+  </data>
+  <data name="Analytics" xml:space="preserve">
+    <value>Analytics</value>
+  </data>
+  <data name="Schedule" xml:space="preserve">
+    <value>Schedule</value>
+  </data>
+  <data name="Notifications" xml:space="preserve">
+    <value>Notifications</value>
+  </data>
+  <data name="Logout" xml:space="preserve">
+    <value>Logout</value>
+  </data>
+
+  
+  <data name="GoodMorning" xml:space="preserve">
+    <value>Good morning, {0}!</value>
+  </data>
+  <data name="GoodAfternoon" xml:space="preserve">
+    <value>Good afternoon, {0}!</value>
+  </data>
+  <data name="GoodEvening" xml:space="preserve">
+    <value>Good evening, {0}!</value>
+  </data>
+  <data name="ScheduleSubtitle" xml:space="preserve">
+    <value>Here's your schedule and shift information</value>
+  </data>
+
+  
+  <data name="Save" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="Add" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="Remove" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="Submit" xml:space="preserve">
+    <value>Submit</value>
+  </data>
+  <data name="Back" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="Search" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="Filter" xml:space="preserve">
+    <value>Filter</value>
+  </data>
+
+  
+  <data name="Date" xml:space="preserve">
+    <value>Date</value>
+  </data>
+  <data name="Time" xml:space="preserve">
+    <value>Time</value>
+  </data>
+  <data name="StartTime" xml:space="preserve">
+    <value>Start Time</value>
+  </data>
+  <data name="EndTime" xml:space="preserve">
+    <value>End Time</value>
+  </data>
+  <data name="Duration" xml:space="preserve">
+    <value>Duration</value>
+  </data>
+
+  
+  <data name="Active" xml:space="preserve">
+    <value>Active</value>
+  </data>
+  <data name="Inactive" xml:space="preserve">
+    <value>Inactive</value>
+  </data>
+  <data name="Pending" xml:space="preserve">
+    <value>Pending</value>
+  </data>
+  <data name="Approved" xml:space="preserve">
+    <value>Approved</value>
+  </data>
+  <data name="Declined" xml:space="preserve">
+    <value>Declined</value>
+  </data>
+
+  
+  <data name="Language" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="English" xml:space="preserve">
+    <value>English</value>
+  </data>
+  <data name="Hebrew" xml:space="preserve">
+    <value>עברית</value>
+  </data>
+
+  
+  <data name="NotificationCenter" xml:space="preserve">
+    <value>Notification Center</value>
+  </data>
+  <data name="MarkAllAsRead" xml:space="preserve">
+    <value>Mark All as Read ({0})</value>
+  </data>
+  <data name="NoNotifications" xml:space="preserve">
+    <value>No Notifications</value>
+  </data>
+  <data name="AllCaughtUp" xml:space="preserve">
+    <value>You're all caught up! New notifications will appear here.</value>
+  </data>
+  <data name="MarkAsRead" xml:space="preserve">
+    <value>Mark as Read</value>
+  </data>
+  <data name="DeleteConfirm" xml:space="preserve">
+    <value>Are you sure you want to delete this notification?</value>
+  </data>
+  <data name="Read" xml:space="preserve">
+    <value>Read</value>
+  </data>
+
+  
+  <data name="AssignShift" xml:space="preserve">
+    <value>Assign Shift</value>
+  </data>
+  <data name="ShiftName" xml:space="preserve">
+    <value>Shift Name</value>
+  </data>
+  <data name="StaffingRequired" xml:space="preserve">
+    <value>Staffing Required</value>
+  </data>
+  <data name="SelectUser" xml:space="preserve">
+    <value>Select User</value>
+  </data>
+  <data name="AssignedUsers" xml:space="preserve">
+    <value>Assigned Users</value>
+  </data>
+
+  
+  <data name="TimeOffRequest" xml:space="preserve">
+    <value>Time Off Request</value>
+  </data>
+  <data name="StartDate" xml:space="preserve">
+    <value>Start Date</value>
+  </data>
+  <data name="EndDate" xml:space="preserve">
+    <value>End Date</value>
+  </data>
+  <data name="Reason" xml:space="preserve">
+    <value>Reason</value>
+  </data>
+  <data name="Approve" xml:space="preserve">
+    <value>Approve</value>
+  </data>
+  <data name="Decline" xml:space="preserve">
+    <value>Decline</value>
+  </data>
+
+  
+  <data name="ErrorOccurred" xml:space="preserve">
+    <value>An error occurred. Please try again.</value>
+  </data>
+  <data name="SuccessMessage" xml:space="preserve">
+    <value>Operation completed successfully.</value>
+  </data>
+
+  
+  <data name="MORNING" xml:space="preserve">
+    <value>Morning</value>
+  </data>
+  <data name="NOON" xml:space="preserve">
+    <value>Noon</value>
+  </data>
+  <data name="NIGHT" xml:space="preserve">
+    <value>Night</value>
+  </data>
+  <data name="MIDDLE" xml:space="preserve">
+    <value>Afternoon</value>
+  </data>
+
+  
+  <data name="Monday" xml:space="preserve">
+    <value>Monday</value>
+  </data>
+  <data name="Tuesday" xml:space="preserve">
+    <value>Tuesday</value>
+  </data>
+  <data name="Wednesday" xml:space="preserve">
+    <value>Wednesday</value>
+  </data>
+  <data name="Thursday" xml:space="preserve">
+    <value>Thursday</value>
+  </data>
+  <data name="Friday" xml:space="preserve">
+    <value>Friday</value>
+  </data>
+  <data name="Saturday" xml:space="preserve">
+    <value>Saturday</value>
+  </data>
+  <data name="Sunday" xml:space="preserve">
+    <value>Sunday</value>
+  </data>
+
+  
+  <data name="January" xml:space="preserve">
+    <value>January</value>
+  </data>
+  <data name="February" xml:space="preserve">
+    <value>February</value>
+  </data>
+  <data name="March" xml:space="preserve">
+    <value>March</value>
+  </data>
+  <data name="April" xml:space="preserve">
+    <value>April</value>
+  </data>
+  <data name="May" xml:space="preserve">
+    <value>May</value>
+  </data>
+  <data name="June" xml:space="preserve">
+    <value>June</value>
+  </data>
+  <data name="July" xml:space="preserve">
+    <value>July</value>
+  </data>
+  <data name="August" xml:space="preserve">
+    <value>August</value>
+  </data>
+  <data name="September" xml:space="preserve">
+    <value>September</value>
+  </data>
+  <data name="October" xml:space="preserve">
+    <value>October</value>
+  </data>
+  <data name="November" xml:space="preserve">
+    <value>November</value>
+  </data>
+  <data name="December" xml:space="preserve">
+    <value>December</value>
+  </data>
+
+  
+  <data name="Today" xml:space="preserve">
+    <value>Today</value>
+  </data>
+  <data name="Tomorrow" xml:space="preserve">
+    <value>Tomorrow</value>
+  </data>
+  <data name="Yesterday" xml:space="preserve">
+    <value>Yesterday</value>
+  </data>
+  <data name="ThisWeek" xml:space="preserve">
+    <value>This Week</value>
+  </data>
+  <data name="NextWeek" xml:space="preserve">
+    <value>Next Week</value>
+  </data>
+  <data name="ThisMonth" xml:space="preserve">
+    <value>This Month</value>
+  </data>
+  <data name="NextMonth" xml:space="preserve">
+    <value>Next Month</value>
+  </data>
+
+  
+  <data name="AdminRole" xml:space="preserve">
+    <value>Admin</value>
+  </data>
+  <data name="Manager" xml:space="preserve">
+    <value>Manager</value>
+  </data>
+  <data name="Employee" xml:space="preserve">
+    <value>Employee</value>
+  </data>
+
+  
+  <data name="AccessDenied" xml:space="preserve">
+    <value>Access Denied</value>
+  </data>
+  <data name="Unauthorized" xml:space="preserve">
+    <value>You don't have permission to access this page.</value>
+  </data>
+  <data name="Login" xml:space="preserve">
+    <value>Login</value>
+  </data>
+  <data name="Email" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="Password" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="RedirectingBack" xml:space="preserve">
+    <value>Redirecting you back...</value>
+  </data>
+
+  
+  <data name="RestHours" xml:space="preserve">
+    <value>Rest hours (between shifts)</value>
+  </data>
+  <data name="WeeklyCap" xml:space="preserve">
+    <value>Weekly hours cap</value>
+  </data>
+  <data name="DisplayName" xml:space="preserve">
+    <value>Display name</value>
+  </data>
+  <data name="Role" xml:space="preserve">
+    <value>Role</value>
+  </data>
+  <data name="ResetPassword" xml:space="preserve">
+    <value>Reset Password</value>
+  </data>
+  <data name="DeleteUser" xml:space="preserve">
+    <value>Delete User</value>
+  </data>
+  <data name="AddShift" xml:space="preserve">
+    <value>Add Shift</value>
+  </data>
+  <data name="HoursByWeek" xml:space="preserve">
+    <value>Hours by week</value>
+  </data>
+  <data name="DecreaseStaffing" xml:space="preserve">
+    <value>Decrease required staffing</value>
+  </data>
+  <data name="IncreaseStaffing" xml:space="preserve">
+    <value>Increase required staffing</value>
+  </data>
+  <data name="AddRequiredStaffing" xml:space="preserve">
+    <value>Add required staffing</value>
+  </data>
+  <data name="ToggleDarkMode" xml:space="preserve">
+    <value>Toggle dark mode</value>
+  </data>
+  <data name="Demo" xml:space="preserve">
+    <value>Demo</value>
+  </data>
+
+  
+  <data name="ClickShiftBadges" xml:space="preserve">
+    <value>Click shift badges to manage assignments</value>
+  </data>
+  <data name="UseButtonsToAdjust" xml:space="preserve">
+    <value>Use + / − to adjust staffing</value>
+  </data>
+  <data name="ViewAssignedShifts" xml:space="preserve">
+    <value>View your assigned shifts and team schedule</value>
+  </data>
+  <data name="Month" xml:space="preserve">
+    <value>Month</value>
+  </data>
+  <data name="Week" xml:space="preserve">
+    <value>Week</value>
+  </data>
+  <data name="Day" xml:space="preserve">
+    <value>Day</value>
+  </data>
+  <data name="Mon" xml:space="preserve">
+    <value>Mon</value>
+  </data>
+  <data name="Tue" xml:space="preserve">
+    <value>Tue</value>
+  </data>
+  <data name="Wed" xml:space="preserve">
+    <value>Wed</value>
+  </data>
+  <data name="Thu" xml:space="preserve">
+    <value>Thu</value>
+  </data>
+  <data name="Fri" xml:space="preserve">
+    <value>Fri</value>
+  </data>
+  <data name="Sat" xml:space="preserve">
+    <value>Sat</value>
+  </data>
+  <data name="Sun" xml:space="preserve">
+    <value>Sun</value>
+  </data>
+  <data name="Staffing" xml:space="preserve">
+    <value>Staffing</value>
+  </data>
+  <data name="NoStaffingRequired" xml:space="preserve">
+    <value>No staffing required</value>
+  </data>
+  <data name="Staffed" xml:space="preserve">
+    <value>staffed</value>
+  </data>
+  <data name="FullyStaffed" xml:space="preserve">
+    <value>✓ Fully Staffed</value>
+  </data>
+  <data name="NeedsMore" xml:space="preserve">
+    <value>⚠ Needs {0} more</value>
+  </data>
+  <data name="Empty" xml:space="preserve">
+    <value>Empty</value>
+  </data>
+
+  
+  <data name="Key" xml:space="preserve">
+    <value>Key</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Start" xml:space="preserve">
+    <value>Start</value>
+  </data>
+  <data name="End" xml:space="preserve">
+    <value>End</value>
+  </data>
+
+  
+  <data name="ShiftType_MORNING" xml:space="preserve">
+    <value>Morning</value>
+  </data>
+  <data name="ShiftType_NOON" xml:space="preserve">
+    <value>Noon</value>
+  </data>
+  <data name="ShiftType_NIGHT" xml:space="preserve">
+    <value>Night</value>
+  </data>
+  <data name="ShiftType_MIDDLE" xml:space="preserve">
+    <value>Middle</value>
+  </data>
+  <data name="ShiftType_OFFLINE" xml:space="preserve">
+    <value>Offline</value>
+  </data>
+
+
+  <data name="Companies" xml:space="preserve">
+    <value>Companies</value>
+  </data>
+  <data name="AddNewCompany" xml:space="preserve">
+    <value>Add New Company</value>
+  </data>
+  <data name="CompanyDetails" xml:space="preserve">
+    <value>Company Details</value>
+  </data>
+  <data name="CompanyName" xml:space="preserve">
+    <value>Company Name</value>
+  </data>
+  <data name="Slug" xml:space="preserve">
+    <value>Slug</value>
+  </data>
+  <data name="ManagerAccount" xml:space="preserve">
+    <value>Manager Account</value>
+  </data>
+  <data name="ManagerEmail" xml:space="preserve">
+    <value>Manager Email</value>
+  </data>
+  <data name="ManagerDisplayName" xml:space="preserve">
+    <value>Manager Display Name</value>
+  </data>
+  <data name="ManagerPassword" xml:space="preserve">
+    <value>Manager Password</value>
+  </data>
+  <data name="CreateCompanyManager" xml:space="preserve">
+    <value>Create Company &amp; Manager</value>
+  </data>
+  <data name="Note" xml:space="preserve">
+    <value>Note</value>
+  </data>
+  <data name="CreatingCompanyWill" xml:space="preserve">
+    <value>Creating a company will:</value>
+  </data>
+  <data name="CreateCompanyWithDetails" xml:space="preserve">
+    <value>Create the company with the specified name and slug</value>
+  </data>
+  <data name="CreateManagerAccount" xml:space="preserve">
+    <value>Create a manager user account for this company</value>
+  </data>
+  <data name="GenerateDefaultShiftTypes" xml:space="preserve">
+    <value>Generate default shift types (Morning, Noon, Night, Middle)</value>
+  </data>
+  <data name="SetupDefaultConfig" xml:space="preserve">
+    <value>Set up default configuration (rest hours, weekly cap)</value>
+  </data>
+  <data name="AllCompanies" xml:space="preserve">
+    <value>All Companies</value>
+  </data>
+  <data name="NoCompaniesYet" xml:space="preserve">
+    <value>No companies yet. Create one above to get started.</value>
+  </data>
+  <data name="RenameCompany" xml:space="preserve">
+    <value>Rename Company</value>
+  </data>
+  <data name="DeleteCompany" xml:space="preserve">
+    <value>Delete Company</value>
+  </data>
+  <data name="NewCompanyName" xml:space="preserve">
+    <value>New Company Name</value>
+  </data>
+  <data name="ConfirmDeleteCompany" xml:space="preserve">
+    <value>Are you sure you want to delete this company? This will permanently delete all shift types, shift instances, assignments, time-off requests, and swap requests associated with this company. This action cannot be undone.</value>
+  </data>
+  <data name="CompanyDeleted" xml:space="preserve">
+    <value>Company deleted successfully</value>
+  </data>
+  <data name="CompanyRenamed" xml:space="preserve">
+    <value>Company renamed successfully</value>
+  </data>
+  <data name="CannotDeleteCompanyWithOwner" xml:space="preserve">
+    <value>Cannot delete company: Owner users must be removed or transferred first</value>
+  </data>
+  <data name="Rename" xml:space="preserve">
+    <value>Rename</value>
+  </data>
+  <data name="OrAssignExistingDirector" xml:space="preserve">
+    <value>Or assign an existing Director</value>
+  </data>
+  <data name="ExistingDirector" xml:space="preserve">
+    <value>Existing Director</value>
+  </data>
+  <data name="SelectExistingDirector" xml:space="preserve">
+    <value>-- Select existing Director (optional) --</value>
+  </data>
+  <data name="IfDirectorSelected" xml:space="preserve">
+    <value>If a Director is selected, they will be assigned to this company instead of creating a new Manager.</value>
+  </data>
+
+  
+  <data name="DirectorAssignments" xml:space="preserve">
+    <value>Director Assignments</value>
+  </data>
+  <data name="AssignDirectorToCompany" xml:space="preserve">
+    <value>Assign Director to Company</value>
+  </data>
+  <data name="SelectDirector" xml:space="preserve">
+    <value>-- Select Director --</value>
+  </data>
+  <data name="SelectCompany" xml:space="preserve">
+    <value>-- Select Company --</value>
+  </data>
+  <data name="CurrentDirectorAssignments" xml:space="preserve">
+    <value>Current Director Assignments</value>
+  </data>
+  <data name="GrantedBy" xml:space="preserve">
+    <value>Granted By</value>
+  </data>
+  <data name="GrantedAt" xml:space="preserve">
+    <value>Granted At</value>
+  </data>
+  <data name="Revoke" xml:space="preserve">
+    <value>Revoke</value>
+  </data>
+  <data name="RevokeDirectorConfirm" xml:space="preserve">
+    <value>Are you sure you want to revoke Director access for {0} from {1}?</value>
+  </data>
+  <data name="NoDirectorAssignments" xml:space="preserve">
+    <value>No director assignments yet. Assign directors to companies above.</value>
+  </data>
+  <data name="AboutDirectorRole" xml:space="preserve">
+    <value>About Director Role:</value>
+  </data>
+  <data name="DirectorsCanOversee" xml:space="preserve">
+    <value>Directors can oversee multiple companies and have the following permissions within their assigned companies:</value>
+  </data>
+  <data name="DirectorPerm1" xml:space="preserve">
+    <value>Add/remove users (Employee and Manager roles only)</value>
+  </data>
+  <data name="DirectorPerm2" xml:space="preserve">
+    <value>Assign/revoke Manager role</value>
+  </data>
+  <data name="DirectorPerm3" xml:space="preserve">
+    <value>Approve/reject time-off and swap requests</value>
+  </data>
+  <data name="DirectorPerm4" xml:space="preserve">
+    <value>View multi-company dashboards and reports</value>
+  </data>
+  <data name="DirectorsCannot" xml:space="preserve">
+    <value>Directors cannot create/delete companies or assign the Owner role.</value>
+  </data>
+
+  
+  <data name="RequestAccess" xml:space="preserve">
+    <value>Request Access</value>
+  </data>
+  <data name="RequestSubmitted" xml:space="preserve">
+    <value>Request Submitted</value>
+  </data>
+  <data name="PasswordMinCharacters" xml:space="preserve">
+    <value>Password (min. 6 characters)</value>
+  </data>
+  <data name="RequestedRole" xml:space="preserve">
+    <value>Requested Role</value>
+  </data>
+  <data name="RequestNeedsApproval" xml:space="preserve">
+    <value>Your request will need to be approved by authorized personnel.</value>
+  </data>
+  <data name="SubmitRequest" xml:space="preserve">
+    <value>Submit Request</value>
+  </data>
+  <data name="AlreadyHaveAccount" xml:space="preserve">
+    <value>Already have an account?</value>
+  </data>
+  <data name="LoginHere" xml:space="preserve">
+    <value>Login here</value>
+  </data>
+  <data name="SignupPendingMessage" xml:space="preserve">
+    <value>Your request to join {0} as {1} is under review. We'll notify you once it's approved.</value>
+  </data>
+  <data name="SignupSubmittedMessage" xml:space="preserve">
+    <value>Your request to join {0} as {1} has been submitted. We'll notify you once it's reviewed.</value>
+  </data>
+
+  
+  <data name="JoinRequests" xml:space="preserve">
+    <value>Join Requests</value>
+  </data>
+  <data name="Submitted" xml:space="preserve">
+    <value>Submitted</value>
+  </data>
+  <data name="Rejected" xml:space="preserve">
+    <value>Rejected</value>
+  </data>
+  <data name="ClearFilters" xml:space="preserve">
+    <value>Clear Filters</value>
+  </data>
+  <data name="Reject" xml:space="preserve">
+    <value>Reject</value>
+  </data>
+  <data name="NoJoinRequestsFound" xml:space="preserve">
+    <value>No join requests found with the current filters.</value>
+  </data>
+  <data name="ExistingUsers" xml:space="preserve">
+    <value>Existing Users</value>
+  </data>
+  <data name="ClearUserFilters" xml:space="preserve">
+    <value>Clear User Filters</value>
+  </data>
+  <data name="UserDeletionWarning" xml:space="preserve">
+    <value>User Deletion Warning:</value>
+  </data>
+  <data name="DeletingUserWillRemove" xml:space="preserve">
+    <value>Deleting a user will permanently remove:</value>
+  </data>
+  <data name="AllTheirShiftAssignments" xml:space="preserve">
+    <value>All their shift assignments (shifts will become empty)</value>
+  </data>
+  <data name="AllTheirTimeOffRequests" xml:space="preserve">
+    <value>All their time-off requests (approved, pending, and declined)</value>
+  </data>
+  <data name="AllTheirSwapRequests" xml:space="preserve">
+    <value>All their swap requests (both from and to the user)</value>
+  </data>
+  <data name="TheUserAccountItself" xml:space="preserve">
+    <value>The user account itself</value>
+  </data>
+  <data name="ActionCannotBeUndone" xml:space="preserve">
+    <value>This action cannot be undone. Use with extreme caution.</value>
+  </data>
+  <data name="AddUser" xml:space="preserve">
+    <value>Add User</value>
+  </data>
+  <data name="Set" xml:space="preserve">
+    <value>Set</value>
+  </data>
+
+  
+  <data name="Director" xml:space="preserve">
+    <value>Director</value>
+  </data>
+  <data name="NotificationHub" xml:space="preserve">
+    <value>Notification Hub</value>
+  </data>
+  <data name="CompanyFilter" xml:space="preserve">
+    <value>Company Filter</value>
+  </data>
+  <data name="ViewAsManager" xml:space="preserve">
+    <value>View as Manager</value>
+  </data>
+
+  
+  <data name="Directors" xml:space="preserve">
+    <value>Directors</value>
+  </data>
+  <data name="Diagnostic" xml:space="preserve">
+    <value>Diagnostic</value>
+  </data>
+
+  
+  <data name="SystemDiagnostics" xml:space="preserve">
+    <value>System Diagnostics</value>
+  </data>
+  <data name="MultiTenantDebugInfo" xml:space="preserve">
+    <value>Multi-Tenant Debug Information</value>
+  </data>
+  <data name="CompaniesInSystem" xml:space="preserve">
+    <value>Companies in System</value>
+  </data>
+  <data name="UserInformation" xml:space="preserve">
+    <value>User Information</value>
+  </data>
+  <data name="CompanyId" xml:space="preserve">
+    <value>Company ID</value>
+  </data>
+  <data name="ShiftInstancesForOctober2025" xml:space="preserve">
+    <value>Shift Instances for October 2025</value>
+  </data>
+  <data name="InstanceId" xml:space="preserve">
+    <value>Instance ID</value>
+  </data>
+  <data name="WorkDate" xml:space="preserve">
+    <value>Work Date</value>
+  </data>
+  <data name="ShiftKey" xml:space="preserve">
+    <value>Shift Key</value>
+  </data>
+  <data name="UserAssignments" xml:space="preserve">
+    <value>User Assignments</value>
+  </data>
+  <data name="AssignmentId" xml:space="preserve">
+    <value>Assignment ID</value>
+  </data>
+  <data name="UserId" xml:space="preserve">
+    <value>User ID</value>
+  </data>
+  <data name="BackToPreviousPage" xml:space="preserve">
+    <value>Back to Previous Page</value>
+  </data>
+  <data name="SelectUserPlaceholder" xml:space="preserve">
+    <value>-- Select a user --</value>
+  </data>
+  <data name="DateRange" xml:space="preserve">
+    <value>Date Range</value>
+  </data>
+  <data name="Apply" xml:space="preserve">
+    <value>Apply</value>
+  </data>
+  <data name="NoUserSelected" xml:space="preserve">
+    <value>No user selected</value>
+  </data>
+  <data name="SelectUserToViewAssignments" xml:space="preserve">
+    <value>Select a user above to view their assignments</value>
+  </data>
+
+  
+  <data name="ViewAsManagerMode" xml:space="preserve">
+    <value>View as Manager Mode</value>
+  </data>
+  <data name="ViewAsModeDescription" xml:space="preserve">
+    <value>Enter "View as Manager" mode to scope your view to a single company with Manager-level permissions. This is useful for troubleshooting or understanding the Manager experience.</value>
+  </data>
+  <data name="CurrentlyInViewAsManagerMode" xml:space="preserve">
+    <value>⚠️ Currently in View as Manager Mode</value>
+  </data>
+  <data name="YouAreViewingAsManagerOf" xml:space="preserve">
+    <value>You are viewing as Manager of:</value>
+  </data>
+  <data name="ViewScopedToCompany" xml:space="preserve">
+    <value>Your view is scoped to this company only. All other companies are hidden. Your permissions match Manager level for this company.</value>
+  </data>
+  <data name="ExitViewAsManagerMode" xml:space="preserve">
+    <value>Exit View as Manager Mode</value>
+  </data>
+  <data name="SelectCompanyToView" xml:space="preserve">
+    <value>Select Company to View</value>
+  </data>
+  <data name="ChooseCompanyViewAsManager" xml:space="preserve">
+    <value>Choose a company to view as Manager. While in this mode:</value>
+  </data>
+  <data name="OnlyThisCompanyDataVisible" xml:space="preserve">
+    <value>Only this company's data will be visible</value>
+  </data>
+  <data name="PermissionsMatchManagerLevel" xml:space="preserve">
+    <value>Your permissions will match Manager level</value>
+  </data>
+  <data name="SeeWhatManagerSees" xml:space="preserve">
+    <value>You can see exactly what a Manager sees for this company</value>
+  </data>
+  <data name="AllOtherCompaniesHidden" xml:space="preserve">
+    <value>All other companies will be hidden</value>
+  </data>
+  <data name="NotAssignedToAnyCompanies" xml:space="preserve">
+    <value>You are not assigned to any companies yet.</value>
+  </data>
+  <data name="Important" xml:space="preserve">
+    <value>Important:</value>
+  </data>
+  <data name="ViewAsModeInfo" xml:space="preserve">
+    <value>View as Manager mode is for demonstration and troubleshooting purposes. The mode will automatically expire after 8 hours or when you explicitly exit.</value>
+  </data>
+
+  
+  <data name="CompanyFilterDescription" xml:space="preserve">
+    <value>Select which companies you want to see in calendars, requests, and dashboards. Leave all unchecked to see all assigned companies.</value>
+  </data>
+  <data name="YourAssignedCompanies" xml:space="preserve">
+    <value>Your Assigned Companies</value>
+  </data>
+  <data name="ApplyFilter" xml:space="preserve">
+    <value>Apply Filter</value>
+  </data>
+  <data name="ShowAllCompanies" xml:space="preserve">
+    <value>Show All Companies</value>
+  </data>
+  <data name="CompanyFilterAppliesTo" xml:space="preserve">
+    <value>The company filter applies to:</value>
+  </data>
+  <data name="CalendarViewsOnlySelected" xml:space="preserve">
+    <value>Calendar views (only shows shifts from selected companies)</value>
+  </data>
+  <data name="RequestListsOnlySelected" xml:space="preserve">
+    <value>Request lists (only shows requests from selected companies)</value>
+  </data>
+  <data name="DashboardsAndReports" xml:space="preserve">
+    <value>Dashboards and reports</value>
+  </data>
+  <data name="FilterPersistsInBrowser" xml:space="preserve">
+    <value>This filter is saved in your browser and persists across sessions.</value>
+  </data>
+
+  
+  <data name="NotificationHubDescription" xml:space="preserve">
+    <value>Cross-company overview of all notifications and pending requests from your assigned companies.</value>
+  </data>
+  <data name="PendingTimeOffRequests" xml:space="preserve">
+    <value>Pending Time-Off Requests</value>
+  </data>
+  <data name="Company" xml:space="preserve">
+    <value>Company</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>User</value>
+  </data>
+  <data name="Details" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="Requested" xml:space="preserve">
+    <value>Requested</value>
+  </data>
+  <data name="NoPendingTimeOffRequests" xml:space="preserve">
+    <value>No pending time-off requests.</value>
+  </data>
+  <data name="PendingSwapRequests" xml:space="preserve">
+    <value>Pending Swap Requests</value>
+  </data>
+  <data name="NoPendingSwapRequests" xml:space="preserve">
+    <value>No pending swap requests.</value>
+  </data>
+  <data name="RecentNotificationsLast50" xml:space="preserve">
+    <value>Recent Notifications (Last 50)</value>
+  </data>
+  <data name="Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Message" xml:space="preserve">
+    <value>Message</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="Unread" xml:space="preserve">
+    <value>Unread</value>
+  </data>
+  <data name="NoNotificationsYet" xml:space="preserve">
+    <value>No notifications yet.</value>
+  </data>
+  <data name="NotificationHubInfo" xml:space="preserve">
+    <value>This hub aggregates data from all companies you oversee as a Director. Company slugs are shown inline with full names on hover.</value>
+  </data>
+
+  
+  <data name="MyProfile" xml:space="preserve">
+    <value>My Profile</value>
+  </data>
+  <data name="EditProfile" xml:space="preserve">
+    <value>Edit Profile</value>
+  </data>
+  <data name="PersonalInformation" xml:space="preserve">
+    <value>Personal Information</value>
+  </data>
+  <data name="ProfessionalInformation" xml:space="preserve">
+    <value>Professional Information</value>
+  </data>
+  <data name="EmergencyContact" xml:space="preserve">
+    <value>Emergency Contact</value>
+  </data>
+  <data name="Avatar" xml:space="preserve">
+    <value>Avatar</value>
+  </data>
+  <data name="UploadAvatar" xml:space="preserve">
+    <value>Upload Avatar</value>
+  </data>
+  <data name="DeleteAvatar" xml:space="preserve">
+    <value>Delete Avatar</value>
+  </data>
+  <data name="PreferredName" xml:space="preserve">
+    <value>Preferred Name</value>
+  </data>
+  <data name="Phone" xml:space="preserve">
+    <value>Phone</value>
+  </data>
+  <data name="City" xml:space="preserve">
+    <value>City</value>
+  </data>
+  <data name="DateOfBirth" xml:space="preserve">
+    <value>Date of Birth</value>
+  </data>
+  <data name="Department" xml:space="preserve">
+    <value>Department</value>
+  </data>
+  <data name="JobTitle" xml:space="preserve">
+    <value>Job Title</value>
+  </data>
+  <data name="HireDate" xml:space="preserve">
+    <value>Hire Date</value>
+  </data>
+  <data name="Skills" xml:space="preserve">
+    <value>Skills</value>
+  </data>
+  <data name="Certifications" xml:space="preserve">
+    <value>Certifications</value>
+  </data>
+  <data name="EmergencyContactName" xml:space="preserve">
+    <value>Emergency Contact Name</value>
+  </data>
+  <data name="EmergencyContactPhone" xml:space="preserve">
+    <value>Emergency Contact Phone</value>
+  </data>
+  <data name="EmergencyContactRelation" xml:space="preserve">
+    <value>Relationship</value>
+  </data>
+  <data name="ProfileUpdatedSuccessfully" xml:space="preserve">
+    <value>Profile updated successfully!</value>
+  </data>
+  <data name="AvatarDeletedSuccessfully" xml:space="preserve">
+    <value>Avatar deleted successfully!</value>
+  </data>
+  <data name="AccountSettings" xml:space="preserve">
+    <value>Account Settings</value>
+  </data>
+  <data name="ActiveAccount" xml:space="preserve">
+    <value>Active Account</value>
+  </data>
+  <data name="RecentProfileChanges" xml:space="preserve">
+    <value>Recent Profile Changes</value>
+  </data>
+  <data name="FieldName" xml:space="preserve">
+    <value>Field</value>
+  </data>
+  <data name="OldValue" xml:space="preserve">
+    <value>Old Value</value>
+  </data>
+  <data name="NewValue" xml:space="preserve">
+    <value>New Value</value>
+  </data>
+  <data name="ChangedBy" xml:space="preserve">
+    <value>Changed By</value>
+  </data>
+
+  
+  <data name="ForgotPassword" xml:space="preserve">
+    <value>Forgot Password</value>
+  </data>
+  <data name="SendTemporaryPassword" xml:space="preserve">
+    <value>Send Temporary Password</value>
+  </data>
+  <data name="BackToLogin" xml:space="preserve">
+    <value>Back to Login</value>
+  </data>
+
+  
+  <data name="Breadcrumb" xml:space="preserve">
+    <value>Breadcrumb</value>
+  </data>
+
+  
+  <data name="AnalyticsDashboard" xml:space="preserve">
+    <value>Analytics Dashboard</value>
+  </data>
+  <data name="CoverageRate" xml:space="preserve">
+    <value>Coverage Rate</value>
+  </data>
+  <data name="SwapRequests" xml:space="preserve">
+    <value>Swap Requests</value>
+  </data>
+  <data name="TimeOffRequests" xml:space="preserve">
+    <value>Time-Off Requests</value>
+  </data>
+  <data name="BackToBackShifts" xml:space="preserve">
+    <value>Back-to-Back Shifts</value>
+  </data>
+  <data name="EmployeeAnalytics" xml:space="preserve">
+    <value>Employee Analytics</value>
+  </data>
+  <data name="TeamAnalytics" xml:space="preserve">
+    <value>Team Analytics</value>
+  </data>
+  <data name="UnderstaffingIssues" xml:space="preserve">
+    <value>Understaffing Issues</value>
+  </data>
+  <data name="OverstaffingIssues" xml:space="preserve">
+    <value>Overstaffing Issues</value>
+  </data>
+  <data name="ExportReport" xml:space="preserve">
+    <value>Export Report</value>
+  </data>
+  <data name="Last7Days" xml:space="preserve">
+    <value>Last 7 Days</value>
+  </data>
+  <data name="Last30Days" xml:space="preserve">
+    <value>Last 30 Days</value>
+  </data>
+  <data name="Last90Days" xml:space="preserve">
+    <value>Last 90 Days</value>
+  </data>
+  <data name="LastYear" xml:space="preserve">
+    <value>Last Year</value>
+  </data>
+  <data name="HoursWorked" xml:space="preserve">
+    <value>Hours Worked</value>
+  </data>
+  <data name="TotalHours" xml:space="preserve">
+    <value>Total Hours</value>
+  </data>
+  <data name="AverageHoursPerWeek" xml:space="preserve">
+    <value>Avg Hours/Week</value>
+  </data>
+  <data name="ShiftCount" xml:space="preserve">
+    <value>Shift Count</value>
+  </data>
+  <data name="NoDataAvailable" xml:space="preserve">
+    <value>No data available</value>
+  </data>
+  <data name="BackToBackShiftWarnings" xml:space="preserve">
+    <value>Back-to-Back Shift Warnings</value>
+  </data>
+  <data name="FirstShift" xml:space="preserve">
+    <value>First Shift</value>
+  </data>
+  <data name="SecondShift" xml:space="preserve">
+    <value>Second Shift</value>
+  </data>
+  <data name="HoursByRole" xml:space="preserve">
+    <value>Hours by Role</value>
+  </data>
+  <data name="UpcomingShifts" xml:space="preserve">
+    <value>Upcoming Shifts</value>
+  </data>
+  <data name="Next7Days" xml:space="preserve">
+    <value>Next 7 Days</value>
+  </data>
+  <data name="NoUnderstaffingIssues" xml:space="preserve">
+    <value>No understaffing issues</value>
+  </data>
+  <data name="NoOverstaffingIssues" xml:space="preserve">
+    <value>No overstaffing issues</value>
+  </data>
+  <data name="Assigned" xml:space="preserve">
+    <value>Assigned</value>
+  </data>
+  <data name="Required" xml:space="preserve">
+    <value>Required</value>
+  </data>
+  <data name="Deficit" xml:space="preserve">
+    <value>Deficit</value>
+  </data>
+  <data name="Surplus" xml:space="preserve">
+    <value>Surplus</value>
+  </data>
+  <data name="Total" xml:space="preserve">
+    <value>Total</value>
+  </data>
+  <data name="ApprovalRate" xml:space="preserve">
+    <value>Approval Rate</value>
+  </data>
+  <data name="AverageApprovalTime" xml:space="preserve">
+    <value>Avg Approval Time</value>
+  </data>
+  <data name="TopSwapRequesters" xml:space="preserve">
+    <value>Top Swap Requesters</value>
+  </data>
+  <data name="RequestCount" xml:space="preserve">
+    <value>Requests</value>
+  </data>
+  <data name="TimeOffAnalytics" xml:space="preserve">
+    <value>Time-Off Analytics</value>
+  </data>
+  <data name="SwapAnalytics" xml:space="preserve">
+    <value>Swap Request Analytics</value>
+  </data>
+  <data name="AverageDaysOff" xml:space="preserve">
+    <value>Avg Days Off/Employee</value>
+  </data>
+  <data name="TimeOffTrend" xml:space="preserve">
+    <value>Time-Off Trend</value>
+  </data>
+  <data name="Last12Months" xml:space="preserve">
+    <value>Last 12 Months</value>
+  </data>
+  <data name="DaysOff" xml:space="preserve">
+    <value>Days Off</value>
+  </data>
+
+  
+  <data name="Filters" xml:space="preserve">
+    <value>Filters</value>
+  </data>
+  <data name="ApplyFilters" xml:space="preserve">
+    <value>Apply Filters</value>
+  </data>
+  <data name="Clear" xml:space="preserve">
+    <value>Clear</value>
+  </data>
+  <data name="ExportCSV" xml:space="preserve">
+    <value>Export CSV</value>
+  </data>
+  <data name="Timestamp" xml:space="preserve">
+    <value>Timestamp</value>
+  </data>
+  <data name="Action" xml:space="preserve">
+    <value>Action</value>
+  </data>
+  <data name="EntityType" xml:space="preserve">
+    <value>Entity Type</value>
+  </data>
+  <data name="EntityID" xml:space="preserve">
+    <value>Entity ID</value>
+  </data>
+  <data name="Description" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="IPAddress" xml:space="preserve">
+    <value>IP Address</value>
+  </data>
+  <data name="AllUsers" xml:space="preserve">
+    <value>All Users</value>
+  </data>
+  <data name="AllActions" xml:space="preserve">
+    <value>All Actions</value>
+  </data>
+  <data name="AllTypes" xml:space="preserve">
+    <value>All Types</value>
+  </data>
+  <data name="ShowDetails" xml:space="preserve">
+    <value>Show Details</value>
+  </data>
+  <data name="Previous" xml:space="preserve">
+    <value>Previous</value>
+  </data>
+  <data name="Next" xml:space="preserve">
+    <value>Next</value>
+  </data>
+  <data name="Page" xml:space="preserve">
+    <value>Page</value>
+  </data>
+  <data name="Of" xml:space="preserve">
+    <value>of</value>
+  </data>
+  <data name="Showing" xml:space="preserve">
+    <value>Showing</value>
+  </data>
+  <data name="Records" xml:space="preserve">
+    <value>records</value>
+  </data>
+
+  
+  <data name="ShiftAssignmentTable" xml:space="preserve">
+    <value>Shift Assignment Table</value>
+  </data>
+  <data name="PreviousTwoWeeks" xml:space="preserve">
+    <value>Previous 2 Weeks</value>
+  </data>
+  <data name="NextTwoWeeks" xml:space="preserve">
+    <value>Next 2 Weeks</value>
+  </data>
+  <data name="CurrentWeek" xml:space="preserve">
+    <value>Current Week</value>
+  </data>
+  <data name="Shift" xml:space="preserve">
+    <value>Shift</value>
+  </data>
+  <data name="Trainee" xml:space="preserve">
+    <value>Trainee</value>
+  </data>
+  <data name="ClickToAssign" xml:space="preserve">
+    <value>Click to assign</value>
+  </data>
+  <data name="AddTrainee" xml:space="preserve">
+    <value>Add Trainee</value>
+  </data>
+  <data name="ChangeTrainee" xml:space="preserve">
+    <value>Change Trainee</value>
+  </data>
+  <data name="RemoveTrainee" xml:space="preserve">
+    <value>Remove Trainee</value>
+  </data>
+  <data name="ChangePrimaryUser" xml:space="preserve">
+    <value>Change Primary User</value>
+  </data>
+  <data name="RemoveUser" xml:space="preserve">
+    <value>Remove User</value>
+  </data>
+  <data name="AssignUser" xml:space="preserve">
+    <value>Assign User</value>
+  </data>
+
+  
+  <data name="Assignments" xml:space="preserve">
+    <value>Assignments</value>
+  </data>
+  <data name="BackToCalendar" xml:space="preserve">
+    <value>Back to Calendar</value>
+  </data>
+  <data name="AddPerson" xml:space="preserve">
+    <value>Add person</value>
+  </data>
+  <data name="ChooseActiveUser" xml:space="preserve">
+    <value>-- choose an active user --</value>
+  </data>
+  <data name="OnTimeOff" xml:space="preserve">
+    <value>ON TIME OFF</value>
+  </data>
+  <data name="AttachTrainee" xml:space="preserve">
+    <value>-- Attach Trainee --</value>
+  </data>
+  <data name="AssignTrainee" xml:space="preserve">
+    <value>Assign Trainee</value>
+  </data>
+  <data name="ShiftNameOptional" xml:space="preserve">
+    <value>Shift Name (optional)</value>
+  </data>
+
+  
+  <data name="PendingRequests" xml:space="preserve">
+    <value>Pending Requests</value>
+  </data>
+  <data name="ManageApprovedTimeOff" xml:space="preserve">
+    <value>Manage Approved Time-Off</value>
+  </data>
+  <data name="PendingTimeOff" xml:space="preserve">
+    <value>Pending Time-off</value>
+  </data>
+  <data name="PendingSwaps" xml:space="preserve">
+    <value>Pending Swaps</value>
+  </data>
+
+  
+  <data name="SaveChanges" xml:space="preserve">
+    <value>Save Changes</value>
+  </data>
+  <data name="UploadNewAvatar" xml:space="preserve">
+    <value>Upload New Avatar</value>
+  </data>
+  <data name="ManagerOnlyFields" xml:space="preserve">
+    <value>These fields can only be updated by your manager</value>
+  </data>
+  <data name="SelectAll" xml:space="preserve">
+    <value>Select All</value>
+  </data>
+  <data name="Selected" xml:space="preserve">
+    <value>selected</value>
+  </data>
+  <data name="AssignRole" xml:space="preserve">
+    <value>Assign Role</value>
+  </data>
+  <data name="ApproveSelected" xml:space="preserve">
+    <value>Approve Selected</value>
+  </data>
+  <data name="ConfirmBatchApproval" xml:space="preserve">
+    <value>Are you sure you want to approve the selected join requests? Users will be created with the assigned roles.</value>
+  </data>
+
+  
+  <data name="ActiveFilters" xml:space="preserve">
+    <value>Active Filters</value>
+  </data>
+  <data name="InvalidDateRange" xml:space="preserve">
+    <value>Start date must be before end date</value>
+  </data>
+  <data name="HideDetails" xml:space="preserve">
+    <value>Hide Details</value>
+  </data>
+  <data name="CopiedToClipboard" xml:space="preserve">
+    <value>Copied to clipboard</value>
+  </data>
+  <data name="ExportingData" xml:space="preserve">
+    <value>Exporting data...</value>
+  </data>
+  <data name="SkillsPlaceholder" xml:space="preserve">
+    <value>e.g., Grill, Prep, Cleaning</value>
+  </data>
+  <data name="CertificationsPlaceholder" xml:space="preserve">
+    <value>e.g., Food Safety, First Aid</value>
+  </data>
+
+  
+  <data name="EditorUserNotFound" xml:space="preserve">
+    <value>Editor user not found</value>
+  </data>
+  <data name="TargetUserNotFound" xml:space="preserve">
+    <value>Target user not found</value>
+  </data>
+  <data name="UnauthorizedAccess" xml:space="preserve">
+    <value>Unauthorized access</value>
+  </data>
+  <data name="OnlyManagersCanChangeEmail" xml:space="preserve">
+    <value>Only managers can change email addresses</value>
+  </data>
+  <data name="UnauthorizedToChangeDisplayName" xml:space="preserve">
+    <value>Unauthorized to change display name</value>
+  </data>
+  <data name="UnauthorizedToChangePreferredName" xml:space="preserve">
+    <value>Unauthorized to change preferred name</value>
+  </data>
+  <data name="UnauthorizedToChangePhone" xml:space="preserve">
+    <value>Unauthorized to change phone</value>
+  </data>
+  <data name="UnauthorizedToChangeCity" xml:space="preserve">
+    <value>Unauthorized to change city</value>
+  </data>
+  <data name="UnauthorizedToChangeDateOfBirth" xml:space="preserve">
+    <value>Unauthorized to change date of birth</value>
+  </data>
+  <data name="OnlyManagersCanChangeDepartment" xml:space="preserve">
+    <value>Only managers can change department</value>
+  </data>
+  <data name="OnlyManagersCanChangeJobTitle" xml:space="preserve">
+    <value>Only managers can change job title</value>
+  </data>
+  <data name="OnlyManagersCanChangeHireDate" xml:space="preserve">
+    <value>Only managers can change hire date</value>
+  </data>
+  <data name="UnauthorizedToChangeSkills" xml:space="preserve">
+    <value>Unauthorized to change skills</value>
+  </data>
+  <data name="UnauthorizedToChangeCertifications" xml:space="preserve">
+    <value>Unauthorized to change certifications</value>
+  </data>
+  <data name="UnauthorizedToChangeEmergencyContact" xml:space="preserve">
+    <value>Unauthorized to change emergency contact</value>
+  </data>
+  <data name="OnlyManagersCanChangeUserRoles" xml:space="preserve">
+    <value>Only managers can change user roles</value>
+  </data>
+  <data name="OnlyManagersCanChangeActiveStatus" xml:space="preserve">
+    <value>Only managers can change active status</value>
+  </data>
+  <data name="ErrorUpdatingProfile" xml:space="preserve">
+    <value>An error occurred while updating the profile</value>
+  </data>
+  <data name="NumberOfPeopleNeeded" xml:space="preserve">
+    <value>Number of people needed</value>
+  </data>
+  <data name="AdjustRequiredHeadcount" xml:space="preserve">
+    <value>Adjust required headcount</value>
+  </data>
+  <data name="AdjustStaffing" xml:space="preserve">
+    <value>Adjust Staffing</value>
+  </data>
+  <data name="AddAssignment" xml:space="preserve">
+    <value>Add Assignment</value>
+  </data>
+  <data name="SelectEmployee" xml:space="preserve">
+    <value>Select Employee...</value>
+  </data>
+  <data name="AssignEmployeeToSlot" xml:space="preserve">
+    <value>Assign employee to this slot</value>
+  </data>
+  <data name="CreateSlots" xml:space="preserve">
+    <value>Create Slots</value>
+  </data>
+  <data name="AddCustomShiftRow" xml:space="preserve">
+    <value>Add Custom Shift Row</value>
+  </data>
+  <data name="FailedToAddTrainee" xml:space="preserve">
+    <value>Failed to add trainee. Please try again.</value>
+  </data>
+  <data name="RemoveTraineeConfirm" xml:space="preserve">
+    <value>Remove trainee from this shift?</value>
+  </data>
+  <data name="FailedToRemoveTrainee" xml:space="preserve">
+    <value>Failed to remove trainee. Please try again.</value>
+  </data>
+  <data name="FailedToChangeUser" xml:space="preserve">
+    <value>Failed to change user. Please try again.</value>
+  </data>
+  <data name="RemoveUserConfirm" xml:space="preserve">
+    <value>Remove user from this shift? This will also remove any trainee.</value>
+  </data>
+  <data name="FailedToRemoveUser" xml:space="preserve">
+    <value>Failed to remove user. Please try again.</value>
+  </data>
+  <data name="DeleteShift" xml:space="preserve">
+    <value>Delete shift</value>
+  </data>
+  <data name="DeleteShiftConfirm" xml:space="preserve">
+    <value>This will permanently remove the shift instance for this date (and its assignments). Continue?</value>
+  </data>
+  <data name="FailedToDeleteShift" xml:space="preserve">
+    <value>Failed to delete shift. Please try again.</value>
+  </data>
+  <data name="ClickShiftBadgeHelp" xml:space="preserve">
+    <value>Click a shift badge to manage assignments.</value>
+  </data>
+  <data name="UseButtonsToAdjustStaffing" xml:space="preserve">
+    <value>Use + / − to adjust required staffing.</value>
+  </data>
+  <data name="ViewAssignedShiftsHelp" xml:space="preserve">
+    <value>View your assigned shifts and team schedule.</value>
+  </data>
+  <data name="ViewDetailedScheduleHelp" xml:space="preserve">
+    <value>View your assigned shifts and detailed schedule.</value>
+  </data>
+  <data name="ConfirmRejectJoinRequest" xml:space="preserve">
+    <value>Reject this join request from {0}?</value>
+  </data>
+  <data name="ConfirmDeleteUser" xml:space="preserve">
+    <value>⚠️ WARNING: This will permanently delete {0} and remove all their shift assignments, time-off requests, and swap requests. This action cannot be undone.
+
+Are you absolutely sure you want to delete this user?</value>
+  </data>
+  <data name="ConfirmRevokeDirectorAccess" xml:space="preserve">
+    <value>Are you sure you want to revoke Director access for {0} from {1}?</value>
+  </data>
+  <data name="ConfirmDeleteTimeOff" xml:space="preserve">
+    <value>Are you sure you want to delete this approved time-off for {0}? This action cannot be undone.</value>
+  </data>
+
+  
+  <data name="WelcomeToShiftManager" xml:space="preserve">
+    <value>Welcome to Shift Manager</value>
+  </data>
+  <data name="HomePageDescription" xml:space="preserve">
+    <value>Use the Calendar to plan coverage, the Requests tab to handle time-off and swaps, or My Shifts to view your schedule.</value>
+  </data>
+  <data name="GoToCalendar" xml:space="preserve">
+    <value>Go to Calendar</value>
+  </data>
+
+  
+  <data name="Upcoming" xml:space="preserve">
+    <value>Upcoming</value>
+  </data>
+  <data name="Totals" xml:space="preserve">
+    <value>Totals</value>
+  </data>
+  <data name="Next4Weeks" xml:space="preserve">
+    <value>Next 4 weeks</value>
+  </data>
+  <data name="Hours" xml:space="preserve">
+    <value>hours</value>
+  </data>
+  <data name="Shadowing" xml:space="preserve">
+    <value>Shadowing</value>
+  </data>
+  <data name="TraineeLabel" xml:space="preserve">
+    <value>Trainee</value>
+  </data>
+
+  
+  <data name="MyRequests" xml:space="preserve">
+    <value>My Requests</value>
+  </data>
+  <data name="RequestTimeOff" xml:space="preserve">
+    <value>Request Time Off</value>
+  </data>
+  <data name="SubmitTimeOffRequest" xml:space="preserve">
+    <value>Submit Time Off Request</value>
+  </data>
+  <data name="RequestShiftSwap" xml:space="preserve">
+    <value>Request Shift Swap</value>
+  </data>
+  <data name="SelectYourShiftToSwap" xml:space="preserve">
+    <value>Select Your Shift to Swap</value>
+  </data>
+  <data name="ChooseAShift" xml:space="preserve">
+    <value>Choose a shift...</value>
+  </data>
+  <data name="SwapRequestDescription" xml:space="preserve">
+    <value>This will create an open swap request that other employees can accept, or a manager can assign to someone.</value>
+  </data>
+  <data name="NoUpcomingShiftsForSwapping" xml:space="preserve">
+    <value>You have no upcoming shifts available for swapping.</value>
+  </data>
+  <data name="MyTimeOffRequests" xml:space="preserve">
+    <value>My Time Off Requests</value>
+  </data>
+  <data name="Dates" xml:space="preserve">
+    <value>Dates</value>
+  </data>
+  <data name="MySwapRequests" xml:space="preserve">
+    <value>My Swap Requests</value>
+  </data>
+  <data name="NoTimeOffRequestsYet" xml:space="preserve">
+    <value>No time off requests yet.</value>
+  </data>
+  <data name="NoSwapRequestsYet" xml:space="preserve">
+    <value>No swap requests yet.</value>
+  </data>
+  <data name="TimeOffReasonPlaceholder" xml:space="preserve">
+    <value>Please provide a reason for your time off request...</value>
+  </data>
+
+  
+  <data name="SomethingWentWrong" xml:space="preserve">
+    <value>Something went wrong</value>
+  </data>
+  <data name="UnexpectedErrorOccurred" xml:space="preserve">
+    <value>Sorry—an unexpected error occurred.</value>
+  </data>
+
+  
+  <data name="Chores" xml:space="preserve">
+    <value>Chores</value>
+  </data>
+  <data name="ChoresCalendar" xml:space="preserve">
+    <value>Chores Calendar</value>
+  </data>
+  <data name="Chore" xml:space="preserve">
+    <value>Chore</value>
+  </data>
+  <data name="CreateChore" xml:space="preserve">
+    <value>Create Chore</value>
+  </data>
+  <data name="ChoreDetails" xml:space="preserve">
+    <value>Chore Details</value>
+  </data>
+  <data name="ChoresList" xml:space="preserve">
+    <value>Chores List</value>
+  </data>
+  <data name="NoChoresThisMonth" xml:space="preserve">
+    <value>No chores for this month</value>
+  </data>
+  <data name="SelectAssignee" xml:space="preserve">
+    <value>Select assignee...</value>
+  </data>
+  <data name="AreYouSureDeleteChore" xml:space="preserve">
+    <value>Are you sure you want to delete the chore</value>
+  </data>
+  <data name="ShiftConflictDetected" xml:space="preserve">
+    <value>Shift Conflict Detected</value>
+  </data>
+  <data name="UserHasShiftOnThisDate" xml:space="preserve">
+    <value>This user already has a shift assigned on this date.</value>
+  </data>
+  <data name="DoYouWantToReplaceShift" xml:space="preserve">
+    <value>Do you want to replace the shift with this chore?</value>
+  </data>
+  <data name="ReplaceShift" xml:space="preserve">
+    <value>Replace Shift</value>
+  </data>
+  <data name="ChoreConflictDetected" xml:space="preserve">
+    <value>Chore Conflict Detected</value>
+  </data>
+  <data name="UserHasChoreOnThisDate" xml:space="preserve">
+    <value>This user already has a chore assigned on this date.</value>
+  </data>
+  <data name="DoYouWantToReplaceChore" xml:space="preserve">
+    <value>Do you want to replace the chore with this shift?</value>
+  </data>
+  <data name="ReplaceChore" xml:space="preserve">
+    <value>Replace Chore</value>
+  </data>
+  <data name="More" xml:space="preserve">
+    <value>more</value>
+  </data>
+
+  <!-- Audit Log Page Strings -->
+  <data name="AuditLogDescription" xml:space="preserve">
+    <value>View and search {0} audit log entries tracking all system actions and changes</value>
+  </data>
+  <data name="ShowingResults" xml:space="preserve">
+    <value>Showing {0}-{1} of {2} results</value>
+  </data>
+  <data name="AllEntityTypes" xml:space="preserve">
+    <value>All Entity Types</value>
+  </data>
+  <data name="SearchPlaceholder" xml:space="preserve">
+    <value>Search descriptions, users, emails...</value>
+  </data>
+  <data name="AdditionalDetails" xml:space="preserve">
+    <value>Additional Details</value>
+  </data>
+  <data name="UserAgent" xml:space="preserve">
+    <value>User Agent</value>
+  </data>
+  <data name="First" xml:space="preserve">
+    <value>First</value>
+  </data>
+  <data name="Last" xml:space="preserve">
+    <value>Last</value>
+  </data>
+  <data name="Of" xml:space="preserve">
+    <value>of</value>
+  </data>
+  <data name="NoAuditLogs" xml:space="preserve">
+    <value>No Audit Logs Found</value>
+  </data>
+  <data name="NoAuditLogsMessage" xml:space="preserve">
+    <value>No audit log entries match your current filters. Try adjusting your search criteria or clear the filters to see all entries.</value>
+  </data>
+  <data name="ApiKeys" xml:space="preserve">
+    <value>API Keys</value>
+  </data>
+  <data name="MyApiKeys" xml:space="preserve">
+    <value>My API Keys</value>
+  </data>
+  <data name="ApiKeyManagement" xml:space="preserve">
+    <value>API Key Management</value>
+  </data>
+  <data name="RequestNewApiKey" xml:space="preserve">
+    <value>Request New API Key</value>
+  </data>
+  <data name="ApiKeyGenerated" xml:space="preserve">
+    <value>API Key Generated Successfully!</value>
+  </data>
+  <data name="ApiKeySaveWarning" xml:space="preserve">
+    <value>Save this API key now - you won't be able to see it again!</value>
+  </data>
+  <data name="AdminApiKeySaveWarning" xml:space="preserve">
+    <value>IMPORTANT: Copy this key and send it to the requester securely. It will not be shown again!</value>
+  </data>
+  <data name="CopyToClipboard" xml:space="preserve">
+    <value>Copy to Clipboard</value>
+  </data>
+  <data name="CopiedToClipboard" xml:space="preserve">
+    <value>Copied to clipboard!</value>
+  </data>
+  <data name="ActiveApiKeys" xml:space="preserve">
+    <value>Active API Keys</value>
+  </data>
+  <data name="NoActiveApiKeys" xml:space="preserve">
+    <value>No active API keys found</value>
+  </data>
+  <data name="PendingRequests" xml:space="preserve">
+    <value>Pending Requests</value>
+  </data>
+  <data name="NoPendingRequests" xml:space="preserve">
+    <value>No pending requests</value>
+  </data>
+  <data name="RequestHistory" xml:space="preserve">
+    <value>Request History</value>
+  </data>
+  <data name="NoRequestHistory" xml:space="preserve">
+    <value>No request history</value>
+  </data>
+  <data name="KeyName" xml:space="preserve">
+    <value>Key Name</value>
+  </data>
+  <data name="KeyNamePlaceholder" xml:space="preserve">
+    <value>e.g., Production Integration</value>
+  </data>
+  <data name="ApiKeyDescriptionPlaceholder" xml:space="preserve">
+    <value>Describe why you need this API key and how it will be used</value>
+  </data>
+  <data name="RequestedScopes" xml:space="preserve">
+    <value>Requested Scopes</value>
+  </data>
+  <data name="SubmitRequest" xml:space="preserve">
+    <value>Submit Request</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Scopes" xml:space="preserve">
+    <value>Scopes</value>
+  </data>
+  <data name="Created" xml:space="preserve">
+    <value>Created</value>
+  </data>
+  <data name="LastUsed" xml:space="preserve">
+    <value>Last Used</value>
+  </data>
+  <data name="Never" xml:space="preserve">
+    <value>Never</value>
+  </data>
+  <data name="NeverExpires" xml:space="preserve">
+    <value>Never Expires</value>
+  </data>
+  <data name="Expires" xml:space="preserve">
+    <value>Expires</value>
+  </data>
+  <data name="Actions" xml:space="preserve">
+    <value>Actions</value>
+  </data>
+  <data name="Revoke" xml:space="preserve">
+    <value>Revoke</value>
+  </data>
+  <data name="ConfirmRevokeKey" xml:space="preserve">
+    <value>Are you sure you want to revoke this API key? This action cannot be undone.</value>
+  </data>
+  <data name="Pending" xml:space="preserve">
+    <value>Pending</value>
+  </data>
+  <data name="Approved" xml:space="preserve">
+    <value>Approved</value>
+  </data>
+  <data name="Rejected" xml:space="preserve">
+    <value>Rejected</value>
+  </data>
+  <data name="RequestedDate" xml:space="preserve">
+    <value>Requested Date</value>
+  </data>
+  <data name="ReviewedDate" xml:space="preserve">
+    <value>Reviewed Date</value>
+  </data>
+  <data name="ReviewedBy" xml:space="preserve">
+    <value>Reviewed By</value>
+  </data>
+  <data name="Notes" xml:space="preserve">
+    <value>Notes</value>
+  </data>
+  <data name="PendingRequestsReview" xml:space="preserve">
+    <value>Pending Requests - Review Required</value>
+  </data>
+  <data name="RequestedBy" xml:space="preserve">
+    <value>Requested By</value>
+  </data>
+  <data name="Approve" xml:space="preserve">
+    <value>Approve</value>
+  </data>
+  <data name="Reject" xml:space="preserve">
+    <value>Reject</value>
+  </data>
+  <data name="ApproveApiKeyRequest" xml:space="preserve">
+    <value>Approve API Key Request</value>
+  </data>
+  <data name="RejectApiKeyRequest" xml:space="preserve">
+    <value>Reject API Key Request</value>
+  </data>
+  <data name="ApprovedScopes" xml:space="preserve">
+    <value>Approved Scopes</value>
+  </data>
+  <data name="ApprovedScopesHelp" xml:space="preserve">
+    <value>You can modify the requested scopes before approving. Comma-separated list.</value>
+  </data>
+  <data name="RateLimitPerMinute" xml:space="preserve">
+    <value>Rate Limit (per minute)</value>
+  </data>
+  <data name="RateLimit" xml:space="preserve">
+    <value>Rate Limit</value>
+  </data>
+  <data name="ExpiresInDays" xml:space="preserve">
+    <value>Expires in Days</value>
+  </data>
+  <data name="ReviewNotes" xml:space="preserve">
+    <value>Review Notes</value>
+  </data>
+  <data name="Optional" xml:space="preserve">
+    <value>Optional</value>
+  </data>
+  <data name="ReviewNotesPlaceholder" xml:space="preserve">
+    <value>Add any notes about this approval...</value>
+  </data>
+  <data name="ApproveAndGenerateKey" xml:space="preserve">
+    <value>Approve and Generate Key</value>
+  </data>
+  <data name="RejectionReason" xml:space="preserve">
+    <value>Rejection Reason</value>
+  </data>
+  <data name="RejectionReasonPlaceholder" xml:space="preserve">
+    <value>Explain why this request is being rejected...</value>
+  </data>
+  <data name="RejectRequest" xml:space="preserve">
+    <value>Reject Request</value>
+  </data>
+  <data name="RevokeApiKey" xml:space="preserve">
+    <value>Revoke API Key</value>
+  </data>
+  <data name="RevokeConfirmation" xml:space="preserve">
+    <value>Are you sure you want to revoke this API key?</value>
+  </data>
+  <data name="RevocationReason" xml:space="preserve">
+    <value>Revocation Reason</value>
+  </data>
+  <data name="RevocationReasonPlaceholder" xml:space="preserve">
+    <value>Why is this key being revoked?</value>
+  </data>
+  <data name="ConfirmRevoke" xml:space="preserve">
+    <value>Confirm Revoke</value>
+  </data>
+  <data name="AllApiKeyRequests" xml:space="preserve">
+    <value>All API Key Requests</value>
+  </data>
+  <data name="AllRequests" xml:space="preserve">
+    <value>All Requests</value>
+  </data>
+  <data name="AdminPanel" xml:space="preserve">
+    <value>Admin Panel</value>
+  </data>
+  <data name="AdminApiKeyManagementDescription" xml:space="preserve">
+    <value>Review and approve API key requests from all users in your company</value>
+  </data>
+  <data name="AllCompanyApiKeys" xml:space="preserve">
+    <value>All Company API Keys</value>
+  </data>
+  <data name="PendingRequestsReview" xml:space="preserve">
+    <value>Pending Requests for Review</value>
+  </data>
+  <data name="Owner" xml:space="preserve">
+    <value>Owner</value>
+  </data>
+  <data name="ApiKey" xml:space="preserve">
+    <value>API Key</value>
+  </data>
+  <data name="ConfirmDeleteShiftType" xml:space="preserve">
+    <value>Are you sure you want to delete this shift type? This action cannot be undone.</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="TimeOffType" xml:space="preserve">
+    <value>Time-off Type</value>
+  </data>
+  <data name="After" xml:space="preserve">
+    <value>After</value>
+  </data>
+  <data name="VacationDescription" xml:space="preserve">
+    <value>Full vacation: Active from the selected date until 1:00 PM the day after the end date</value>
+  </data>
+  <data name="AfterDescription" xml:space="preserve">
+    <value>Half day: Active from 4:00 PM on the selected date until 1:00 PM the next day</value>
+  </data>
+  <data name="Date" xml:space="preserve">
+    <value>Date</value>
+  </data>
+  <data name="ReasonOptional" xml:space="preserve">
+    <value>Reason (optional)</value>
+  </data>
+
+  <!-- Public Section & On-Duty -->
+  <data name="Public" xml:space="preserve">
+    <value>Public</value>
+  </data>
+  <data name="Assigner" xml:space="preserve">
+    <value>Assigner</value>
+  </data>
+  <data name="OnDuty" xml:space="preserve">
+    <value>On-Duty</value>
+  </data>
+  <data name="OnDutyCalendar" xml:space="preserve">
+    <value>On-Duty Calendar</value>
+  </data>
+  <data name="OnDutyHakam" xml:space="preserve">
+    <value>On-Duty Hakam</value>
+  </data>
+  <data name="OnDutyLead" xml:space="preserve">
+    <value>On-Duty Lead</value>
+  </data>
+  <data name="Hakam" xml:space="preserve">
+    <value>Hakam</value>
+  </data>
+  <data name="Lead" xml:space="preserve">
+    <value>Lead</value>
+  </data>
+  <data name="OnDutyType" xml:space="preserve">
+    <value>On-Duty Type</value>
+  </data>
+  <data name="CreateOnDuty" xml:space="preserve">
+    <value>Create On-Duty</value>
+  </data>
+  <data name="CancelOnDuty" xml:space="preserve">
+    <value>Cancel On-Duty</value>
+  </data>
+  <data name="OnDutyList" xml:space="preserve">
+    <value>On-Duty List</value>
+  </data>
+  <data name="NoOnDutyThisMonth" xml:space="preserve">
+    <value>No on-duty assignments this month</value>
+  </data>
+  <data name="VacationConflict" xml:space="preserve">
+    <value>Cannot assign on-duty: User has an approved vacation on this date</value>
+  </data>
+  <data name="SelectType" xml:space="preserve">
+    <value>Select Type</value>
+  </data>
+  <data name="CompanySettings" xml:space="preserve">
+    <value>Company Settings</value>
+  </data>
+  <data name="OnDutyTypes" xml:space="preserve">
+    <value>On-Duty Types</value>
+  </data>
+  <data name="OnDutyTypesDescription" xml:space="preserve">
+    <value>Manage custom on-duty types. Default types (Hakam and Lead) cannot be modified.</value>
+  </data>
+  <data name="DefaultTypes" xml:space="preserve">
+    <value>Default Types</value>
+  </data>
+  <data name="CustomTypes" xml:space="preserve">
+    <value>Custom Types</value>
+  </data>
+  <data name="ValueLabel" xml:space="preserve">
+    <value>Value</value>
+  </data>
+  <data name="Default" xml:space="preserve">
+    <value>Default</value>
+  </data>
+  <data name="Custom" xml:space="preserve">
+    <value>Custom</value>
+  </data>
+  <data name="AddNewOnDutyType" xml:space="preserve">
+    <value>Add New On-Duty Type</value>
+  </data>
+  <data name="TypeValue" xml:space="preserve">
+    <value>Type Value</value>
+  </data>
+  <data name="MustBe2OrGreater" xml:space="preserve">
+    <value>must be 2 or greater</value>
+  </data>
+  <data name="NameEnglish" xml:space="preserve">
+    <value>Name (English)</value>
+  </data>
+  <data name="NameHebrew" xml:space="preserve">
+    <value>Name (Hebrew)</value>
+  </data>
+  <data name="Emoji" xml:space="preserve">
+    <value>emoji</value>
+  </data>
+  <data name="HexColor" xml:space="preserve">
+    <value>hex color</value>
+  </data>
+  <data name="ConfirmDeleteOnDutyType" xml:space="preserve">
+    <value>Are you sure you want to delete the on-duty type '{0}'?</value>
+  </data>
+  <data name="Add" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="VacationType" xml:space="preserve">
+    <value>Vacation Type</value>
+  </data>
+  <data name="RegularVacation" xml:space="preserve">
+    <value>Regular Vacation</value>
+  </data>
+  <data name="AfterDutyVacation" xml:space="preserve">
+    <value>After-Duty Vacation</value>
+  </data>
+  <data name="VacationTypeDescription" xml:space="preserve">
+    <value>Regular vacation starts at midnight, after-duty vacation starts at 4:00 PM</value>
+  </data>
+  <data name="SpecificApprover" xml:space="preserve">
+    <value>Specific Approver</value>
+  </data>
+  <data name="AnyManager" xml:space="preserve">
+    <value>Any Manager</value>
+  </data>
+  <data name="ApproverDescription" xml:space="preserve">
+    <value>Optionally select a specific manager to approve your request for privacy</value>
+  </data>
+  <data name="TimeOffReasonPlaceholder" xml:space="preserve">
+    <value>Optional reason for time off request</value>
+  </data>
+  <data name="Information" xml:space="preserve">
+    <value>Information</value>
+  </data>
+  <data name="OK" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="NoOnDutyContactManager" xml:space="preserve">
+    <value>There isn't an on-duty assignment for this day. Contact your team manager if you think that's wrong.</value>
+  </data>
+  <data name="NoChoreContactManager" xml:space="preserve">
+    <value>There isn't a chore for this day. Contact your team manager if you think that's wrong.</value>
+  </data>
+  <data name="MyOverview" xml:space="preserve">
+    <value>My Overview</value>
+  </data>
+  <data name="Week" xml:space="preserve">
+    <value>Week</value>
+  </data>
+  <data name="Custom" xml:space="preserve">
+    <value>Custom</value>
+  </data>
+  <data name="TimeRangeSwitcher" xml:space="preserve">
+    <value>Time Range</value>
+  </data>
+  <data name="Filters" xml:space="preserve">
+    <value>Filters</value>
+  </data>
+  <data name="Vacations" xml:space="preserve">
+    <value>Vacations</value>
+  </data>
+  <data name="OnDuty" xml:space="preserve">
+    <value>On-Duty</value>
+  </data>
+  <data name="Chores" xml:space="preserve">
+    <value>Chores</value>
+  </data>
+  <data name="Today" xml:space="preserve">
+    <value>Today</value>
+  </data>
+  <data name="Tomorrow" xml:space="preserve">
+    <value>Tomorrow</value>
+  </data>
+  <data name="ThisWeek" xml:space="preserve">
+    <value>This Week</value>
+  </data>
+  <data name="Later" xml:space="preserve">
+    <value>Later</value>
+  </data>
+  <data name="Past" xml:space="preserve">
+    <value>Past</value>
+  </data>
+  <data name="Upcoming" xml:space="preserve">
+    <value>Upcoming</value>
+  </data>
+  <data name="All" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="Past30Days" xml:space="preserve">
+    <value>Past 30 Days</value>
+  </data>
+  <data name="MyStatsForThisPeriod" xml:space="preserve">
+    <value>My stats for this period</value>
+  </data>
+  <data name="Count" xml:space="preserve">
+    <value>Count</value>
+  </data>
+  <data name="NothingHereYet" xml:space="preserve">
+    <value>Nothing here yet for this period.</value>
+  </data>
+  <data name="NoItemsMatch" xml:space="preserve">
+    <value>No items match your filters.</value>
+  </data>
+  <data name="ClearFilters" xml:space="preserve">
+    <value>Clear Filters</value>
+  </data>
+  <data name="Details" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="Conflict" xml:space="preserve">
+    <value>Conflict</value>
+  </data>
+  <data name="ViewDetails" xml:space="preserve">
+    <value>View Details</value>
+  </data>
+  <data name="Legend" xml:space="preserve">
+    <value>Legend</value>
+  </data>
+  <data name="ToggleCountHours" xml:space="preserve">
+    <value>Toggle Count/Hours</value>
+  </data>
+  <data name="Showing" xml:space="preserve">
+    <value>Showing</value>
+  </data>
+  <data name="Items" xml:space="preserve">
+    <value>items</value>
+  </data>
+  <data name="InDateRange" xml:space="preserve">
+    <value>in date range</value>
+  </data>
+  <data name="Vacation" xml:space="preserve">
+    <value>Vacation</value>
+  </data>
+  <data name="After" xml:space="preserve">
+    <value>After</value>
+  </data>
+  <data name="OnDutyHakam" xml:space="preserve">
+    <value>On-Duty Hakam</value>
+  </data>
+  <data name="OnDutyLead" xml:space="preserve">
+    <value>On-Duty Lead</value>
+  </data>
+  <data name="Shadowing" xml:space="preserve">
+    <value>Shadowing</value>
+  </data>
+  <data name="Days" xml:space="preserve">
+    <value>days</value>
+  </data>
+  <data name="Day" xml:space="preserve">
+    <value>day</value>
+  </data>
+
+  <!-- My Team Calendars -->
+  <data name="MyTeam" xml:space="preserve">
+    <value>My Team</value>
+  </data>
+  <data name="ConfigureMembers" xml:space="preserve">
+    <value>Configure Members</value>
+  </data>
+  <data name="SwitchCalendar" xml:space="preserve">
+    <value>Switch Calendar</value>
+  </data>
+  <data name="NewCalendar" xml:space="preserve">
+    <value>New Calendar</value>
+  </data>
+  <data name="PreviousWeek" xml:space="preserve">
+    <value>Previous Week</value>
+  </data>
+  <data name="NextWeek" xml:space="preserve">
+    <value>Next Week</value>
+  </data>
+  <data name="ThisWeek" xml:space="preserve">
+    <value>This Week</value>
+  </data>
+  <data name="TeamMember" xml:space="preserve">
+    <value>Team Member</value>
+  </data>
+  <data name="NoTeamMembers" xml:space="preserve">
+    <value>No Team Members</value>
+  </data>
+  <data name="AddTeamMembersToStart" xml:space="preserve">
+    <value>Add team members to start viewing their weekly schedule</value>
+  </data>
+  <data name="CalendarName" xml:space="preserve">
+    <value>Calendar Name</value>
+  </data>
+  <data name="CreateNewCalendar" xml:space="preserve">
+    <value>Create New Calendar</value>
+  </data>
+  <data name="CalendarNamePlaceholder" xml:space="preserve">
+    <value>e.g., Project X Team</value>
+  </data>
+  <data name="ConfigureTeamMembers" xml:space="preserve">
+    <value>Configure Team Members</value>
+  </data>
+  <data name="CurrentMembers" xml:space="preserve">
+    <value>Current Members</value>
+  </data>
+  <data name="AvailableUsers" xml:space="preserve">
+    <value>Available Users</value>
+  </data>
+  <data name="SearchByName" xml:space="preserve">
+    <value>Search by name...</value>
+  </data>
+  <data name="SaveChanges" xml:space="preserve">
+    <value>Save Changes</value>
+  </data>
+  <data name="DeleteCalendar" xml:space="preserve">
+    <value>Delete Calendar</value>
+  </data>
+  <data name="RenameCalendar" xml:space="preserve">
+    <value>Rename Calendar</value>
+  </data>
+  <data name="ConfirmDeleteCalendar" xml:space="preserve">
+    <value>Delete "{0}"? This will only remove your personal view. No data will be affected.</value>
+  </data>
+  <data name="EnterNewName" xml:space="preserve">
+    <value>Enter new name</value>
+  </data>
+  <data name="NoMembersYet" xml:space="preserve">
+    <value>No members yet</value>
+  </data>
+  <data name="NoUsersFound" xml:space="preserve">
+    <value>No users found</value>
+  </data>
+  <data name="MembersInCalendar" xml:space="preserve">
+    <value>Members in calendar: {0}</value>
+  </data>
+  <data name="NotInTeam" xml:space="preserve">
+    <value>Not in team: {0}</value>
+  </data>
+  <data name="MyCalendars" xml:space="preserve">
+    <value>My Calendars</value>
+  </data>
+  <data name="Switch" xml:space="preserve">
+    <value>Switch</value>
+  </data>
+  <data name="CalendarNameRequired" xml:space="preserve">
+    <value>Calendar name is required</value>
+  </data>
+  <data name="CalendarNameLength" xml:space="preserve">
+    <value>Name must be 1-60 characters</value>
+  </data>
+  <data name="DuplicateCalendarName" xml:space="preserve">
+    <value>A calendar with this name already exists</value>
+  </data>
+  <data name="ErrorLoadingMembers" xml:space="preserve">
+    <value>Failed to load member lists</value>
+  </data>
+  <data name="ErrorLoadingWeek" xml:space="preserve">
+    <value>Failed to load week view</value>
+  </data>
+  <data name="LoadingWeek" xml:space="preserve">
+    <value>Loading week view...</value>
+  </data>
+  <data name="ClickToView" xml:space="preserve">
+    <value>Click to view</value>
+  </data>
+  <data name="ViewOnlyNoNavigation" xml:space="preserve">
+    <value>(View-only - no navigation available for your role)</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="DeleteCalendarNote" xml:space="preserve">
+    <value>This will only remove your personal view. It won't affect any actual data.</value>
+  </data>
+  <data name="Sunday" xml:space="preserve">
+    <value>Sunday</value>
+  </data>
+  <data name="Monday" xml:space="preserve">
+    <value>Monday</value>
+  </data>
+  <data name="Tuesday" xml:space="preserve">
+    <value>Tuesday</value>
+  </data>
+  <data name="Wednesday" xml:space="preserve">
+    <value>Wednesday</value>
+  </data>
+  <data name="Thursday" xml:space="preserve">
+    <value>Thursday</value>
+  </data>
+  <data name="Friday" xml:space="preserve">
+    <value>Friday</value>
+  </data>
+  <data name="Saturday" xml:space="preserve">
+    <value>Saturday</value>
+  </data>
+  <data name="SunShort" xml:space="preserve">
+    <value>Sun</value>
+  </data>
+  <data name="MonShort" xml:space="preserve">
+    <value>Mon</value>
+  </data>
+  <data name="TueShort" xml:space="preserve">
+    <value>Tue</value>
+  </data>
+  <data name="WedShort" xml:space="preserve">
+    <value>Wed</value>
+  </data>
+  <data name="ThuShort" xml:space="preserve">
+    <value>Thu</value>
+  </data>
+  <data name="FriShort" xml:space="preserve">
+    <value>Fri</value>
+  </data>
+  <data name="SatShort" xml:space="preserve">
+    <value>Sat</value>
+  </data>
+  <data name="NoCalendars" xml:space="preserve">
+    <value>No Calendars</value>
+  </data>
+  <data name="NoTeamCalendars" xml:space="preserve">
+    <value>No Team Calendars</value>
+  </data>
+  <data name="CreateFirstCalendar" xml:space="preserve">
+    <value>Create your first team calendar to start tracking your team's schedule</value>
+  </data>
+  <data name="CreateCalendar" xml:space="preserve">
+    <value>Create Calendar</value>
+  </data>
+  <data name="FailedToLoadCalendars" xml:space="preserve">
+    <value>Failed to load calendars</value>
+  </data>
+  <data name="FailedToLoadWeekView" xml:space="preserve">
+    <value>Failed to load week view</value>
+  </data>
+  <data name="NoCalendarsAvailable" xml:space="preserve">
+    <value>No calendars available</value>
+  </data>
+  <data name="Members" xml:space="preserve">
+    <value>members</value>
+  </data>
+  <data name="Rename" xml:space="preserve">
+    <value>Rename</value>
+  </data>
+  <data name="RenameCalendarTitle" xml:space="preserve">
+    <value>Rename Calendar</value>
+  </data>
+  <data name="PleaseEnterCalendarName" xml:space="preserve">
+    <value>Please enter a calendar name</value>
+  </data>
+  <data name="CalendarNameMaxLength" xml:space="preserve">
+    <value>Calendar name must be 60 characters or less</value>
+  </data>
+  <data name="CalendarRenamedSuccessfully" xml:space="preserve">
+    <value>Calendar renamed successfully</value>
+  </data>
+  <data name="CalendarDeletedSuccessfully" xml:space="preserve">
+    <value>Calendar deleted successfully</value>
+  </data>
+  <data name="PleaseSelectCalendar" xml:space="preserve">
+    <value>Please select a calendar first</value>
+  </data>
+  <data name="MembersUpdatedSuccessfully" xml:space="preserve">
+    <value>Members updated successfully</value>
+  </data>
+  <data name="NoUsers" xml:space="preserve">
+    <value>No users</value>
+  </data>
+  <data name="Jan" xml:space="preserve">
+    <value>Jan</value>
+  </data>
+  <data name="Feb" xml:space="preserve">
+    <value>Feb</value>
+  </data>
+  <data name="Mar" xml:space="preserve">
+    <value>Mar</value>
+  </data>
+  <data name="Apr" xml:space="preserve">
+    <value>Apr</value>
+  </data>
+  <data name="May" xml:space="preserve">
+    <value>May</value>
+  </data>
+  <data name="Jun" xml:space="preserve">
+    <value>Jun</value>
+  </data>
+  <data name="Jul" xml:space="preserve">
+    <value>Jul</value>
+  </data>
+  <data name="Aug" xml:space="preserve">
+    <value>Aug</value>
+  </data>
+  <data name="Sep" xml:space="preserve">
+    <value>Sep</value>
+  </data>
+  <data name="Oct" xml:space="preserve">
+    <value>Oct</value>
+  </data>
+  <data name="Nov" xml:space="preserve">
+    <value>Nov</value>
+  </data>
+  <data name="Dec" xml:space="preserve">
+    <value>Dec</value>
+  </data>
+  <data name="StatusFree" xml:space="preserve">
+    <value>Free</value>
+  </data>
+  <data name="StatusVacation" xml:space="preserve">
+    <value>Vacation</value>
+  </data>
+  <data name="StatusOnDuty" xml:space="preserve">
+    <value>On Duty</value>
+  </data>
+  <data name="StatusShift" xml:space="preserve">
+    <value>Shift</value>
+  </data>
+  <data name="StatusChore" xml:space="preserve">
+    <value>Chore</value>
+  </data>
+  <data name="Feedback" xml:space="preserve">
+    <value>Feedback</value>
+  </data>
+  <data name="SubmitFeedback" xml:space="preserve">
+    <value>Submit Feedback</value>
+  </data>
+  <data name="FeedbackType" xml:space="preserve">
+    <value>Feedback Type</value>
+  </data>
+  <data name="FeedbackTypeError" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="FeedbackTypeSuggestion" xml:space="preserve">
+    <value>Suggestion / Improvement</value>
+  </data>
+  <data name="FeedbackContent" xml:space="preserve">
+    <value>Feedback Content</value>
+  </data>
+  <data name="FeedbackContentPlaceholder" xml:space="preserve">
+    <value>Describe the issue or suggestion in detail...</value>
+  </data>
+  <data name="AddPicture" xml:space="preserve">
+    <value>Add picture (optional)</value>
+  </data>
+  <data name="FeedbackSubmitted" xml:space="preserve">
+    <value>Feedback submitted successfully. Thank you!</value>
+  </data>
+  <data name="FeedbackList" xml:space="preserve">
+    <value>Feedback List</value>
+  </data>
+  <data name="SubmittedBy" xml:space="preserve">
+    <value>Submitted by</value>
+  </data>
+  <data name="MarkToWorkOn" xml:space="preserve">
+    <value>Mark as to work on</value>
+  </data>
+  <data name="ToWorkOn" xml:space="preserve">
+    <value>To Work On</value>
+  </data>
+  <data name="NewFeedback" xml:space="preserve">
+    <value>New</value>
+  </data>
+  <data name="DeleteFeedback" xml:space="preserve">
+    <value>Delete feedback</value>
+  </data>
+  <data name="ConfirmDeleteFeedback" xml:space="preserve">
+    <value>Are you sure you want to delete this feedback?</value>
+  </data>
+  <data name="FeedbackDeleted" xml:space="preserve">
+    <value>Feedback deleted successfully.</value>
+  </data>
+  <data name="FeedbackMarkedToWorkOn" xml:space="preserve">
+    <value>Feedback marked as "To Work On".</value>
+  </data>
+  <data name="NoFeedback" xml:space="preserve">
+    <value>No feedback submitted yet.</value>
+  </data>
+  <data name="NewFeedbackNotificationTitle" xml:space="preserve">
+    <value>New Feedback Submitted</value>
+  </data>
+  <data name="FeedbackTypeRequired" xml:space="preserve">
+    <value>Please select a feedback type.</value>
+  </data>
+  <data name="FeedbackContentRequired" xml:space="preserve">
+    <value>Please enter feedback content.</value>
+  </data>
+</root>

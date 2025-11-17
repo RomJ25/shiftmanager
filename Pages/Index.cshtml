@@ -1,0 +1,13 @@
+@page
+@model IndexModel
+@using Microsoft.Extensions.Localization
+@using ShiftManager.Resources
+@inject IStringLocalizer<SharedResources> Localizer
+@{
+    Layout = "_Layout";
+}
+<div class="card">
+    <h2>@Localizer["WelcomeToShiftManager"]</h2>
+    <p>@Localizer["HomePageDescription"]</p>
+    <p><a class="btn btn-primary" href="/Calendar/Month">@Localizer["GoToCalendar"]</a></p>
+</div>

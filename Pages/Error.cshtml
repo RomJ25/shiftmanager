@@ -1,0 +1,12 @@
+@page
+@model ErrorModel
+@using Microsoft.Extensions.Localization
+@using ShiftManager.Resources
+@inject IStringLocalizer<SharedResources> Localizer
+@{
+    Layout = "_Layout";
+}
+<div class="card">
+    <h2>@Localizer["SomethingWentWrong"]</h2>
+    <p>@Localizer["UnexpectedErrorOccurred"]</p>
+</div>
