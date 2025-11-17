@@ -17,22 +17,23 @@
 :root[data-theme="dark"] {
   /* === Neutral Backgrounds - Dark Mode ===
      Think: Lighter = Closer to user (elevated)
-     L values: 0% → 5% → 8% → 12% → 18% */
+     L values: 0% → 5% → 8% → 12% → 18%
+     Chroma: 0.02-0.04 for subtle cool personality */
 
-  --bg-darkest: oklch(0.15 0.008 250);      /* L=15% - Deepest recesses */
-  --bg-dark: oklch(0.18 0.008 250);         /* L=18% - Page background */
-  --bg: oklch(0.22 0.01 250);               /* L=22% - Normal surfaces */
-  --bg-light: oklch(0.28 0.012 250);        /* L=28% - Cards, elevated */
-  --bg-lightest: oklch(0.35 0.014 250);     /* L=35% - Interactive highlights */
+  --bg-darkest: oklch(0.15 0.025 250);      /* L=15% - Deepest recesses */
+  --bg-dark: oklch(0.18 0.028 250);         /* L=18% - Page background */
+  --bg: oklch(0.22 0.032 250);              /* L=22% - Normal surfaces */
+  --bg-light: oklch(0.28 0.038 250);        /* L=28% - Cards, elevated */
+  --bg-lightest: oklch(0.35 0.045 250);     /* L=35% - Interactive highlights */
 
   /* === Text Hierarchy === */
-  --text-strong: oklch(0.95 0.005 250);     /* Headings, key text */
-  --text: oklch(0.88 0.008 250);            /* Body text */
-  --text-muted: oklch(0.65 0.01 250);       /* Secondary text */
+  --text-strong: oklch(0.95 0.008 250);     /* Headings, key text */
+  --text: oklch(0.88 0.012 250);            /* Body text */
+  --text-muted: oklch(0.65 0.020 250);      /* Secondary text */
 
   /* === Depth System === */
-  --border: oklch(0.32 0.01 250);           /* Subtle dividers */
-  --highlight: oklch(0.42 0.015 250);       /* Top edge highlight */
+  --border: oklch(0.32 0.025 250);          /* Subtle dividers */
+  --highlight: oklch(0.42 0.035 250);       /* Top edge highlight */
 
   /* === Shadows (Combined: soft + dark) === */
   --shadow-sm:
@@ -73,22 +74,23 @@
   /* === Neutral Backgrounds - Light Mode ===
      Flipped from dark: 100 - darkValue
      Then adjusted for proper light direction
-     L values: 100% → 95% → 92% → 88% → 82% */
+     L values: 100% → 95% → 92% → 88% → 82%
+     Chroma: 0.015-0.035 for subtle cool personality */
 
-  --bg-darkest: oklch(0.82 0.008 250);      /* Darkest in light mode */
-  --bg-dark: oklch(0.88 0.008 250);         /* Secondary surfaces */
-  --bg: oklch(0.96 0.005 250);              /* Page background */
-  --bg-light: oklch(0.99 0.003 250);        /* Cards, elevated */
-  --bg-lightest: oklch(1.0 0.001 250);      /* Brightest highlights */
+  --bg-darkest: oklch(0.82 0.020 250);      /* Darkest in light mode */
+  --bg-dark: oklch(0.88 0.018 250);         /* Secondary surfaces */
+  --bg: oklch(0.96 0.015 250);              /* Page background */
+  --bg-light: oklch(0.99 0.012 250);        /* Cards, elevated */
+  --bg-lightest: oklch(1.0 0.008 250);      /* Brightest highlights */
 
   /* === Text Hierarchy === */
-  --text-strong: oklch(0.20 0.01 250);      /* Strong, dark text */
-  --text: oklch(0.30 0.008 250);            /* Body text */
-  --text-muted: oklch(0.52 0.01 250);       /* Muted text */
+  --text-strong: oklch(0.20 0.025 250);     /* Strong, dark text */
+  --text: oklch(0.30 0.018 250);            /* Body text */
+  --text-muted: oklch(0.52 0.022 250);      /* Muted text */
 
   /* === Depth System === */
-  --border: oklch(0.86 0.005 250);          /* Light borders */
-  --highlight: oklch(0.98 0.002 250);       /* Very light highlight */
+  --border: oklch(0.86 0.015 250);          /* Light borders */
+  --highlight: oklch(0.98 0.008 250);       /* Very light highlight */
 
   /* === Shadows (Lighter, softer in light mode) === */
   --shadow-sm:
@@ -167,7 +169,7 @@ button.linklike:hover {
   align-items: center;
   gap: 1rem;
   padding: .75rem 1.25rem;
-  background: var(--gradient-subtle);
+  background: var(--bg-light);
   border-bottom: 1px solid var(--border);
   border-top: 1px solid var(--highlight);
   position: sticky;
@@ -276,7 +278,7 @@ button.linklike:hover {
 
 /* === Cards - Elevated surfaces === */
 .card {
-  background: var(--gradient-subtle);
+  background: var(--bg-light);
   border: 1px solid var(--border);
   border-top: 1px solid var(--highlight);
   border-radius: .75rem;
@@ -289,8 +291,8 @@ button.linklike:hover {
 
 .card:hover {
   box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
-  border-top-color: var(--primary);
+  transform: translateY(-1px);
+  border-color: var(--primary);
 }
 
 /* === Tables - Recessed with inset shadow === */
@@ -325,12 +327,12 @@ tr:hover td {
   background: var(--bg);
 }
 
-/* === Buttons - Polished with gradients === */
+/* === Buttons - Clean with strategic depth === */
 .btn {
   padding: .5rem .85rem;
   border-radius: .5rem;
   border: 1px solid var(--border);
-  background: var(--gradient-subtle);
+  background: var(--bg-light);
   color: var(--text);
   cursor: pointer;
   font-weight: 500;
@@ -339,25 +341,14 @@ tr:hover td {
   position: relative;
 }
 
-.btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: var(--highlight);
-  border-radius: .5rem .5rem 0 0;
-}
-
 .btn:hover {
-  transform: translateY(-1px);
+  background: var(--bg-lightest);
+  border-color: var(--primary);
   box-shadow: var(--shadow-md);
-  background: var(--gradient-interactive);
 }
 
 .btn:active {
-  transform: translateY(0);
+  transform: scale(0.98);
   box-shadow: var(--shadow-sm);
 }
 
@@ -406,9 +397,9 @@ tr:hover td {
 
 /* === Modern Calendar Styles - Enhanced with Depth === */
 .calendar-header {
-  background: var(--gradient-subtle);
+  background: var(--bg-light);
   border: 1px solid var(--border);
-  border-top: 1px solid var(--highlight);
+  border-top: 2px solid var(--primary);
   border-radius: 1rem;
   padding: 2rem 2.5rem;
   margin-bottom: 2rem;
@@ -419,22 +410,6 @@ tr:hover td {
   gap: 1.5rem;
   box-shadow: var(--shadow-lg);
   position: relative;
-  overflow: hidden;
-}
-
-.calendar-header::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg,
-    transparent 0%,
-    var(--primary) 20%,
-    var(--focus) 50%,
-    var(--primary) 80%,
-    transparent 100%);
 }
 
 .calendar-header h2 {
@@ -594,7 +569,7 @@ tr:hover td {
   color: var(--muted);
 }
 
-/* === Modern Shift Line Styling - Elevated interactive card === */
+/* === Modern Shift Line Styling - Clean interactive card === */
 .shift-line {
   display: flex;
   align-items: center;
@@ -603,18 +578,15 @@ tr:hover td {
   padding: .6rem .5rem;
   margin-bottom: .4rem;
   background: var(--bg-light);
-  border-radius: .75rem;
+  border-radius: .5rem;
   border: 1px solid var(--border);
-  border-top: 1px solid var(--highlight);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: var(--shadow-sm);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .shift-line:hover {
-  background: var(--gradient-interactive);
+  background: var(--bg-lightest);
   border-color: var(--primary);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-sm);
 }
 
 .shift-badge {
@@ -768,12 +740,11 @@ tr:hover td {
 }
 
 .week-day {
-  background: var(--gradient-subtle);
+  background: var(--bg);
   min-height: 280px;
   padding: 1.5rem 1.25rem;
   border-radius: 1rem;
   border: 1px solid var(--border);
-  border-top: 1px solid var(--highlight);
   box-shadow: var(--shadow-md);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
@@ -781,48 +752,19 @@ tr:hover td {
   flex-direction: column;
 }
 
-.week-day::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg,
-    transparent 0%,
-    var(--primary) 30%,
-    var(--focus) 70%,
-    transparent 100%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
 .week-day:hover {
-  background: var(--gradient-interactive);
-  transform: translateY(-3px);
+  background: var(--bg-light);
+  transform: translateY(-2px);
   box-shadow: var(--shadow-lg);
-  border-top-color: var(--primary);
-}
-
-.week-day:hover::before {
-  opacity: 1;
+  border-color: var(--primary);
 }
 
 .week-day.today {
-  background: var(--gradient-interactive);
-  border-color: var(--primary);
-  border-top-color: var(--focus);
+  background: var(--bg-light);
+  border: 2px solid var(--primary);
   box-shadow:
     var(--shadow-lg),
-    0 0 0 2px oklch(0.65 0.19 250 / 0.2);
-}
-
-.week-day.today::before {
-  opacity: 1;
-  background: linear-gradient(90deg,
-    var(--primary) 0%,
-    var(--focus) 50%,
-    var(--primary) 100%);
+    0 0 0 2px oklch(0.65 0.19 250 / 0.15);
 }
 
 .day-header {
@@ -875,59 +817,28 @@ tr:hover td {
 }
 
 .day-shift {
-  background: var(--gradient-subtle);
+  background: var(--bg);
   border: 1px solid var(--border);
-  border-top: 1px solid var(--highlight);
-  border-radius: 1.25rem;
+  border-radius: 1rem;
   padding: 2rem;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
-  overflow: hidden;
   box-shadow: var(--shadow-md);
-}
-
-.day-shift::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg,
-    transparent 0%,
-    var(--primary) 30%,
-    var(--focus) 70%,
-    transparent 100%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
 }
 
 .day-shift:hover {
   box-shadow: var(--shadow-lg);
-  transform: translateY(-4px);
+  transform: translateY(-2px);
   border-color: var(--primary);
-  background: var(--gradient-interactive);
-}
-
-.day-shift:hover::before {
-  opacity: 1;
+  background: var(--bg-light);
 }
 
 .day-shift.active {
-  border-color: var(--primary);
-  border-top-color: var(--focus);
-  background: var(--gradient-interactive);
+  border: 2px solid var(--primary);
+  background: var(--bg-light);
   box-shadow:
     var(--shadow-lg),
-    0 0 0 2px oklch(0.65 0.19 250 / 0.2);
-}
-
-.day-shift.active::before {
-  opacity: 1;
-  background: linear-gradient(90deg,
-    var(--primary) 0%,
-    var(--focus) 50%,
-    var(--primary) 100%);
+    0 0 0 2px oklch(0.65 0.19 250 / 0.15);
 }
 
 .shift-info {
@@ -961,23 +872,20 @@ tr:hover td {
   flex: 1;
 }
 
-/* === Modern Staffing Info - Subtle elevated card === */
+/* === Modern Staffing Info - Clean elevated card === */
 .staffing-info {
   background: var(--bg-light);
-  border-radius: 1rem;
+  border-radius: .75rem;
   padding: 1.25rem;
   text-align: center;
   border: 1px solid var(--border);
-  border-top: 1px solid var(--highlight);
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   box-shadow: var(--shadow-sm);
 }
 
 .staffing-info:hover {
-  background: var(--gradient-interactive);
   border-color: var(--primary);
   box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
 }
 
 .staffing-label {
@@ -1234,31 +1142,24 @@ tr:hover td {
 .shift-type-option {
   background: var(--bg);
   border: 1px solid var(--border);
-  border-top: 1px solid var(--highlight);
   border-radius: .75rem;
   padding: 1rem;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   text-align: center;
   position: relative;
-  box-shadow: var(--shadow-sm);
 }
 
 .shift-type-option:hover {
   border-color: var(--primary);
   background: var(--bg-light);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-sm);
 }
 
 .shift-type-option.selected {
-  border-color: var(--primary);
-  border-top-color: var(--focus);
-  background: var(--gradient-interactive);
-  box-shadow:
-    var(--shadow-md),
-    0 0 0 2px oklch(0.65 0.19 250 / 0.2);
-  transform: translateY(-2px);
+  border: 2px solid var(--primary);
+  background: var(--bg-light);
+  box-shadow: var(--shadow-md);
 }
 
 .shift-type-option.selected::after {
